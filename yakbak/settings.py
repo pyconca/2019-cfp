@@ -43,4 +43,4 @@ def load_settings(settings_dict: Dict[str, Any]) -> Settings:
         raise InvalidSettings(
             f"settings has unexpected sections: {settings_dict.keys()}")
 
-    return Settings(**top_level)
+    return Settings(**top_level)  # type: ignore

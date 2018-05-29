@@ -4,17 +4,17 @@ import sys
 from flask import Flask
 
 from yakbak.settings import Settings
+from yakbak.types import Application
 
 
-def create_app(settings: Settings) -> Flask:
+def create_app(settings: Settings) -> Application:
     """
     Bootstrap the application.
 
     """
     set_up_logging(settings)
 
-    app = Flask("yakbak")
-    app.settings = settings
+    app = Application(settings)
     set_up_flask_defaults(app)
 
     # TODO: set_up_database(app)

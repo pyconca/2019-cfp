@@ -26,4 +26,5 @@ Yak-Bak requires Python 3.6 or newer, and PostgreSQL 10 or newer.
     development.
 
 4. Run tests with `py.test yakbak`, check style compliance with `tox -e
-   style`, or run the full CI suite (tests + style check) simply with `tox`.
+   style`, check types with `tox -e mypy`, or run the full CI suite (tests,
+   style check, and type check) simply with `tox`.

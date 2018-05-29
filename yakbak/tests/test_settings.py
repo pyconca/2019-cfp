@@ -12,7 +12,7 @@ def valid_settings_dict() -> Dict[str, Any]:
     }
 
 
-def test_it_fails_with_extra_fields():
+def test_it_fails_with_extra_fields() -> None:
     settings_dict = valid_settings_dict()
     settings_dict["extra"] = {"foo": "bar"}
 
@@ -20,7 +20,7 @@ def test_it_fails_with_extra_fields():
         load_settings(settings_dict)
 
 
-def test_it_fails_with_missing_fields():
+def test_it_fails_with_missing_fields() -> None:
     settings_dict = valid_settings_dict()
     del settings_dict["db"]
 
