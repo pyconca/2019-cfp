@@ -1,0 +1,9 @@
+# Never put production configurations in the repository!
+yakbak.toml
+
+# Leftovers from tools & support libs
+dist/
+.eggs/
+.tox/
+_version.py
+version.txt
