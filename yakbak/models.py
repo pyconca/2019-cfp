@@ -16,8 +16,8 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-class User(db.Model):
-    user_id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(256), nullable=False, unique=True)
+class User(db.Model):  # type: ignore
+    user_id: int = db.Column(db.Integer, primary_key=True)
+    email: str = db.Column(db.String(256), nullable=False, unique=True)
     # password = ...
-    name = db.Column(db.String(256), nullable=False)
+    name: str = db.Column(db.String(256), nullable=False)
