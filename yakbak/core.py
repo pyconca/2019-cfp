@@ -17,7 +17,7 @@ def create_app(settings: Settings) -> Application:
     app = Application(settings)
     set_up_flask_defaults(app)
 
-    # TODO: set_up_database(app)
+    set_up_database(app)
 
     from . import views
     app.register_blueprint(views.app)
@@ -49,3 +49,15 @@ def set_up_flask_defaults(app: Flask) -> None:
     # messages that we'd rather log through our own handler at the root
     for handler in list(app.logger.handlers):
         app.logger.removeHandler(handler)
+
+
+def set_up_database(app: Application) -> None:
+    from yakbak.models import db
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = app.settings.db.uri
+
+    # Disable signals (callbacks) on model changes
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    db.app = app
+    db.init_app(app)

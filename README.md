@@ -4,7 +4,7 @@ Future home of a tech conference call for proposals and program selection app.
 
 ## Running it Locally
 
-Yak-Bak requires Python 3.6 or newer, and PostgreSQL 10 or newer.
+Yak-Bak requires Python 3.6 or newer.
 
 1. Install requirements: `pip install -r test-requirements.txt`
 
@@ -20,11 +20,25 @@ Yak-Bak requires Python 3.6 or newer, and PostgreSQL 10 or newer.
     of the repository. Be a good citizen and don't ever check production
     configuration into the source code repo!
 
-3. Run the Flask development server: `FLASK_APP=wsgi flask run`
+3. Choose a database and enter an appropriate URI in `yakbak.toml`
+
+    For local development with Postgres, you may use
+    `postgres+psycopg2://localhost/yakbak`, assuming a database name of
+    `yakbak`.
+
+    For local development with SQLite, you may use `sqlite://yakbak.sqlite3`,
+    which will create a file named `yakbak.sqlite3` in the repository root.
+
+    We recommend that you use PostgreSQL 10 or newer. You will also need to
+    install the PostgreSQL driver for python with `pip install psycopg2`.
+
+4. Create tables in the database with `alembic upgrade head`
+
+5. Run the Flask development server: `FLASK_APP=wsgi flask run`
 
     You may find the `--debugger` and `--reload` flags helpful during
     development.
 
-4. Run tests with `py.test yakbak`, check style compliance with `tox -e
+6. Run tests with `py.test yakbak`, check style compliance with `tox -e
    style`, check types with `tox -e mypy`, or run the full CI suite (tests,
    style check, and type check) simply with `tox`.

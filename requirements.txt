@@ -1,3 +1,6 @@
+alembic==0.9.9
 attrs==18.1.0
 flask==1.0.2
+flask-sqlalchemy==2.3.2
+sqlalchemy==1.2.8
 toml==0.9.4
