@@ -6,8 +6,10 @@ from flask import Flask
 from flask_bootstrap import Bootstrap
 
 from yakbak.auth import login_manager
+from yakbak.models import db
 from yakbak.settings import Settings
 from yakbak.types import Application
+from yakbak import views
 
 
 def create_app(settings: Settings) -> Application:
@@ -24,7 +26,6 @@ def create_app(settings: Settings) -> Application:
     set_up_auth(app)
     set_up_bootstrap(app)
 
-    from . import views
     app.register_blueprint(views.app)
 
     return app
@@ -60,8 +61,6 @@ def set_up_flask(app: Application) -> None:
 
 
 def set_up_database(app: Application) -> None:
-    from yakbak.models import db
-
     app.config["SQLALCHEMY_DATABASE_URI"] = app.settings.db.uri
 
     # Disable signals (callbacks) on model changes
