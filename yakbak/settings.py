@@ -20,9 +20,15 @@ class LoggingSettings:
 
 
 @attrs(frozen=True)
+class FlaskSettings:
+    secret_key: str = attrib(validator=[instance_of(str)])
+
+
+@attrs(frozen=True)
 class Settings:
     db: DbSettings = attrib()
     logging: LoggingSettings = attrib()
+    flask: FlaskSettings = attrib()
 
 
 def load_settings_file(settings_path: str) -> Settings:

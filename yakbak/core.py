@@ -1,6 +1,7 @@
 import logging
 import sys
 
+from attr import asdict
 from flask import Flask
 
 from yakbak.settings import Settings
@@ -15,7 +16,7 @@ def create_app(settings: Settings) -> Application:
     set_up_logging(settings)
 
     app = Application(settings)
-    set_up_flask_defaults(app)
+    set_up_flask(app)
 
     set_up_database(app)
 
@@ -39,7 +40,7 @@ def set_up_logging(settings: Settings) -> None:
     root_logger.addHandler(stream_handler)
 
 
-def set_up_flask_defaults(app: Flask) -> None:
+def set_up_flask(app: Application) -> None:
     """
     Some of Flask's default settings make no sense for us.
 
@@ -49,6 +50,9 @@ def set_up_flask_defaults(app: Flask) -> None:
     # messages that we'd rather log through our own handler at the root
     for handler in list(app.logger.handlers):
         app.logger.removeHandler(handler)
+
+    for key, value in asdict(app.settings.flask).items():
+        app.config[key.upper()] = value
 
 
 def set_up_database(app: Application) -> None:

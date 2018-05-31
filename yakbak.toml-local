@@ -3,3 +3,8 @@ uri="postgres+psycopg2://localhost/yakbak"
 
 [logging]
 level="INFO"
+
+[flask]
+# Set this to somtething long and randomly-generated, but constant
+# across all servers serving the same Yak-Bak instance
+secret_key="hlIuOBFBsKZBbq41BEE9XJUKipy2TC5b"
