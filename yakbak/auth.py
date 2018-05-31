@@ -12,5 +12,5 @@ login_manager = LoginManager()
 def load_user(user_id: str) -> Optional[User]:
     try:
         return User.query.get(int(user_id))
-    except TypeError:
+    except (TypeError, ValueError):
         return None
