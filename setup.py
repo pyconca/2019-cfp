@@ -14,7 +14,16 @@ setup(
     download_url="https://github.com/bigapplepy/yak-bak/tags",
     license="BSD-3-Clause",
     packages=find_packages(),
-    install_requires=[],
+    install_requires=[
+        "alembic",
+        "attrs",
+        "flask",
+        "flask-bootstrap4",
+        "flask-login",
+        "flask-sqlalchemy",
+        "sqlalchemy",
+        "toml",
+    ],
     setup_requires=["vcversioner"],
     vcversioner={"version_module_paths" : ["yakbak/_version.py"]},
 )

@@ -6,7 +6,7 @@ Future home of a tech conference call for proposals and program selection app.
 
 Yak-Bak requires Python 3.6 or newer.
 
-1. Install requirements: `pip install -r test-requirements.txt`
+1. Install requirements: `pip install tox pip-tools -e .`
 
     You may want to use [virtualenv](https://virtualenv.pypa.io/en/stable/)
     or [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/)
@@ -42,3 +42,15 @@ Yak-Bak requires Python 3.6 or newer.
 6. Run tests with `py.test yakbak`, check style compliance with `tox -e
    style`, check types with `tox -e mypy`, or run the full CI suite (tests,
    style check, and type check) simply with `tox`.
+
+## Development Notes
+
+- Yak-Bak uses [pip-tools](https://github.com/jazzband/pip-tools) to manage
+  the `requirements.txt` from `install_requires` in setup.py. Install
+  pip-tools with `pip install pip-tools`.
+
+    To add or update dependencies, edit `setup.py` then run `pip-compile
+    --upgrade-package name-of-package` to update `requirements.txt` with
+    just that package, plus its dependencies. You will have to re-run `pip
+    install -r requirements.txt` after doing so to install or update the
+    packages.
