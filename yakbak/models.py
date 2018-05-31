@@ -8,6 +8,8 @@ Some style notes:
 - Always have an opaque primary key (usually an integer), even if a
   surrogate key seems like a good candidate (eg is unique, stable, etc)
 - Always name the primary key "<tablename>_id"
+- MyPy has some trouble understanding SQLAlchemy, so use `# type: ignore`
+  on each model class, but do annotate each column with a type
 
 """
 from flask_sqlalchemy import SQLAlchemy
