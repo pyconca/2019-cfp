@@ -23,3 +23,19 @@ class User(db.Model):  # type: ignore
     email: str = db.Column(db.String(256), nullable=False, unique=True)
     # password = ...
     name: str = db.Column(db.String(256), nullable=False)
+
+    # Flask-Login compatibility
+    def get_id(self) -> str:
+        return str(self.user_id)
+
+    @property
+    def is_authenticated(self) -> bool:
+        return True
+
+    @property
+    def is_active(self) -> bool:
+        return True
+
+    @property
+    def is_anonymous(self) -> bool:
+        return False
