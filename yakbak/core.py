@@ -3,6 +3,7 @@ import sys
 
 from attr import asdict
 from flask import Flask
+from flask_bootstrap import Bootstrap
 
 from yakbak.auth import login_manager
 from yakbak.settings import Settings
@@ -17,10 +18,11 @@ def create_app(settings: Settings) -> Application:
     set_up_logging(settings)
 
     app = Application(settings)
-    set_up_flask(app)
 
+    set_up_flask(app)
     set_up_database(app)
     set_up_auth(app)
+    set_up_bootstrap(app)
 
     from . import views
     app.register_blueprint(views.app)
@@ -71,3 +73,7 @@ def set_up_database(app: Application) -> None:
 
 def set_up_auth(app: Flask) -> None:
     login_manager.init_app(app)
+
+
+def set_up_bootstrap(app: Flask) -> None:
+    Bootstrap(app)

@@ -1,0 +1,13 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/utils.html" as utils %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+{{ utils.flashed_messages() }}
+<form method="post" action="{{ url_for("views.login") }}">
+  <label for="user_id">User ID:</label>
+  <input type="text" name="user_id" id="user_id">
+  <input type="submit">
+</form>
+{% endblock %}
