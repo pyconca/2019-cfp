@@ -1,3 +1,6 @@
+[site]
+title="Test Conference"
+
 [db]
 uri="sqlite://"  # in-memory DB
 

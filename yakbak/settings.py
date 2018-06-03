@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Optional, Tuple
 from operator import itemgetter
+from typing import Any, Dict, List, Optional, Tuple
 import os.path
 
 from attr import attrib, attrs, fields

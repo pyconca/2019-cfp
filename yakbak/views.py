@@ -3,7 +3,6 @@ import logging
 
 from flask import (
     Blueprint,
-    current_app,
     g,
     redirect,
     render_template,
@@ -27,7 +26,7 @@ def top_nav() -> Dict[str, List[Tuple[str, str, bool]]]:
         return (label, url, request.path == url)
 
     nav = [
-        navtuple("Home", "views.index")
+        navtuple("Home", "views.index"),
     ]
     if g.user.is_authenticated:
         nav.append(navtuple("Log Out", "views.logout"))
