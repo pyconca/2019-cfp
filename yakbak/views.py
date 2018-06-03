@@ -1,6 +1,16 @@
+from typing import Dict, List, Tuple
 import logging
 
-from flask import Blueprint, current_app, redirect, render_template, Response, url_for
+from flask import (
+    Blueprint,
+    current_app,
+    g,
+    redirect,
+    render_template,
+    request,
+    Response,
+    url_for,
+)
 from flask_login import logout_user
 
 from yakbak.settings import SocialAuthSettings
@@ -8,6 +18,23 @@ from yakbak.settings import SocialAuthSettings
 
 app = Blueprint("views", __name__)
 logger = logging.getLogger("views")
+
+
+@app.context_processor
+def top_nav() -> Dict[str, List[Tuple[str, str, bool]]]:
+    def navtuple(label: str, route: str) -> Tuple[str, str, bool]:
+        url = url_for(route)
+        return (label, url, request.path == url)
+
+    nav = [
+        navtuple("Home", "views.index")
+    ]
+    if g.user.is_authenticated:
+        nav.append(navtuple("Log Out", "views.logout"))
+    else:
+        nav.append(navtuple("Log In", "views.login"))
+
+    return {"nav_links": nav}
 
 
 @app.route("/")
