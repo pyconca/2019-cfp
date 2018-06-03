@@ -18,7 +18,6 @@ setup(
         "alembic",
         "attrs",
         "flask",
-        "flask-bootstrap4",
         "flask-login",
         "flask-sqlalchemy",
         "python-social-auth",

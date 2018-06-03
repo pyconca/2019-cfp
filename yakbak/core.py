@@ -5,7 +5,6 @@ import sys
 
 from attr import asdict
 from flask import Flask, g
-from flask_bootstrap import Bootstrap
 from flask_login import current_user
 from social_flask.routes import social_auth
 from social_flask_sqlalchemy.models import init_social
@@ -46,7 +45,6 @@ def create_app(settings: Settings) -> Application:
     set_up_flask(app)
     set_up_database(app)
     set_up_auth(app)
-    set_up_bootstrap(app)
 
     app.register_blueprint(views.app)
     app.register_blueprint(social_auth, url_prefix="/login/external")
@@ -154,7 +152,3 @@ def set_up_auth(app: Application) -> None:
         ]
 
     init_social(app, db.session)
-
-
-def set_up_bootstrap(app: Flask) -> None:
-    Bootstrap(app)
