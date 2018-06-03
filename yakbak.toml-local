@@ -1,3 +1,6 @@
+[site]
+title="A PyConference"
+
 [db]
 uri="postgres+psycopg2://localhost/yakbak"
 

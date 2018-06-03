@@ -1,4 +1,5 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
+from operator import itemgetter
 import os.path
 
 from attr import attrib, attrs, fields
@@ -16,13 +17,18 @@ class DbSettings:
 
 
 @attrs(frozen=True)
+class FlaskSettings:
+    secret_key: str = attrib(validator=instance_of(str))
+
+
+@attrs(frozen=True)
 class LoggingSettings:
     level: str = attrib(validator=instance_of(str))
 
 
 @attrs(frozen=True)
-class FlaskSettings:
-    secret_key: str = attrib(validator=instance_of(str))
+class SiteSettings:
+    title: str = attrib(validator=instance_of(str))
 
 
 @attrs(frozen=True)
@@ -38,12 +44,37 @@ class SocialAuthSettings:
     google: bool = attrib()
     none: bool = attrib()
 
+    @classmethod
+    def social_auth_methods(cls) -> List[Tuple[str, str]]:
+        """
+        Get a list of social auth methods as (``name``, ``display_name``) tuples.
+
+        The ``name`` is the base for the keys used in the TOML file and in this
+        object. The ``display_name`` is the properly-capitalized name for use in
+        templates and so on.
+
+        """
+        # any which are not .title()
+        special_display_names = {
+            "github": "GitHub",
+        }
+        methods = []
+        for field in fields(cls):
+            if not field.name.endswith("_key"):
+                continue
+            name = field.name[:-4]
+            display_name = special_display_names.get(name, name.title())
+            methods.append((name, display_name))
+        methods.sort(key=itemgetter(1))
+        return methods
+
 
 @attrs(frozen=True)
 class Settings:
     db: DbSettings = attrib()
-    logging: LoggingSettings = attrib()
     flask: FlaskSettings = attrib()
+    logging: LoggingSettings = attrib()
+    site: SiteSettings = attrib()
     social_auth: SocialAuthSettings = attrib()
 
 

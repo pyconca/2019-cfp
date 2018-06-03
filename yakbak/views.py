@@ -1,7 +1,9 @@
 import logging
 
-from flask import Blueprint, redirect, render_template, Response, url_for
+from flask import Blueprint, current_app, redirect, render_template, Response, url_for
 from flask_login import logout_user
+
+from yakbak.settings import SocialAuthSettings
 
 
 app = Blueprint("views", __name__)
@@ -15,7 +17,8 @@ def index() -> Response:
 
 @app.route("/login")
 def login() -> Response:
-    return render_template("login.html")
+    social_methods = SocialAuthSettings.social_auth_methods()
+    return render_template("login.html", social_methods=social_methods)
 
 
 @app.route("/logout")

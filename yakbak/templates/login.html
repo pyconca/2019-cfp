@@ -1,15 +1,30 @@
-{% extends "bootstrap/base.html" %}
-{% import "bootstrap/utils.html" as utils %}
+{% extends "base.html" %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Login - {{ super() }}{% endblock %}
 
-{% block content %}
-<p>You can log in with:
+{% macro logincard(name, display_name) %}
+{% endmacro %}
 
-<ul>
-  {% if settings.social_auth.github %}<li><a href="{{ url_for("social.auth", backend="github") }}">GitHub</a></li>{% endif %}
-  {% if settings.social_auth.google %}<li><a href="{{ url_for("social.auth", backend="google-oauth2") }}">Google</a></li>{% endif %}
-  {% if settings.social_auth.none %}<li>No social authentication configured :-(</li>{% endif %}
-</ul>
-</p>
+{% block container %}
+<div class="row py-3">
+  <div class="col">
+    <h3>Log in with:</h3>
+  </div>
+</div>
+<div class="row py-1">
+  {% for name, display_name in social_methods %}
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center">
+        <img class="img-fluid" src="{{ url_for("static", filename="social/" +  name + ".png") }}" alt="{{ display_name }} logo">
+        <h5 class="py-2">{{ display_name }}</h5>
+        <a href="{{ url_for("social.auth", backend=name) }}" class="btn btn-primary">Log In</a>
+      </div>
+    </div>
+  </div>
+  {% if loop.cycle(False, False, True) and not loop.last -%}
+  </div><div class="row py-1">
+  {%- endif %}
+  {% endfor %}
+</div>
 {% endblock %}
