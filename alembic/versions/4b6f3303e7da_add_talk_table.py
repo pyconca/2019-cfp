@@ -5,6 +5,8 @@ Revises: e51e178df6ae
 Create Date: 2018-06-03 15:42:07.536453
 
 """
+from datetime import datetime
+
 from alembic import op
 import sqlalchemy as sa
 
@@ -35,8 +37,15 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
     sa.PrimaryKeyConstraint('talk_id', 'user_id')
     )
-    op.add_column('user', sa.Column('created', sa.TIMESTAMP(), nullable=False))
-    op.add_column('user', sa.Column('updated', sa.TIMESTAMP(), nullable=False))
+
+    op.add_column('user', sa.Column('created', sa.TIMESTAMP(), nullable=True))
+    op.add_column('user', sa.Column('updated', sa.TIMESTAMP(), nullable=True))
+
+    op.execute("set time zone utc")
+    op.execute("update public.user set created = now(), updated = now()")
+
+    op.alter_column('user', 'created', nullable=False)
+    op.alter_column('user', 'updated', nullable=False)
     # ### end Alembic commands ###
 
 
