@@ -3,7 +3,7 @@ Database models for Yak-Bak.
 
 Some style notes:
 
-- Always name tables with the singular noun for the data they contain,
+- Always name models with the singular noun for the data it contains,
   eg "User" not "Users"
 - Always have an opaque primary key (usually an integer), even if a
   surrogate key seems like a good candidate (eg is unique, stable, etc)
@@ -12,17 +12,24 @@ Some style notes:
   on each model class, but do annotate each column with a type
 
 """
+import logging
+
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import synonym
 
 
 db = SQLAlchemy()
+logger = logging.getLogger("models")
 
 
 class User(db.Model):  # type: ignore
     user_id: int = db.Column(db.Integer, primary_key=True)
+
+    fullname: str = db.Column(db.String(256), nullable=False)
     email: str = db.Column(db.String(256), nullable=False, unique=True)
-    # password = ...
-    name: str = db.Column(db.String(256), nullable=False)
+
+    # Flask-Social-Auth compatibility
+    id: int = synonym("user_id")
 
     # Flask-Login compatibility
     def get_id(self) -> str:

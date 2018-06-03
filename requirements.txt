@@ -6,20 +6,35 @@
 #
 alembic==0.9.9
 attrs==18.1.0
+certifi==2018.4.16        # via requests
+chardet==3.0.4            # via requests
 click==6.7                # via flask
+defusedxml==0.5.0         # via python3-openid, social-auth-core
 dominate==2.3.1           # via flask-bootstrap4
 flask-bootstrap4==4.0.2
 flask-login==0.4.1
 flask-sqlalchemy==2.3.2
 flask==1.0.2
+idna==2.6                 # via requests
 itsdangerous==0.24        # via flask
 jinja2==2.10              # via flask
 mako==1.0.7               # via alembic
 markupsafe==1.0           # via jinja2, mako
+oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
+pyjwt==1.6.4              # via social-auth-core
 python-dateutil==2.7.3    # via alembic
 python-editor==1.0.3      # via alembic
-six==1.11.0               # via python-dateutil
+python-social-auth==0.3.6
+python3-openid==3.1.0     # via social-auth-core
+requests-oauthlib==0.8.0  # via social-auth-core
+requests==2.18.4          # via requests-oauthlib, social-auth-core
+six==1.11.0               # via python-dateutil, social-auth-app-flask, social-auth-app-flask-sqlalchemy, social-auth-core, social-auth-storage-sqlalchemy
+social-auth-app-flask-sqlalchemy==1.0.1
+social-auth-app-flask==1.0.0  # via social-auth-app-flask-sqlalchemy
+social-auth-core==1.7.0   # via python-social-auth, social-auth-app-flask, social-auth-app-flask-sqlalchemy, social-auth-storage-sqlalchemy
+social-auth-storage-sqlalchemy==1.1.0  # via social-auth-app-flask-sqlalchemy
 sqlalchemy==1.2.8
 toml==0.9.4
+urllib3==1.22             # via requests
 visitor==0.1.3            # via flask-bootstrap4
 werkzeug==0.14.1          # via flask

@@ -30,6 +30,12 @@ target_metadata = db.metadata
 # ... etc.
 
 
+def ignore_social_auth_tables(tablename, schema):
+    if tablename.startswith("social_auth_"):
+        return False
+    return True
+
+
 def inject_uri_from_settings():
     """
     Use the DB URI from yakbak.toml, overwriting whatever is in alembic.ini.
@@ -57,7 +63,11 @@ def run_migrations_offline():
 
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True)
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        include_symbol=ignore_social_auth_tables,
+    )
 
     with context.begin_transaction():
         context.run_migrations()
@@ -80,7 +90,8 @@ def run_migrations_online():
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
-            target_metadata=target_metadata
+            target_metadata=target_metadata,
+            include_symbol=ignore_social_auth_tables,
         )
 
         with context.begin_transaction():

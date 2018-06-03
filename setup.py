@@ -21,9 +21,16 @@ setup(
         "flask-bootstrap4",
         "flask-login",
         "flask-sqlalchemy",
+        "python-social-auth",
+        "social-auth-app-flask-sqlalchemy",
         "sqlalchemy",
         "toml",
     ],
+    entry_points={
+        "flask.commands": [
+            "sync_db=yakbak.flaskcli:sync_db",
+        ],
+    },
     setup_requires=["vcversioner"],
     vcversioner={"version_module_paths" : ["yakbak/_version.py"]},
 )

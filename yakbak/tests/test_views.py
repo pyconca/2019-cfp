@@ -1,28 +1,42 @@
+from typing import Iterable
 import os.path
 
-from flask import Response
+from flask import abort, redirect, Response
+from flask_login import login_user
 from werkzeug.test import Client
 import pytest
 
-from yakbak.core import create_app
+from yakbak.auth import load_user
+from yakbak.core import APP_CACHE, create_app
 from yakbak.models import db, User
 from yakbak.settings import load_settings_file
 from yakbak.types import Application
 
 
 @pytest.fixture
-def app() -> Application:
+def app() -> Iterable[Application]:
+    APP_CACHE.clear()
+
     here = os.path.dirname(__file__)
-    root = os.path.join(here, "..", "..")
-    test_toml = os.path.join(root, "yakbak.toml-test")
+    test_toml = os.path.join(here, "yakbak.toml-test")
 
     settings = load_settings_file(test_toml)
     app = create_app(settings)
     app.config["TESTING"] = True
 
-    db.create_all()
+    # cheeky: add a /test-login endpoint to the app,
+    # logging in with social auth in tests is tough
+    @app.route("/test-login/<user_id>")
+    def test_login(user_id: str) -> Response:
+        user = load_user(user_id)
+        if not user:
+            abort(401)
+        login_user(user)
+        return redirect("/")
 
-    return app
+    db.create_all()
+    yield app
+    db.drop_all()
 
 
 @pytest.fixture
@@ -30,12 +44,27 @@ def client(app: Application) -> Client:
     return app.test_client()
 
 
-def assert_html_response(resp: Response) -> str:
+@pytest.fixture
+def user() -> User:
+    user = User(fullname="Test User", email="test@example.com")
+    db.session.add(user)
+    db.session.commit()
+
+    # TODO: This avoids an error where SQLAlchemy says that the user
+    # is not associated with a session. I don't understand why.
+    list(User.query.all())
+
+    return user
+
+
+def assert_html_response(resp: Response, status: int = 200) -> str:
     """
     Ensure ``resp`` has certain common HTTP headers for HTML responses.
 
     Returns the decoded HTTP response body.
+
     """
+    assert resp.status_code == status
     assert resp.headers["Content-Type"].startswith("text/html")
     assert "charset" in resp.headers["Content-Type"]
 
@@ -45,44 +74,27 @@ def assert_html_response(resp: Response) -> str:
     return data.decode(resp.mimetype_params["charset"])
 
 
-def assert_html_response_contains(resp: Response, *snippets: str) -> None:
+def assert_html_response_contains(resp: Response, *snippets: str, status: int = 200) -> None:  # noqa: E501
     """
     Ensure that each of the ``snippets`` is in the body of ``resp``.
 
     """
-    content = assert_html_response(resp)
+    content = assert_html_response(resp, status)
     for snippet in snippets:
         assert snippet in content
 
 
-def test_login_with_existing_user_id_redirects_to_homepage(client: Client) -> None:
-    db.session.add(User(user_id=1, name="Test User", email="test@example.com"))
-    db.session.commit()
-
+def test_homepage_shows_user_name(client: Client, user: User) -> None:
     resp = client.get("/")
     assert_html_response_contains(resp, "You are anonymous")
 
-    resp = client.post("/login", data=dict(user_id="1"), follow_redirects=True)
-    assert_html_response_contains(resp, "You are Test User")
+    resp = client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
+    assert_html_response_contains(resp, "You are {}".format(user.fullname))
 
 
-def test_login_with_missing_user_id(client: Client) -> None:
-    resp = client.get("/")
-    assert_html_response_contains(resp, "You are anonymous")
-
-    resp = client.post("/login", data=dict(user_id="1"), follow_redirects=True)
-    assert_html_response_contains(resp, "User ID not found")  # the flash message
-
-
-def test_logout_logs_you_out(client: Client) -> None:
-    db.session.add(User(user_id=1, name="Test User", email="test@example.com"))
-    db.session.commit()
-
-    resp = client.get("/")
-    assert_html_response_contains(resp, "You are anonymous")
-
-    resp = client.post("/login", data=dict(user_id="1"), follow_redirects=True)
-    assert_html_response_contains(resp, "You are Test User")
+def test_logout_logs_you_out(client: Client, user: User) -> None:
+    resp = client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
+    assert_html_response_contains(resp, "You are {}".format(user.fullname))
 
     resp = client.get("/logout", follow_redirects=True)
     assert_html_response_contains(resp, "You are anonymous")

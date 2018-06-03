@@ -8,3 +8,5 @@ level="INFO"
 # Set this to somtething long and randomly-generated, but constant
 # across all servers serving the same Yak-Bak instance
 secret_key="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+[social_auth]

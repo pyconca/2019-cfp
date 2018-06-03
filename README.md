@@ -32,7 +32,7 @@ Yak-Bak requires Python 3.6 or newer.
     We recommend that you use PostgreSQL 10 or newer. You will also need to
     install the PostgreSQL driver for python with `pip install psycopg2`.
 
-4. Create tables in the database with `alembic upgrade head`
+4. Create tables in the database with `FLASK_APP=wsgi flask sync_db`
 
 5. Run the Flask development server: `FLASK_APP=wsgi flask run`
 
@@ -54,3 +54,34 @@ Yak-Bak requires Python 3.6 or newer.
     just that package, plus its dependencies. You will have to re-run `pip
     install -r requirements.txt` after doing so to install or update the
     packages.
+
+## Social Auth
+
+### GitHub
+
+You will need to [create a new
+application](https://github.com/settings/applications/new) on GitHub. You
+should name it "Yak-Bak <yourname> Development". You can set the homepage
+URL and description to anything you like, but you will need to set the
+callback URL to `http://localhost:5000/login/external/complete/github/`.
+Enter the Client ID and Client Secret as `github_key` and `github_secret`,
+respectively, in `yakbak.toml` in the `social_auth` section.
+
+### Google
+
+You will need to create a new project in the [Google APIs
+Console](https://console.developers.google.com/apis/dashboard) by clicking
+"Select a Project" and then "New Project" in the upper-right of that dialog.
+You should name it "Yak-Bak <yourname> Development". Select your project
+from the "Select a Project" menu, then select "Credentials" from the
+left-hand menu. Click "Create credentials", then "OAuth Client ID". Select
+"Web Application", and enter
+`http://localhost:5000/login/external/complete/google-oauth2/` as the
+Authorized Redirect URL. Enter the Client ID and Client Secret as
+`google_key` and `google_secret`, respectively, in `yakbak.toml` in the
+`social_auth` section.
+
+You must also enable the Google+ API. Go to the [Google APIs
+Console](https://console.developers.google.com/apis/dashboard), select your
+project, select "Dashboard" on the left menu, then click "Enable APIs and
+Services". Search for, select, and enable the Google+ API.

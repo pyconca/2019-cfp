@@ -4,10 +4,12 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-{{ utils.flashed_messages() }}
-<form method="post" action="{{ url_for("views.login") }}">
-  <label for="user_id">User ID:</label>
-  <input type="text" name="user_id" id="user_id">
-  <input type="submit">
-</form>
+<p>You can log in with:
+
+<ul>
+  {% if settings.social_auth.github %}<li><a href="{{ url_for("social.auth", backend="github") }}">GitHub</a></li>{% endif %}
+  {% if settings.social_auth.google %}<li><a href="{{ url_for("social.auth", backend="google-oauth2") }}">Google</a></li>{% endif %}
+  {% if settings.social_auth.none %}<li>No social authentication configured :-(</li>{% endif %}
+</ul>
+</p>
 {% endblock %}
