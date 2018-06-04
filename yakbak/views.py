@@ -11,7 +11,7 @@ from flask import (
 )
 from flask_login import login_required, logout_user
 
-from yakbak.forms import TalkForm
+from yakbak.forms import TalkForm, UserForm
 from yakbak.models import db, Talk
 from yakbak.settings import SocialAuthSettings
 
@@ -38,6 +38,19 @@ def login() -> Response:
 def logout() -> Response:
     logout_user()
     return redirect(url_for("views.index"))
+
+
+@app.route("/profile", methods=["GET", "POST"])
+def user_profile() -> Response:
+    user = g.user
+    form = UserForm(obj=user)
+    if form.validate_on_submit():
+        form.populate_obj(user)
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for("views.dashboard"))
+
+    return render_template("profile.html", form=form)
 
 
 @app.route("/dashboard")

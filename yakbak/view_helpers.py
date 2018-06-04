@@ -20,6 +20,7 @@ def top_nav() -> Dict[str, List[Tuple[str, str, bool]]]:
 
     right_nav = []
     if g.user.is_authenticated:
+        right_nav.append(navtuple("Edit Profile", "views.user_profile"))
         right_nav.append(navtuple(f"Log Out ({g.user.fullname})", "views.logout"))
     else:
         right_nav.append(navtuple("Log In", "views.login"))
