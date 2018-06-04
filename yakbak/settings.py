@@ -63,7 +63,7 @@ class SocialAuthSettings:
     none: bool = attrib()
 
     @classmethod
-    def social_auth_methods(cls) -> List[Tuple[str, str]]:
+    def social_auth_methods(cls) -> List[Tuple[str, str, str]]:
         """
         Get a list of social auth methods as (``name``, ``display_name``) tuples.
 
@@ -72,17 +72,22 @@ class SocialAuthSettings:
         templates and so on.
 
         """
-        # any which are not .title()
-        special_display_names = {
+        # any which are not name.title()
+        display_names = {
             "github": "GitHub",
+        }
+        # any which are not name
+        backend_names = {
+            "google": "google-oauth2",
         }
         methods = []
         for field in fields(cls):
             if not field.name.endswith("_key"):
                 continue
             name = field.name[:-4]
-            display_name = special_display_names.get(name, name.title())
-            methods.append((name, display_name))
+            display_name = display_names.get(name, name.title())
+            backend_name = backend_names.get(name, name)
+            methods.append((name, backend_name, display_name))
         methods.sort(key=itemgetter(1))
         return methods
 

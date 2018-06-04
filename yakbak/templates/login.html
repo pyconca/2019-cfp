@@ -9,13 +9,13 @@
   </div>
 </div>
 <div class="row py-1">
-  {% for name, display_name in social_methods %}
+  {% for name, backend_name, display_name in social_methods %}
   <div class="col-md-4">
     <div class="card">
       <div class="card-body text-center">
         <img class="img-fluid" src="{{ url_for("static", filename="social/" +  name + ".png") }}" alt="{{ display_name }} logo">
         <h5 class="py-2">{{ display_name }}</h5>
-        <a href="{{ url_for("social.auth", backend=name) }}" class="btn btn-primary">Log In</a>
+        <a href="{{ url_for("social.auth", backend=backend_name) }}" class="btn btn-primary">Log In</a>
       </div>
     </div>
   </div>
