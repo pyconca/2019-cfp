@@ -10,7 +10,7 @@ from flask_wtf.csrf import CsrfProtect
 from social_flask.routes import social_auth
 from social_flask_sqlalchemy.models import init_social
 
-from yakbak import views
+from yakbak import view_helpers, views
 from yakbak.auth import login_manager
 from yakbak.forms import init_forms
 from yakbak.models import db
@@ -51,6 +51,7 @@ def create_app(settings: Settings) -> Application:
     CsrfProtect(app)
 
     app.register_blueprint(views.app)
+    app.register_blueprint(view_helpers.app)  # filters etc
     app.register_blueprint(social_auth, url_prefix="/login/external")
 
     return app
