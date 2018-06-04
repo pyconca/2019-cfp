@@ -45,7 +45,11 @@ class User(db.Model):  # type: ignore
     email: str = db.Column(db.String(256), nullable=False, unique=True)
 
     talks: Iterable["Talk"] = db.relationship(
-        "Talk", secondary=talk_speaker, back_populates="speakers")
+        "Talk",
+        secondary=talk_speaker,
+        back_populates="speakers",
+        order_by="Talk.created",
+    )
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
@@ -75,12 +79,16 @@ class Talk(db.Model):  # type: ignore
     talk_id: int = db.Column(db.Integer, primary_key=True)
 
     speakers: Iterable[User] = db.relationship(
-        "User", secondary=talk_speaker, back_populates="talks")
+        "User",
+        secondary=talk_speaker,
+        back_populates="talks",
+        order_by="User.created",
+    )
 
     # talk type = ...
 
     title: str = db.Column(db.String(512), nullable=False)
-    overview: str = db.Column(db.String(1024), nullable=True)
+    length: int = db.Column(db.Integer, nullable=False)
     description: str = db.Column(db.Text, nullable=True)
     outline: str = db.Column(db.Text, nullable=True)
 

@@ -1,6 +1,9 @@
 [site]
 title="Test Conference"
 
+[cfp]
+talk_lengths=[25, 40]
+
 [db]
 uri="sqlite://"  # in-memory DB
 

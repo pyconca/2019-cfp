@@ -1,5 +1,5 @@
 from operator import itemgetter
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 import os.path
 
 from attr import attrib, attrs, fields
@@ -9,6 +9,21 @@ import toml
 
 class InvalidSettings(Exception):
     pass
+
+
+def list_of(validator: Callable[[Any], None]) -> Callable[[Any], None]:
+    def list_validator(instance: Any, attribute: Any, value: Any) -> None:
+        if not isinstance(value, (list, tuple)):
+            raise TypeError("value must be a list or tuple")
+        for element in value:
+            validator(instance, attribute, element)
+
+    return list_validator
+
+
+@attrs(frozen=True)
+class CfpSettings:
+    talk_lengths: List[int] = attrib(validator=list_of(instance_of(int)))
 
 
 @attrs(frozen=True)
@@ -71,6 +86,7 @@ class SocialAuthSettings:
 
 @attrs(frozen=True)
 class Settings:
+    cfp: CfpSettings = attrib()
     db: DbSettings = attrib()
     flask: FlaskSettings = attrib()
     logging: LoggingSettings = attrib()

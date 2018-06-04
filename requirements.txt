@@ -12,11 +12,13 @@ click==6.7                # via flask
 defusedxml==0.5.0         # via python3-openid, social-auth-core
 flask-login==0.4.1
 flask-sqlalchemy==2.3.2
+flask-wtf==0.14.2
 flask==1.0.2
 idna==2.6                 # via requests
 itsdangerous==0.24        # via flask
 jinja2==2.10              # via flask
 mako==1.0.7               # via alembic
+markdown==2.6.11
 markupsafe==1.0           # via jinja2, mako
 oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
 pyjwt==1.6.4              # via social-auth-core
@@ -35,3 +37,4 @@ sqlalchemy==1.2.8
 toml==0.9.4
 urllib3==1.22             # via requests
 werkzeug==0.14.1          # via flask
+wtforms==2.2              # via flask-wtf

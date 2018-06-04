@@ -20,6 +20,8 @@ setup(
         "flask",
         "flask-login",
         "flask-sqlalchemy",
+        "flask-wtf",
+        "markdown",
         "python-social-auth",
         "social-auth-app-flask-sqlalchemy",
         "sqlalchemy",

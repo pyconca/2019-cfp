@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ talk.title|default("Talk") }} - {{ super() }}{% endblock %}
+
+{% block morestyles %}
+{{ super() }}
+<style type="text/css">
+  textarea {
+    min-height: 15rem;
+  }
+</style>
+{% endblock %}
+
+{% macro render_field(field, placeholder) -%}
+{% if placeholder %}
+{{ field(placeholder=placeholder, class_="form-control", aria_describedby=field.id + "-help") }}
+{% else %}
+{{ field(class_="form-control", aria_describedby=field.id + "-help") }}
+{% endif %}
+{%- endmacro %}
+
+{% macro render_label(field, label) -%}
+<label for="{{ field.id }}"{% if field.errors %} class="text-danger"{% endif %}>{{ label }}</label>
+{%- endmacro %}
+
+{% macro render_error(field) -%}
+{% if field.errors -%}
+<small class="form-text text-danger">{{ field.errors|join(";") }}</small>
+{%- endif %}
+{%- endmacro %}
+
+
+{% block container %}
+<form method="post">
+  <div class="row">
+    {% set field = form["title"] %}
+    <div class="col-md-8 form-group">
+      {{ render_label(field, "Title") }}
+      {{ render_field(field, "My Incredible Talk") }}
+      {{ render_error(field) }}
+    </div>
+
+    {% set field = form["length"] %}
+    <div class="col-md-4 form-group">
+      {{ render_label(field, "Length") }}
+      {{ render_field(field, "") }}
+      {{ render_error(field) }}
+    </div>
+  </div>
+  <div class="row">
+    {% set field = form["description"] %}
+    <div class="col-md-8 form-group">
+      {{ render_label(field, "Description") }}
+      {{ render_field(field, "Markdown supports **bold**, _italic_, [links](http://www.example.com/), and lots more!") }}
+      {{ render_error(field) }}
+    </div>
+    <div class="col-md-4">
+      <label></label>{# for spacing :( #}
+      <small id="{{ field.id }}-help" class="form-text text-muted">
+        <p>
+        Your description should catch attendees' attention, and draw them
+        in to your talk. What secrets will you reveal? How will we cringe or
+        applaud at the stories you tell? What technique will they learn about
+        that they don't yet know they need? Be persuasive and brief, attendees
+        will have a lot of talks to read through.
+        </p>
+        <p>
+        The description will be public in the conference program. The first
+        paragraph may be excerpted in the talk list. Supports
+        <a href="https://daringfireball.net/projects/markdown/syntax">Markdown</a>.
+        </p>
+      </small>
+    </div>
+  </div>
+  <div class="row">
+    {% set field = form["outline"] %}
+    <div class="col-md-8 form-group">
+      {{ render_label(field, "Outline") }}
+      {{ render_field(field, "It's nice to:\n\n* Format bullet points, using Markdown\n* So that\n  * You can write it easily, and\n  * It is nicely formatted for reviewers") }}
+      {{ render_error(field) }}
+    </div>
+    <div class="col-md-4">
+      <label></label>{# for spacing :( #}
+      <small id="{{ field.id }}-help" class="form-text text-muted">
+        <p>
+        Your outline should answer the questions you posed in the description.
+        It's one thing to tantalize your potential audience, but the voters and
+        program committee will want to know more precisely what you plan to talk
+        about. A good range for outlines is anywhere from 8 to 20 bullet points
+        &mdash; more if your topic is especially subtle, or your talk especially
+        deep, less if your description already provides sufficient detail.
+        </p>
+        <p>
+        The outline will be made available to public voters and the program committee,
+        but will <strong>not</strong> appear in the conference program. Supports
+        <a href="https://daringfireball.net/projects/markdown/syntax">Markdown</a>.
+        </p>
+      </small>
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Save Talk</button>
+  {{ form["csrf_token"] }}
+</form>
+{% endblock %}

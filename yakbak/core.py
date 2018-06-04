@@ -6,11 +6,13 @@ import sys
 from attr import asdict
 from flask import Flask, g
 from flask_login import current_user
+from flask_wtf.csrf import CsrfProtect
 from social_flask.routes import social_auth
 from social_flask_sqlalchemy.models import init_social
 
 from yakbak import views
 from yakbak.auth import login_manager
+from yakbak.forms import init_forms
 from yakbak.models import db
 from yakbak.settings import Settings
 from yakbak.types import Application
@@ -45,6 +47,8 @@ def create_app(settings: Settings) -> Application:
     set_up_flask(app)
     set_up_database(app)
     set_up_auth(app)
+    init_forms(app)
+    CsrfProtect(app)
 
     app.register_blueprint(views.app)
     app.register_blueprint(social_auth, url_prefix="/login/external")

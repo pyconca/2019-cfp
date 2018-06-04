@@ -1,6 +1,9 @@
 [site]
 title="A PyConference"
 
+[cfp]
+talk_lengths=[25, 40]
+
 [db]
 uri="postgres+psycopg2://localhost/yakbak"
 
