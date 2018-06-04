@@ -115,9 +115,19 @@ def edit_talk(talk_id: int) -> Response:
         form.populate_obj(talk)
         db.session.add(talk)
         db.session.commit()
-        return redirect(url_for("views.dashboard"))
+        return redirect(url_for("views.preview_talk", talk_id=talk.talk_id))
 
     return render_template("edit_talk.html", talk=talk, form=form)
+
+
+@app.route("/talks/<int:talk_id>/preview")
+def preview_talk(talk_id: int) -> Response:
+    talk = Talk.query.get_or_404(talk_id)
+    if g.user not in talk.speakers:
+        # TODO: figure out how to do this in the query directly?
+        abort(404)
+
+    return render_template("preview_talk.html", talk=talk)
 
 
 @app.route("/talks/new", methods=["GET", "POST"])

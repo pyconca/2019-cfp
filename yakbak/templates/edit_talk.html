@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Edit {{ talk.title|default("Talk") }} - {{ super() }}{% endblock %}
+{% block title %}{% if talk.title %}Edit "{{ talk.title }}"{% else %}New Talk{% endif %} - {{ super() }}{% endblock %}
 
 {% block morestyles %}
 {{ super() }}
@@ -98,7 +98,18 @@
       </small>
     </div>
   </div>
-  <button type="submit" class="btn btn-primary">Save Talk</button>
+  <div class="row">
+    <div class="col-md-auto">
+      <button type="submit" class="btn btn-primary">Save &amp; Preview</button>
+    </div>
+    <div class="col-md-6">
+      <small id="{{ field.id }}-help" class="form-text text-muted" style="margin-top:0">
+        On the next page, you'll have a chance to see what your rendered proposal
+        will look like to the voters and program committee. You can edit your talk
+        until voting begins.
+      </small>
+    </div>
+  </div>
   {{ form["csrf_token"] }}
 </form>
 {% endblock %}
