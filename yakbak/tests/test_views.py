@@ -84,17 +84,26 @@ def assert_html_response_contains(resp: Response, *snippets: str, status: int = 
         assert snippet in content
 
 
-def test_homepage_shows_user_name(client: Client, user: User) -> None:
-    resp = client.get("/")
-    assert_html_response_contains(resp, "You are anonymous")
+def assert_redirected(resp: Response, to: str) -> None:
+    assert_html_response(resp, 302)
 
+    landing_url = f"http://localhost{to}"
+    assert resp.headers["Location"] == landing_url
+
+
+def test_homepage_redirects_to_login(client: Client) -> None:
+    resp = client.get("/")
+    assert_redirected(resp, "/login")
+
+
+def test_homepage_shows_user_name(client: Client, user: User) -> None:
     resp = client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
-    assert_html_response_contains(resp, "You are {}".format(user.fullname))
+    assert_html_response_contains(resp, f"Log Out ({user.fullname})")
 
 
 def test_logout_logs_you_out(client: Client, user: User) -> None:
     resp = client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
-    assert_html_response_contains(resp, "You are {}".format(user.fullname))
+    assert_html_response_contains(resp, f"Log Out ({user.fullname})")
 
     resp = client.get("/logout", follow_redirects=True)
-    assert_html_response_contains(resp, "You are anonymous")
+    assert_html_response_contains(resp, "Log In")

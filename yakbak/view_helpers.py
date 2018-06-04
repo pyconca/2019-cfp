@@ -14,15 +14,20 @@ def top_nav() -> Dict[str, List[Tuple[str, str, bool]]]:
         url = url_for(route)
         return (label, url, request.path == url)
 
-    nav = [
+    left_nav = [
         navtuple("Home", "views.dashboard"),
     ]
-    if g.user.is_authenticated:
-        nav.append(navtuple("Log Out", "views.logout"))
-    else:
-        nav.append(navtuple("Log In", "views.login"))
 
-    return {"nav_links": nav}
+    right_nav = []
+    if g.user.is_authenticated:
+        right_nav.append(navtuple(f"Log Out ({g.user.fullname})", "views.logout"))
+    else:
+        right_nav.append(navtuple("Log In", "views.login"))
+
+    return {
+        "left_nav": left_nav,
+        "right_nav": right_nav,
+    }
 
 
 @app.app_template_filter("timesince")
