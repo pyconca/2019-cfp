@@ -91,6 +91,7 @@ class Talk(db.Model):  # type: ignore
     length: int = db.Column(db.Integer, nullable=False)
     description: str = db.Column(db.Text, nullable=True)
     outline: str = db.Column(db.Text, nullable=True)
+    requirements: str = db.Column(db.Text, nullable=True)
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(

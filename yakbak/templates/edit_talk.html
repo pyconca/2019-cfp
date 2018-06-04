@@ -99,6 +99,31 @@
     </div>
   </div>
   <div class="row">
+    {% set field = form["requirements"] %}
+    <div class="col-md-8 form-group">
+      {{ render_label(field, "Extra Requirements") }}
+      {{ render_field(field, "Because I am planning to smash watermelons with a sledge hammer, the conference should provide wet-weather gear to attendees in the first five rows") }}
+      {{ render_error(field) }}
+    </div>
+    <div class="col-md-4">
+      <label></label>{# for spacing :( #}
+      <small id="{{ field.id }}-help" class="form-text text-muted">
+        <p>
+        If your talk has any special requirements, please note them here.
+        We will provide audio and video connections for all common connectors
+        (HDMI, VGA, DVI, Thunderbolt, USB-C, and Mini Display Port; and a
+        stereo headphone jack connector) and podium, lavalier, and hand-held
+        microphones.
+        </p>
+        <p>
+        This field will not be shown to public voters, but will be available
+        to the program committee. If your talk has truly unusual requirements,
+        we may not be able to accept it.
+        </p>
+      </small>
+    </div>
+  </div>
+  <div class="row">
     <div class="col-md-auto">
       <button type="submit" class="btn btn-primary">Save &amp; Preview</button>
     </div>
