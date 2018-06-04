@@ -11,7 +11,10 @@ class InvalidSettings(Exception):
     pass
 
 
-def list_of(validator: Callable[[Any], None]) -> Callable[[Any], None]:
+ValidationFunc = Callable[[Any, Any, Any], None]
+
+
+def list_of(validator: ValidationFunc) -> ValidationFunc:
     def list_validator(instance: Any, attribute: Any, value: Any) -> None:
         if not isinstance(value, (list, tuple)):
             raise TypeError("value must be a list or tuple")

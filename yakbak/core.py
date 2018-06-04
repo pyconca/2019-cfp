@@ -4,7 +4,7 @@ import os
 import sys
 
 from attr import asdict
-from flask import Flask, g
+from flask import g
 from flask_login import current_user
 from flask_wtf.csrf import CsrfProtect
 from social_flask.routes import social_auth

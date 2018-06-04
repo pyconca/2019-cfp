@@ -2,8 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms.ext.sqlalchemy.orm import model_form, ModelConverter
 from wtforms.fields import SelectField
 
-from yakbak.types import Application
 from yakbak.models import db, Talk
+from yakbak.types import Application
 
 
 class ModelConverterWithDoc(ModelConverter):

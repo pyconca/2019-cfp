@@ -1,6 +1,5 @@
 import logging
 
-from attr import fields
 from flask import (
     abort,
     Blueprint,
