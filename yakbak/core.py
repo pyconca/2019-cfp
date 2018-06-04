@@ -6,7 +6,7 @@ import sys
 from attr import asdict
 from flask import g
 from flask_login import current_user
-from flask_wtf.csrf import CsrfProtect
+from flask_wtf.csrf import CSRFProtect
 from social_flask.routes import social_auth
 from social_flask_sqlalchemy.models import init_social
 
@@ -48,7 +48,7 @@ def create_app(settings: Settings) -> Application:
     set_up_database(app)
     set_up_auth(app)
     init_forms(app)
-    CsrfProtect(app)
+    CSRFProtect(app)
 
     app.register_blueprint(views.app)
     app.register_blueprint(view_helpers.app)  # filters etc
