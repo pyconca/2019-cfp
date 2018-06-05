@@ -2,6 +2,14 @@
 
 {% block title %}Login - {{ super() }}{% endblock %}
 
+{% block morestyles %}
+<style type="text/css">
+  a.card-link:hover, a.card-link:active {
+    text-decoration: none;
+  }
+</style>
+{% endblock %}
+
 {% block container %}
 <div class="row py-3">
   <div class="col">
@@ -9,14 +17,16 @@
   </div>
 </div>
 <div class="row py-1">
-  {% for name, backend_name, display_name in social_methods %}
+  {% for auth in auth_methods %}
   <div class="col-md-4">
     <div class="card">
-      <div class="card-body text-center">
-        <img class="img-fluid" src="{{ url_for("static", filename="social/" +  name + ".png") }}" alt="{{ display_name }} logo">
-        <h5 class="py-2">{{ display_name }}</h5>
-        <a href="{{ url_for("social.auth", backend=backend_name) }}" class="btn btn-primary">Log In</a>
-      </div>
+      <a href="{{ auth.url() }}" class="card-link text-body">
+        <div class="card-body text-center">
+          <img class="img-fluid" src="{{ url_for("static", filename="social/" +  auth.name + ".png") }}" alt="{{ auth.display_name }} logo">
+          <h5 class="py-2">{{ auth.display_name }}</h5>
+          <button class="btn btn-primary">Log In</button>
+        </div>
+      </a>
     </div>
   </div>
   {% if loop.cycle(False, False, True) and not loop.last -%}

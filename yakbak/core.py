@@ -97,7 +97,7 @@ def set_up_database(app: Application) -> None:
 def set_up_auth(app: Application) -> None:
     login_manager.init_app(app)
 
-    if app.settings.social_auth.none:
+    if app.settings.auth.no_social_auth:
         # Should only be true in testing! But it avoids some issues
         # in how social-sqlalchemy defines its models at call time.
         return
@@ -113,7 +113,7 @@ def set_up_auth(app: Application) -> None:
         "social_core.backends.github.GithubOAuth2",
     ]
 
-    cfg = app.settings.social_auth
+    cfg = app.settings.auth
     if cfg.github_key and cfg.github_secret:
         app.config["SOCIAL_AUTH_GITHUB_KEY"] = cfg.github_key
         app.config["SOCIAL_AUTH_GITHUB_SECRET"] = cfg.github_secret

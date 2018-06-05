@@ -1,17 +1,29 @@
-from operator import itemgetter
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from operator import attrgetter
+from typing import Any, Callable, Dict, List, Optional
 import os.path
 
 from attr import attrib, attrs, fields
 from attr.validators import instance_of, optional
+from flask import url_for
 import toml
+
+
+ValidationFunc = Callable[[Any, Any, Any], None]
 
 
 class InvalidSettings(Exception):
     pass
 
 
-ValidationFunc = Callable[[Any, Any, Any], None]
+@attrs
+class AuthMethod:
+    name: str = attrib()
+    display_name: str = attrib()
+    view: str = attrib()
+    view_kwargs: Dict[str, Any] = attrib()
+
+    def url(self) -> str:
+        return url_for(self.view, **self.view_kwargs)
 
 
 def list_of(validator: ValidationFunc) -> ValidationFunc:
@@ -50,7 +62,7 @@ class SiteSettings:
 
 
 @attrs(frozen=True)
-class SocialAuthSettings:
+class AuthSettings:
     github_key: Optional[str] = attrib(validator=optional(instance_of(str)))
     github_secret: Optional[str] = attrib(validator=optional(instance_of(str)))
 
@@ -60,16 +72,11 @@ class SocialAuthSettings:
     # these are initialized in core.py
     github: bool = attrib()
     google: bool = attrib()
-    none: bool = attrib()
+    no_social_auth: bool = attrib()
 
-    @classmethod
-    def social_auth_methods(cls) -> List[Tuple[str, str, str]]:
+    def auth_methods(self) -> List[AuthMethod]:
         """
-        Get a list of social auth methods as (``name``, ``display_name``) tuples.
-
-        The ``name`` is the base for the keys used in the TOML file and in this
-        object. The ``display_name`` is the properly-capitalized name for use in
-        templates and so on.
+        Get a list of social auth methods.
 
         """
         # any which are not name.title()
@@ -81,25 +88,29 @@ class SocialAuthSettings:
             "google": "google-oauth2",
         }
         methods = []
-        for field in fields(cls):
+        for field in fields(AuthSettings):
             if not field.name.endswith("_key"):
                 continue
             name = field.name[:-4]
+            if not getattr(self, name, False):
+                continue
             display_name = display_names.get(name, name.title())
             backend_name = backend_names.get(name, name)
-            methods.append((name, backend_name, display_name))
-        methods.sort(key=itemgetter(1))
+            view, kwargs = "social.auth", {"backend": backend_name}
+            methods.append(AuthMethod(name, display_name, view, kwargs))
+
+        methods.sort(key=attrgetter("name"))
         return methods
 
 
 @attrs(frozen=True)
 class Settings:
+    auth: AuthSettings = attrib()
     cfp: CfpSettings = attrib()
     db: DbSettings = attrib()
     flask: FlaskSettings = attrib()
     logging: LoggingSettings = attrib()
     site: SiteSettings = attrib()
-    social_auth: SocialAuthSettings = attrib()
 
 
 def find_settings_file() -> str:
@@ -127,15 +138,15 @@ def load_settings(settings_dict: Dict[str, Any]) -> Settings:
 
         # For each social auth method, set a setting named eg "github"
         # if that method is configured; if none are configured, set
-        # a field "none" to True
-        if section == "social_auth":
+        # a field "no_social_auth" to True
+        if section == "auth":
             social_methods = set([
                 f.name[:-4]
-                for f in fields(SocialAuthSettings)
+                for f in fields(AuthSettings)
                 if f.name.endswith("_key")
             ])
 
-            data["none"] = True
+            data["no_social_auth"] = True
             for social_method in social_methods:
                 key_field = "{}_key".format(social_method)
                 secret_field = "{}_secret".format(social_method)
@@ -143,7 +154,7 @@ def load_settings(settings_dict: Dict[str, Any]) -> Settings:
                 data.setdefault(secret_field, None)
                 data[social_method] = data.get(key_field) and data.get(secret_field)
                 if data[social_method]:
-                    data["none"] = False
+                    data["no_social_auth"] = False
 
         top_level[section] = field.type(**data)
 

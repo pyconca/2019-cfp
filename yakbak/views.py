@@ -3,6 +3,7 @@ import logging
 from flask import (
     abort,
     Blueprint,
+    current_app,
     g,
     redirect,
     render_template,
@@ -13,7 +14,6 @@ from flask_login import login_required, logout_user
 
 from yakbak.forms import TalkForm, UserForm
 from yakbak.models import db, Talk
-from yakbak.settings import SocialAuthSettings
 
 
 app = Blueprint("views", __name__)
@@ -30,8 +30,8 @@ def index() -> Response:
 
 @app.route("/login")
 def login() -> Response:
-    social_methods = SocialAuthSettings.social_auth_methods()
-    return render_template("login.html", social_methods=social_methods)
+    auth_methods = current_app.settings.auth.auth_methods()
+    return render_template("login.html", auth_methods=auth_methods)
 
 
 @app.route("/logout")
