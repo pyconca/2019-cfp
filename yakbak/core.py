@@ -1,11 +1,9 @@
-from typing import Any, Dict
+from typing import Dict
 import logging
 import os
 import sys
 
 from attr import asdict
-from flask import g
-from flask_login import current_user
 from flask_wtf.csrf import CSRFProtect
 from social_flask.routes import social_auth
 from social_flask_sqlalchemy.models import init_social
@@ -85,10 +83,6 @@ def set_up_flask(app: Application) -> None:
     for key, value in asdict(app.settings.flask).items():
         app.config[key.upper()] = value
 
-    @app.context_processor
-    def set_template_vars() -> Dict[str, Any]:
-        return {"settings": app.settings}
-
 
 def set_up_database(app: Application) -> None:
     app.config["SQLALCHEMY_DATABASE_URI"] = app.settings.db.uri
@@ -102,17 +96,6 @@ def set_up_database(app: Application) -> None:
 
 def set_up_auth(app: Application) -> None:
     login_manager.init_app(app)
-
-    @app.before_request
-    def set_current_user_on_g() -> None:
-        g.user = current_user
-
-    @app.context_processor
-    def set_user_in_templates() -> Dict[str, Any]:
-        try:
-            return {"user": g.user}
-        except AttributeError:
-            return {}
 
     if app.settings.social_auth.none:
         # Should only be true in testing! But it avoids some issues

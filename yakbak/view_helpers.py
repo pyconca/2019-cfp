@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Tuple
 
-from flask import Blueprint, g, Markup, request, url_for
+from flask import Blueprint, current_app, g, Markup, request, url_for
+from flask_login import current_user
 from markdown import markdown
 
 
@@ -29,6 +30,24 @@ def top_nav() -> Dict[str, List[Tuple[str, str, bool]]]:
         "left_nav": left_nav,
         "right_nav": right_nav,
     }
+
+
+@app.app_context_processor
+def settings_in_template() -> Dict[str, Any]:
+    return {"settings": current_app.settings}
+
+
+@app.app_context_processor
+def set_user_in_templates() -> Dict[str, Any]:
+    try:
+        return {"user": current_user}
+    except AttributeError:
+        return {}
+
+
+@app.before_app_request
+def set_current_user_on_g() -> None:
+    g.user = current_user
 
 
 @app.app_template_filter("timesince")
