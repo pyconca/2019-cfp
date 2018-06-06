@@ -11,6 +11,7 @@ from social_flask_sqlalchemy.models import init_social
 from yakbak import view_helpers, views
 from yakbak.auth import login_manager
 from yakbak.forms import init_forms
+from yakbak.mail import mail
 from yakbak.models import db
 from yakbak.settings import Settings
 from yakbak.types import Application
@@ -45,6 +46,7 @@ def create_app(settings: Settings) -> Application:
     set_up_flask(app)
     set_up_database(app)
     set_up_auth(app)
+    set_up_mail(app)
     init_forms(app)
     CSRFProtect(app)
 
@@ -128,3 +130,15 @@ def set_up_auth(app: Application) -> None:
         ]
 
     init_social(app, db.session)
+
+
+def set_up_mail(app: Application) -> None:
+    app.config["MAIL_SERVER"] = app.settings.smtp.host
+    app.config["MAIL_PORT"] = app.settings.smtp.port
+    app.config["MAIL_USERNAME"] = app.settings.smtp.username
+    app.config["MAIL_PASSWORD"] = app.settings.smtp.password
+    app.config["MAIL_DEFAULT_SENDER"] = app.settings.smtp.sender
+    app.config["MAIL_USE_TLS"] = True
+    app.config["MAIL_MAX_EMAILS"] = 10  # guess
+
+    mail.init_app(app)

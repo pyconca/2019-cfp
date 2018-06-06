@@ -10,6 +10,13 @@ uri="postgres+psycopg2://localhost/yakbak"
 [logging]
 level="INFO"
 
+[smtp]
+host="..."
+port=25
+username="..."
+password="..."
+sender="Yak-Bak <yakbak@example.com>"
+
 [flask]
 # Set this to somtething long and randomly-generated, but constant
 # across all servers serving the same Yak-Bak instance

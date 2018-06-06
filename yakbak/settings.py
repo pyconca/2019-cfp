@@ -59,6 +59,7 @@ class LoggingSettings:
 @attrs(frozen=True)
 class SiteSettings:
     title: str = attrib(validator=instance_of(str))
+    conference: str = attrib(validator=instance_of(str))
 
 
 @attrs(frozen=True)
@@ -104,6 +105,15 @@ class AuthSettings:
 
 
 @attrs(frozen=True)
+class SMTPSettings:
+    host: str = attrib()
+    port: int = attrib()
+    username: str = attrib()
+    password: str = attrib()
+    sender: str = attrib()
+
+
+@attrs(frozen=True)
 class Settings:
     auth: AuthSettings = attrib()
     cfp: CfpSettings = attrib()
@@ -111,6 +121,7 @@ class Settings:
     flask: FlaskSettings = attrib()
     logging: LoggingSettings = attrib()
     site: SiteSettings = attrib()
+    smtp: SMTPSettings = attrib()
 
 
 def find_settings_file() -> str:
