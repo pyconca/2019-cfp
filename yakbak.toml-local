@@ -22,9 +22,9 @@ sender="Yak-Bak <yakbak@example.com>"
 # across all servers serving the same Yak-Bak instance
 secret_key="hlIuOBFBsKZBbq41BEE9XJUKipy2TC5b"
 
-[social_auth]
-github_key="..."
+[auth]
+github_key_id="..."
 github_secret="..."
 
-google_key="..."
+google_key_id="..."
 google_secret="..."

@@ -64,10 +64,10 @@ class SiteSettings:
 
 @attrs(frozen=True)
 class AuthSettings:
-    github_key: Optional[str] = attrib(validator=optional(instance_of(str)))
+    github_key_id: Optional[str] = attrib(validator=optional(instance_of(str)))
     github_secret: Optional[str] = attrib(validator=optional(instance_of(str)))
 
-    google_key: Optional[str] = attrib(validator=optional(instance_of(str)))
+    google_key_id: Optional[str] = attrib(validator=optional(instance_of(str)))
     google_secret: Optional[str] = attrib(validator=optional(instance_of(str)))
 
     # these are initialized in core.py
@@ -90,9 +90,9 @@ class AuthSettings:
         }
         methods = []
         for field in fields(AuthSettings):
-            if not field.name.endswith("_key"):
+            if not field.name.endswith("_key_id"):
                 continue
-            name = field.name[:-4]
+            name = field.name[:-7]
             if not getattr(self, name, False):
                 continue
             display_name = display_names.get(name, name.title())
@@ -152,20 +152,22 @@ def load_settings(settings_dict: Dict[str, Any]) -> Settings:
         # a field "no_social_auth" to True
         if section == "auth":
             social_methods = set([
-                f.name[:-4]
+                f.name[:-7]
                 for f in fields(AuthSettings)
-                if f.name.endswith("_key")
+                if f.name.endswith("_key_id")
             ])
 
             data["no_social_auth"] = True
             for social_method in social_methods:
-                key_field = "{}_key".format(social_method)
+                key_id_field = "{}_key_id".format(social_method)
                 secret_field = "{}_secret".format(social_method)
-                data.setdefault(key_field, None)
+                data.setdefault(key_id_field, None)
                 data.setdefault(secret_field, None)
-                data[social_method] = data.get(key_field) and data.get(secret_field)
+                data[social_method] = data.get(key_id_field) and data.get(secret_field)
                 if data[social_method]:
                     data["no_social_auth"] = False
+
+            data.setdefault("email_magic_link", False)
 
         top_level[section] = field.type(**data)
 

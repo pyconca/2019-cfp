@@ -116,13 +116,13 @@ def set_up_auth(app: Application) -> None:
     ]
 
     cfg = app.settings.auth
-    if cfg.github_key and cfg.github_secret:
-        app.config["SOCIAL_AUTH_GITHUB_KEY"] = cfg.github_key
+    if cfg.github:
+        app.config["SOCIAL_AUTH_GITHUB_KEY"] = cfg.github_key_id
         app.config["SOCIAL_AUTH_GITHUB_SECRET"] = cfg.github_secret
         app.config["SOCIAL_AUTH_GITHUB_SCOPE"] = ["read:user", "user:email"]
 
-    if cfg.google_key and cfg.google_secret:
-        app.config["SOCIAL_AUTH_GOOGLE_OAUTH2_KEY"] = cfg.google_key
+    if cfg.google:
+        app.config["SOCIAL_AUTH_GOOGLE_OAUTH2_KEY"] = cfg.google_key_id
         app.config["SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET"] = cfg.google_secret
         app.config["SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE"] = [
             "https://www.googleapis.com/auth/userinfo.email",
