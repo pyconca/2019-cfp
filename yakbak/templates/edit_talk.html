@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros %}
 
 {% block title %}{% if talk.title %}Edit "{{ talk.title }}"{% else %}New Talk{% endif %} - {{ super() }}{% endblock %}
 
@@ -11,48 +12,29 @@
 </style>
 {% endblock %}
 
-{% macro render_field(field, placeholder) -%}
-{% if placeholder %}
-{{ field(placeholder=placeholder, class_="form-control", aria_describedby=field.id + "-help") }}
-{% else %}
-{{ field(class_="form-control", aria_describedby=field.id + "-help") }}
-{% endif %}
-{%- endmacro %}
-
-{% macro render_label(field, label) -%}
-<label for="{{ field.id }}"{% if field.errors %} class="text-danger"{% endif %}>{{ label }}</label>
-{%- endmacro %}
-
-{% macro render_error(field) -%}
-{% if field.errors -%}
-<small class="form-text text-danger">{{ field.errors|join(";") }}</small>
-{%- endif %}
-{%- endmacro %}
-
-
 {% block container %}
 <form method="post">
   <div class="row">
     {% set field = form["title"] %}
     <div class="col-md-8 form-group">
-      {{ render_label(field, "Title") }}
-      {{ render_field(field, "My Incredible Talk") }}
-      {{ render_error(field) }}
+      {{ macros.render_label(field, "Title") }}
+      {{ macros.render_field(field, "My Incredible Talk") }}
+      {{ macros.render_error(field) }}
     </div>
 
     {% set field = form["length"] %}
     <div class="col-md-4 form-group">
-      {{ render_label(field, "Length") }}
-      {{ render_field(field, "") }}
-      {{ render_error(field) }}
+      {{ macros.render_label(field, "Length") }}
+      {{ macros.render_field(field, "") }}
+      {{ macros.render_error(field) }}
     </div>
   </div>
   <div class="row">
     {% set field = form["description"] %}
     <div class="col-md-8 form-group">
-      {{ render_label(field, "Description") }}
-      {{ render_field(field, "Markdown supports **bold**, _italic_, [links](http://www.example.com/), and lots more!") }}
-      {{ render_error(field) }}
+      {{ macros.render_label(field, "Description") }}
+      {{ macros.render_field(field, "Markdown supports **bold**, _italic_, [links](http://www.example.com/), and lots more!") }}
+      {{ macros.render_error(field) }}
     </div>
     <div class="col-md-4">
       <label></label>{# for spacing :( #}
@@ -75,9 +57,9 @@
   <div class="row">
     {% set field = form["outline"] %}
     <div class="col-md-8 form-group">
-      {{ render_label(field, "Outline") }}
-      {{ render_field(field, "It's nice to:\n\n* Format bullet points, using Markdown\n* So that\n  * You can write it easily, and\n  * It is nicely formatted for reviewers") }}
-      {{ render_error(field) }}
+      {{ macros.render_label(field, "Outline") }}
+      {{ macros.render_field(field, "It's nice to:\n\n* Format bullet points, using Markdown\n* So that\n  * You can write it easily, and\n  * It is nicely formatted for reviewers") }}
+      {{ macros.render_error(field) }}
     </div>
     <div class="col-md-4">
       <label></label>{# for spacing :( #}
@@ -101,9 +83,9 @@
   <div class="row">
     {% set field = form["requirements"] %}
     <div class="col-md-8 form-group">
-      {{ render_label(field, "Extra Requirements") }}
-      {{ render_field(field, "Because I am planning to smash watermelons with a sledge hammer, the conference should provide wet-weather gear to attendees in the first five rows") }}
-      {{ render_error(field) }}
+      {{ macros.render_label(field, "Extra Requirements") }}
+      {{ macros.render_field(field, "Because I am planning to smash watermelons with a sledge hammer, the conference should provide wet-weather gear to attendees in the first five rows") }}
+      {{ macros.render_error(field) }}
     </div>
     <div class="col-md-4">
       <label></label>{# for spacing :( #}

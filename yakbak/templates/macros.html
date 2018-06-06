@@ -1,0 +1,18 @@
+{% macro render_field(field, placeholder) -%}
+{% if placeholder %}
+{{ field(placeholder=placeholder, class_="form-control", aria_describedby=field.id + "-help") }}
+{% else %}
+{{ field(class_="form-control", aria_describedby=field.id + "-help") }}
+{% endif %}
+{%- endmacro %}
+
+{% macro render_label(field, label) -%}
+<label for="{{ field.id }}"{% if field.errors %} class="text-danger"{% endif %}>{{ label }}</label>
+{%- endmacro %}
+
+{% macro render_error(field) -%}
+{% if field.errors -%}
+<small class="form-text text-danger">{{ field.errors|join(";") }}</small>
+{%- endif %}
+{%- endmacro %}
+
