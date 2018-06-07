@@ -49,6 +49,8 @@ class DbSettings:
 @attrs(frozen=True)
 class FlaskSettings:
     secret_key: str = attrib(validator=instance_of(str))
+    templates_auto_reload: bool = attrib(
+        validator=optional(instance_of(bool)), default=False)
 
 
 @attrs(frozen=True)
