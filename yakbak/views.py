@@ -88,6 +88,7 @@ def email_magic_link_login(magic_link_token: str) -> Response:
 
 
 @app.route("/profile", methods=["GET", "POST"])
+@login_required
 def user_profile() -> Response:
     user = g.user
     form = UserForm(obj=user)
@@ -108,6 +109,7 @@ def dashboard() -> Response:
 
 
 @app.route("/talks/<int:talk_id>", methods=["GET", "POST"])
+@login_required
 def edit_talk(talk_id: int) -> Response:
     talk = Talk.query.get_or_404(talk_id)
     if g.user not in talk.speakers:
@@ -125,6 +127,7 @@ def edit_talk(talk_id: int) -> Response:
 
 
 @app.route("/talks/<int:talk_id>/preview")
+@login_required
 def preview_talk(talk_id: int) -> Response:
     talk = Talk.query.get_or_404(talk_id)
     if g.user not in talk.speakers:
@@ -135,6 +138,7 @@ def preview_talk(talk_id: int) -> Response:
 
 
 @app.route("/talks/new", methods=["GET", "POST"])
+@login_required
 def create_talk() -> Response:
     talk = Talk(speakers=[g.user])
     form = TalkForm(obj=talk)
