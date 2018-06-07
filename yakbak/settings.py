@@ -1,5 +1,5 @@
 from operator import attrgetter
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 import os.path
 
 from attr import attrib, attrs, fields
@@ -66,21 +66,24 @@ class SiteSettings:
 
 @attrs(frozen=True)
 class AuthSettings:
+    # these are initialized in core.py
+    github: bool = attrib()
+    google: bool = attrib()
+    no_social_auth: bool = attrib()
+
     github_key_id: Optional[str] = attrib(validator=optional(instance_of(str)))
     github_secret: Optional[str] = attrib(validator=optional(instance_of(str)))
 
     google_key_id: Optional[str] = attrib(validator=optional(instance_of(str)))
     google_secret: Optional[str] = attrib(validator=optional(instance_of(str)))
 
-    email_magic_link: Optional[bool] = attrib(validator=optional(instance_of(bool)))
-    email_magic_link_expiry: Optional[int] = attrib(validator=optional(instance_of(int)))
+    email_magic_link: Optional[bool] = attrib(
+        validator=optional(instance_of(bool)), default=False)
+    email_magic_link_expiry: Optional[int] = attrib(
+        validator=optional(instance_of(int)), default=None)
 
-    signing_key: Optional[str] = attrib(validator=instance_of(str))
-
-    # these are initialized in core.py
-    github: bool = attrib()
-    google: bool = attrib()
-    no_social_auth: bool = attrib()
+    signing_key: Optional[str] = attrib(
+        validator=optional(instance_of(str)), default=None)
 
     def auth_methods(self) -> List[AuthMethod]:
         """
@@ -96,7 +99,7 @@ class AuthSettings:
             "google": "google-oauth2",
         }
         # any which are not social-auth
-        view_and_kwargs = {
+        view_and_kwargs: Dict[str, Tuple[str, Dict[str, Any]]] = {
             "email": ("views.magic_link_begin", {}),
         }
 
@@ -122,11 +125,11 @@ class AuthSettings:
 
 @attrs(frozen=True)
 class SMTPSettings:
-    host: str = attrib()
-    port: int = attrib()
-    username: str = attrib()
-    password: str = attrib()
-    sender: str = attrib()
+    host: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
+    port: Optional[int] = attrib(validator=optional(instance_of(int)), default=None)
+    username: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
+    password: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
+    sender: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
 
 
 @attrs(frozen=True)
@@ -185,7 +188,7 @@ def load_settings(settings_dict: Dict[str, Any]) -> Settings:
 
             data.setdefault("email_magic_link", False)
 
-        top_level[section] = field.type(**data)
+        top_level[section] = field.type(**data)  # type: ignore
 
     if settings_dict:
         raise InvalidSettings(

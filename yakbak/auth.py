@@ -28,7 +28,7 @@ def get_magic_link_serializer() -> URLSafeTimedSerializer:
     )
 
 
-def get_magic_link_token_and_expiry(email: str) -> Tuple[str, str]:
+def get_magic_link_token_and_expiry(email: str) -> Tuple[bytes, str]:
     authsettings = current_app.settings.auth
     exp = authsettings.email_magic_link_expiry
     years, rem = divmod(exp, 365 * 24 * 60 * 60)
@@ -50,6 +50,8 @@ def get_magic_link_token_and_expiry(email: str) -> Tuple[str, str]:
 
     serializer = get_magic_link_serializer()
     token = serializer.dumps(email)
+    if isinstance(token, str):
+        token = token.encode("us-ascii")
 
     return token, expiry
 

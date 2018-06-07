@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms.ext.sqlalchemy.orm import model_form, ModelConverter
+from wtforms.ext.sqlalchemy.orm import model_form
 from wtforms.fields import SelectField, StringField
 from wtforms.validators import Email
 

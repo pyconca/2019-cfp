@@ -1,8 +1,7 @@
-from smtplib import SMTP
 from typing import Any, Dict, List, Optional, Tuple
 
 from attr import attrib, attrs
-from flask import current_app, render_template
+from flask import current_app, render_template as flask_render_template
 from flask_mail import Mail
 import frontmatter
 
@@ -16,14 +15,14 @@ class MailMeta:
     sender: Optional[str] = attrib(default=None)
 
 
-def render_and_parse_template(template: str, **kwargs: Dict[str, Any]) -> Tuple[MailMeta, str]:
-    rendered = render_template(template, **kwargs)
+def render_template(template: str, **kwargs: Dict[str, Any]) -> Tuple[MailMeta, str]:
+    rendered = flask_render_template(template, **kwargs)
     parsed = frontmatter.loads(rendered)
     meta = MailMeta(parsed["subject"], parsed.get("sender"))
     return meta, parsed.content
 
 
-def send_mail(to: List[str], template: str, **kwargs: Dict[str, Any]) -> None:
+def send_mail(to: List[str], template: str, **kwargs: Any) -> None:
     """
     Send an email based on the ``template`` and ``kwargs``.
 
@@ -34,7 +33,7 @@ def send_mail(to: List[str], template: str, **kwargs: Dict[str, Any]) -> None:
     - ``sender`` (str): override default sender address
 
     """
-    meta, body = render_and_parse_template(template, **kwargs)
+    meta, body = render_template(template, **kwargs)
     sender = meta.sender or current_app.settings.smtp.sender
     with mail.connect() as conn:
         conn.send_message(

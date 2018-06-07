@@ -1,5 +1,6 @@
 [site]
-title="Test Conference"
+title="TestPyConf"
+conference="Test PyConference"
 
 [cfp]
 talk_lengths=[25, 40]
@@ -15,4 +16,6 @@ level="INFO"
 # across all servers serving the same Yak-Bak instance
 secret_key="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
-[social_auth]
+[auth]
+
+[smtp]
