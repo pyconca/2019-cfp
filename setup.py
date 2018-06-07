@@ -22,6 +22,7 @@ setup(
         "flask-mail",
         "flask-sqlalchemy",
         "flask-wtf",
+        "itsdangerous",
         "markdown",
         "python-frontmatter",
         "python-social-auth",

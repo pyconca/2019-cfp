@@ -70,6 +70,11 @@ class AuthSettings:
     google_key_id: Optional[str] = attrib(validator=optional(instance_of(str)))
     google_secret: Optional[str] = attrib(validator=optional(instance_of(str)))
 
+    email_magic_link: Optional[bool] = attrib(validator=optional(instance_of(bool)))
+    email_magic_link_expiry: Optional[int] = attrib(validator=optional(instance_of(int)))
+
+    signing_key: Optional[str] = attrib(validator=instance_of(str))
+
     # these are initialized in core.py
     github: bool = attrib()
     google: bool = attrib()
@@ -88,6 +93,11 @@ class AuthSettings:
         backend_names = {
             "google": "google-oauth2",
         }
+        # any which are not social-auth
+        view_and_kwargs = {
+            "email": ("views.magic_link_begin", {}),
+        }
+
         methods = []
         for field in fields(AuthSettings):
             if not field.name.endswith("_key_id"):
@@ -97,10 +107,14 @@ class AuthSettings:
                 continue
             display_name = display_names.get(name, name.title())
             backend_name = backend_names.get(name, name)
-            view, kwargs = "social.auth", {"backend": backend_name}
+            default_view_and_kwargs = ("social.auth", {"backend": backend_name})
+            view, kwargs = view_and_kwargs.get(name, default_view_and_kwargs)
             methods.append(AuthMethod(name, display_name, view, kwargs))
 
         methods.sort(key=attrgetter("name"))
+        if self.email_magic_link:
+            email = AuthMethod("email", "Email Magic Link", "views.email_magic_link", {})
+            methods.insert(0, email)
         return methods
 
 

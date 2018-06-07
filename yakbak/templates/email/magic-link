@@ -1,0 +1,18 @@
+---
+subject: Log In Link for {{ settings.site.title }}
+---
+Hello,
+
+You can log in to {{ settings.site.title }} using the following link:
+
+{{ magic_link }}
+
+The link will be valid for {{ magic_link_expiration }}.
+
+If you did not request this link, please reply or forward this email to
+{{ settings.smtp.sender }}.
+
+
+Thanks!
+
+Your friends at {{ settings.site.conference }}

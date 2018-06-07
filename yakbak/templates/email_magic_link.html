@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}Request Login Link - {{ super() }}{% endblock %}
+
+{% block container %}
+<p>You can log in using just your email address -- we'll send a link that
+you can click which will return you to the site logged in and ready to go!</p>
+<form method="post">
+  <div class="form-group">
+    {{ macros.render_label(form.email, "Email Address") }}
+    {{ macros.render_field(form.email, "jane@example.com") }}
+    {% if form.email.errors %}
+    {{ macros.render_error(form.email) }}
+    {% else %}
+    <small class="form-text" id="email-help">If you are returning, be sure to use the same email address as last time</small>
+    {% endif %}
+  </div>
+  <button type="submit" class="btn btn-primary">Send Magic Link</button>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+{% endblock %}

@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms.ext.sqlalchemy.orm import model_form, ModelConverter
-from wtforms.fields import SelectField
+from wtforms.fields import SelectField, StringField
+from wtforms.validators import Email
 
 from yakbak.models import db, Talk, User
 from yakbak.types import Application
@@ -20,6 +21,10 @@ UserForm = model_form(
     base_class=FlaskForm,
     exclude={"user_id", "email", "talks", "created", "updated"},
 )
+
+
+class MagicLinkForm(FlaskForm):
+    email = StringField(validators=[Email()])
 
 
 def init_forms(app: Application) -> None:
