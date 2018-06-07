@@ -17,5 +17,8 @@ level="INFO"
 secret_key="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 [auth]
+email_magic_link=true
+email_magic_link_expiry=1800
+signing_key="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 [smtp]

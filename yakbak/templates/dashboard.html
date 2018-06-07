@@ -21,7 +21,7 @@
 </div>
 {% for talk in talks %}
   <div class="row py-2 border-top border-right border-left{% if loop.last %} border-bottom{% endif %}">
-    <div class="col-md-9">
+    <div class="col-md-9 talk">
       <a href="{{ url_for("views.edit_talk", talk_id=talk.talk_id) }}">{{ talk.title|truncate(100) }}</a>
       {{ vitals(talk) }}
     </div>
