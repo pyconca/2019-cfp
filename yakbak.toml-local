@@ -35,7 +35,7 @@ google_secret="..."
 
 # Also be sure to configure the [smtp] section!
 email_magic_link=true
-email_maic_link_epxiry=28800  # 8 hours
+email_magic_link_expiry=28800  # 8 hours
 
 # Set this to somtething long and randomly-generated, but constant
 # across all servers serving the same Yak-Bak instance
