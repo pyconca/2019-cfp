@@ -88,7 +88,7 @@ def assert_html_response_contains(resp: Response, *snippets: Union[str, Pattern]
     content = assert_html_response(resp, status)
     for snippet in snippets:
         if isinstance(snippet, Pattern):
-            assert re.search(snippet, content), f"could not match {snippet!r} in {content!r}"
+            assert re.search(snippet, content), f"{snippet!r} does not match {content!r}"
         else:
             assert snippet in content
 
@@ -105,7 +105,9 @@ def extract_csrf_from(resp: Response) -> str:
     body = data.decode(resp.mimetype_params["charset"])
     tags = re.findall('(<input[^>]*type="hidden"[^>]*>)', body)
     assert len(tags) == 1
-    return re.search('value="([^"]*)"', tags[0]).group(1)
+    match = re.search('value="([^"]*)"', tags[0])
+    assert match, "CSRF hidden input had no value"
+    return match.group(1)
 
 
 def test_homepage_redirects_to_login(client: Client) -> None:
