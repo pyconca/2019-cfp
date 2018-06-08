@@ -5,10 +5,11 @@ py36:
     - tox -r -e py36
 
 py37:
-  image: python:3.7-slim
+  image: python:3.7-rc-slim
   script:
     - python3.7 -m pip install tox
     - tox -r -e py37
+  allow_failure: true
 
 style:
   image: python:3.6-slim
