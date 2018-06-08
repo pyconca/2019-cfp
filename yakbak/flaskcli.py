@@ -10,9 +10,6 @@ app = create_app(load_settings_file(find_settings_file()))
 
 @app.cli.command()
 def sync_db() -> None:
-    from social_flask_sqlalchemy import models
-    models.PSABase.metadata.create_all(db.engine)
-
     here = os.path.dirname(__file__)
     root = os.path.join(here, "..")
     alembic_ini = os.path.abspath(os.path.join(root, "alembic.ini"))
@@ -21,3 +18,8 @@ def sync_db() -> None:
     from alembic import command
     alembic_cfg = Config(alembic_ini)
     command.upgrade(alembic_cfg, "head")
+
+    # Social-Auth needs to have the User model already in existence,
+    # so do this second to creating the yakbak-specific models
+    from social_flask_sqlalchemy import models
+    models.PSABase.metadata.create_all(db.engine)
