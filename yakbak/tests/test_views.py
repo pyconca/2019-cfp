@@ -193,6 +193,7 @@ def test_create_talk_goes_to_preview(client: Client, user: User) -> None:
     )
 
     # but at this point the talk is saved
-    talks = Talk.query.filter(Talk.speakers.any(user_id=user.user_id)).all()
+    speakers_predicate = Talk.speakers.any(user_id=user.user_id)  # type: ignore
+    talks = Talk.query.filter(speakers_predicate).all()
     assert len(talks) == 1
     assert talks[0].title == "My Awesome Talk"
