@@ -146,6 +146,6 @@ def create_talk() -> Response:
         form.populate_obj(talk)
         db.session.add(talk)
         db.session.commit()
-        return redirect(url_for("views.dashboard"))
+        return redirect(url_for("views.preview_talk", talk_id=talk.talk_id))
 
     return render_template("edit_talk.html", talk=talk, form=form)

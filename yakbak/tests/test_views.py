@@ -171,3 +171,28 @@ def test_dashboard_lists_talks(client: Client, user: User) -> None:
         "Our Talk (40 Minutes, Alice Example and You)",
         "All Our Talk (25 Minutes, Alice Example, Bob Example, and You)",
     ])
+
+
+def test_create_talk_goes_to_preview(client: Client, user: User) -> None:
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks/new")
+    csrf_token = extract_csrf_from(resp)
+
+    postdata = {
+        "title": "My Awesome Talk",
+        "length": "25",
+        "csrf_token": csrf_token,
+    }
+
+    resp = client.post("/talks/new", data=postdata, follow_redirects=True)
+    assert_html_response_contains(
+        resp,
+        "Reviewers will see voting instructions here",
+        "Save &amp; Return",
+        "Edit Again",
+    )
+
+    # but at this point the talk is saved
+    talks = Talk.query.filter(Talk.speakers.any(user_id=user.user_id)).all()
+    assert len(talks) == 1
+    assert talks[0].title == "My Awesome Talk"
