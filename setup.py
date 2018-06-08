@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 
 
 setup(
-    name="yak-bak",
+    name="Yak-Bak",
     description=__doc__.strip().splitlines()[0],
     long_escription=__doc__,
     author="Big Apple Py, Inc.",
