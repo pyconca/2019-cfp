@@ -2,8 +2,10 @@
 yakbak.toml
 
 # Leftovers from tools & support libs
+.coverage
 dist/
 .eggs/
+htmlcov/
 .tox/
 .mypy_cache/
 _version.py
