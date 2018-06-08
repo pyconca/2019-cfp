@@ -1,0 +1,4 @@
+---
+subject: The Email Subject
+---
+This is the email. It has {{ variables }}!

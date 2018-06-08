@@ -1,65 +1,13 @@
-from typing import Iterable, Pattern, Union
-import os.path
+from typing import Pattern, Union
 import re
 
-from flask import abort, redirect, Response
-from flask_login import login_user
+from flask import Response
 from werkzeug.test import Client
 import bs4
 import mock
-import pytest
 
 from yakbak import mail, views
-from yakbak.auth import load_user
-from yakbak.core import APP_CACHE, create_app
 from yakbak.models import db, Talk, User
-from yakbak.settings import load_settings_file
-from yakbak.types import Application
-
-
-@pytest.fixture
-def app() -> Iterable[Application]:
-    APP_CACHE.clear()
-
-    here = os.path.dirname(__file__)
-    test_toml = os.path.join(here, "yakbak.toml-test")
-
-    settings = load_settings_file(test_toml)
-    app = create_app(settings)
-    app.config["TESTING"] = True
-
-    # cheeky: add a /test-login endpoint to the app,
-    # logging in with social auth in tests is tough
-    @app.route("/test-login/<user_id>")
-    def test_login(user_id: str) -> Response:
-        user = load_user(user_id)
-        if not user:
-            abort(401)
-        login_user(user)
-        return redirect("/")
-
-    db.create_all()
-    yield app
-
-    # remove() clears any in-process state; because of where we
-    # define the session, a new one is not created when we call
-    # create_app()
-    db.session.remove()
-    db.drop_all()
-
-
-@pytest.fixture
-def client(app: Application) -> Client:
-    return app.test_client()
-
-
-@pytest.fixture
-def user(app: Application) -> User:
-    user = User(fullname="Test User", email="test@example.com")
-    db.session.add(user)
-    db.session.commit()
-
-    return user
 
 
 def assert_html_response(resp: Response, status: int = 200) -> str:

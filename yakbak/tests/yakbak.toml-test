@@ -22,3 +22,4 @@ email_magic_link_expiry=1800
 signing_key="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 [smtp]
+sender="sender@example.com"

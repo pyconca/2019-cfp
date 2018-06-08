@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 import logging
 import os
 import sys
@@ -26,7 +26,7 @@ logger = logging.getLogger("core")
 APP_CACHE: Dict[int, Application] = {}
 
 
-def create_app(settings: Settings) -> Application:
+def create_app(settings: Settings, flask_config: Dict[str, Any] = {}) -> Application:
     """
     Bootstrap the application.
 
@@ -43,7 +43,7 @@ def create_app(settings: Settings) -> Application:
         APP_CACHE.clear()
         APP_CACHE[os.getpid()] = app
 
-    set_up_flask(app)
+    set_up_flask(app, flask_config)
     set_up_database(app)
     set_up_auth(app)
     set_up_mail(app)
@@ -71,7 +71,7 @@ def set_up_logging(settings: Settings) -> None:
     root_logger.addHandler(stream_handler)
 
 
-def set_up_flask(app: Application) -> None:
+def set_up_flask(app: Application, flask_config: Dict[str, Any]) -> None:
     """
     Some of Flask's default settings make no sense for us.
 
@@ -84,6 +84,8 @@ def set_up_flask(app: Application) -> None:
 
     for key, value in asdict(app.settings.flask).items():
         app.config[key.upper()] = value
+
+    app.config.update(flask_config)
 
 
 def set_up_database(app: Application) -> None:
