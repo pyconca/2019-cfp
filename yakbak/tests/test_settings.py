@@ -14,7 +14,7 @@ def valid_settings_dict() -> Dict[str, Any]:
             "talk_lengths": [30, 45],
         },
         "db": {
-            "uri": "sqlite://",
+            "url": "sqlite://",
         },
         "flask": {
             "secret_key": "abcd",
@@ -49,7 +49,7 @@ def test_it_parses_settings() -> None:
     settings = load_settings(settings_dict)
 
     # spot check a few things
-    assert settings.db.uri == "sqlite://"
+    assert settings.db.url == "sqlite://"
     assert settings.logging.level == "ERROR"
 
 

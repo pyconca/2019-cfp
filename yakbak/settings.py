@@ -43,7 +43,7 @@ class CfpSettings:
 
 @attrs(frozen=True)
 class DbSettings:
-    uri: str = attrib(validator=instance_of(str))
+    url: str = attrib(validator=instance_of(str))
 
 
 @attrs(frozen=True)

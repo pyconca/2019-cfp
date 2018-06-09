@@ -89,7 +89,7 @@ def set_up_flask(app: Application, flask_config: Dict[str, Any]) -> None:
 
 
 def set_up_database(app: Application) -> None:
-    app.config["SQLALCHEMY_DATABASE_URI"] = app.settings.db.uri
+    app.config["SQLALCHEMY_DATABASE_URI"] = app.settings.db.url
 
     # Disable signals (callbacks) on model changes
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
