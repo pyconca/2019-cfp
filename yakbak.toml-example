@@ -1,11 +1,12 @@
 [site]
 title="A PyConference"
+conference="PyConference 201i"
 
 [cfp]
 talk_lengths=[25, 40]
 
 [db]
-uri="postgres+psycopg2://localhost/yakbak"
+url="postgres+psycopg2://localhost/yakbak"
 
 [logging]
 level="INFO"

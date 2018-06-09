@@ -47,7 +47,7 @@ Yak-Bak on your system is with |pip|_::
 
     $ pip install Yak-Bak
 
-.. |pip| replace:: ``pip``
+.. |pip| replace:: :command:`pip`
 .. _pip: https://docs.python.org/3/installing/index.html
 
 You will also need a database. Yak-Bak is tested and developed with
@@ -57,7 +57,7 @@ well. If you are using PostgreSQL, you should further install the `psycopg2
 <https://pypi.org/project/psycopg2-binary/>`_  packages.
 
 Copy the `sample configuration file
-<https://gitlab.com/bigapplepy/yak-bak/blob/master/yakbak.toml-local>`_ to
+<https://gitlab.com/bigapplepy/yak-bak/blob/master/yakbak.toml-example>`_ to
 your system. You will, at minimum, need to change the ``uri`` setting in the
 ``[db]`` section.
 

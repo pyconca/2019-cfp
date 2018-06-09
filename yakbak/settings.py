@@ -55,7 +55,7 @@ class FlaskSettings:
 
 @attrs(frozen=True)
 class LoggingSettings:
-    level: str = attrib(validator=instance_of(str))
+    level: str = attrib(validator=instance_of(str), default="INFO")
 
 
 @attrs(frozen=True)
