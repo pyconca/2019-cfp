@@ -83,6 +83,12 @@ def test_logout_logs_you_out(client: Client, user: User) -> None:
     assert_html_response_contains(resp, "Log In")
 
 
+def test_login_shows_auth_methods(client: Client) -> None:
+    # only the email auth method is enabled in test config :\
+    resp = client.get("/login")
+    assert_html_response_contains(resp, "Magic Link")
+
+
 def test_email_magic_link_form(client: Client) -> None:
     resp = client.get("/login/email")
     assert_html_response_contains(resp, re.compile('<input.*name="email"'))
