@@ -1,6 +1,7 @@
 [site]
 title="A PyConference"
-conference="PyConference 201i"
+conference="PyConference 2018"
+copyright="Copyright &copy; 2018 PyConference Organizers"
 
 [cfp]
 talk_lengths=[25, 40]

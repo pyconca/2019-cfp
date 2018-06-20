@@ -62,6 +62,7 @@ class LoggingSettings:
 class SiteSettings:
     title: str = attrib(validator=instance_of(str))
     conference: str = attrib(validator=instance_of(str))
+    copyright: str = attrib(validator=instance_of(str))
 
 
 @attrs(frozen=True)

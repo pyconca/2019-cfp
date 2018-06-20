@@ -25,6 +25,7 @@ def valid_settings_dict() -> Dict[str, Any]:
         "site": {
             "title": "A PyConference",
             "conference": "PyConference 2018",
+            "copyright": "Copyright (C) 2018 PyConference Organizers",
         },
         "smtp": {},
     }

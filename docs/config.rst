@@ -27,6 +27,7 @@ Example::
     [site]
     title="PyConference Call for Proposals"
     conference="PyConference 2018"
+    copyright="Copyright &copy; 2018 PyConference Organizers"
 
 
 ``title``
