@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block morestyles %}
+<style type="text/css">
+  .jumbotron {
+    background-image: url('{{ url_for("static", filename="seats.jpg") }}');
+    background-size: cover;
+  }
+</style>
+{% endblock %}
+
+{% block morefooter %}
+&mdash; <a href="https://www.flickr.com/photos/zkorb/39927898670/">Sumner M. Redstone Theater image</a>
+by <a href="https://www.flickr.com/photos/zkorb/">Zach Korb</a>
+used with modifications under <a href="https://creativecommons.org/licenses/by-nc/2.0/">CC BY-NC 2.0</a>
+{% endblock %}
+
+{% block container %}
+<div class="jumbotron">
+  <h1 class="display-4">{{ settings.site.conference }} Call for Proposals</h1>
+  <p class="lead">
+  Everyone, no matter their job, age, level of experience, or background has
+  something interesting to share. Even you! {{ settings.site.conference }} wants
+  to hear your story. Won't you share it with us?
+  </p>
+  <hr class="my-4">
+  <p>
+  <strong>There's still time!</strong>
+  Our Call for Proposals is open through June 4, <a href="https://time.is/Anywhere_on_Earth">AoE</a>.
+  </p>
+  <a class="btn btn-lg btn-light border" href="{{ url_for("views.create_talk") }}">Create a Talk Now</a>
+</div>
+<div class="row py-3">
+  <div class="col">
+    <h2>About {{ settings.site.conference }}</h2>
+
+    <p>
+    Corrupti quos dolores et quas molestias excepturi sint occaecati.
+    Sed ut perspiciatis unde omnis iste natus error sit voluptatem. Ut
+    aut reiciendis voluptatibus maiores alias consequatur aut
+    perferendis doloribus asperiores repellat.
+    </p>
+
+    <p>
+    Cupiditate non provident, similique sunt in culpa qui officia
+    deserunt mollitia. Lorem ipsum dolor sit amet, consectetur
+    adipisicing elit. Excepteur sint occaecat cupidatat non proident,
+    sunt in culpa.
+    </p>
+
+    <h2>Who should submit? What topics are OK?</h2>
+
+    <p>
+    Qui officia deserunt mollit anim id est laborum. Nam libero
+    tempore, cum soluta nobis est eligendi optio cumque nihil impedit
+    quo minus id quod maxime placeat. Esse cillum dolore eu fugiat
+    nulla pariatur.
+    </p>
+
+    <ul>
+      <li>Inventore veritatis et quasi architecto</li>
+      <li>Beatae vitae dicta sunt explicabo</li>
+      <li>Facere possimus, omnis voluptas assumenda est</li>
+      <li>Omnis dolor repellendus</li>
+      <li>Itaque earum rerum hic tenetur a sapiente delectus</li>
+    </ul>
+
+    <h2>What if I need help?</h2>
+
+    <p>
+    Itaque earum rerum hic tenetur a sapiente delectus. Temporibus
+    autem quibusdam et aut officiis debitis aut rerum necessitatibus
+    saepe eveniet ut et voluptates repudiandae sint et molestiae non
+    recusandae.
+    </p>
+
+    <h2>OK, I'm sold!</h2>
+
+    <p>
+    Fantastic! If you have an idea, turning it into a proposal is a
+    snap -- why not <a href="{{ url_for("views.create_talk") }}">create
+    a talk</a> right now?
+    </p>
+  </div>
+</div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <span class="text-muted">Place sticky footer content here.</span>
+  </div>
+</footer>
+<div>
+{% endblock %}

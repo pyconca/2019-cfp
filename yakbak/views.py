@@ -27,8 +27,7 @@ logger = logging.getLogger("views")
 def index() -> Response:
     if g.user.is_authenticated:
         return redirect(url_for("views.dashboard"))
-    else:
-        return redirect(url_for("views.login"))
+    return render_template("index.html")
 
 
 @app.route("/login")

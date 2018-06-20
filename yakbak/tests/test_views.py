@@ -58,12 +58,19 @@ def extract_csrf_from(resp: Response) -> str:
     return match.group(1)
 
 
-def test_homepage_redirects_to_login(client: Client) -> None:
+def test_root_shows_cfp_description_when_logged_out(client: Client) -> None:
     resp = client.get("/")
-    assert_redirected(resp, "/login")
+    assert_html_response_contains(resp, "Our Call for Proposals is open through")
 
 
-def test_homepage_shows_user_name(client: Client, user: User) -> None:
+def test_root_redirects_to_dashboard_when_logged_in(client: Client, user: User) -> None:
+    resp = client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
+
+    resp = client.get("/")
+    assert_redirected(resp, "/dashboard")
+
+
+def test_dashboard_shows_user_name(client: Client, user: User) -> None:
     resp = client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
     assert_html_response_contains(resp, f"Log Out ({user.fullname})")
 
