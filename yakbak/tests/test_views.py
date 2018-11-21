@@ -178,7 +178,7 @@ def test_dashboard_lists_talks(client: Client, user: User) -> None:
     talks = soup.find_all("div", class_="talk")
     assert len(talks) == 3
 
-    talk_row_texts = [re.sub("\s+", " ", talk.get_text()).strip() for talk in talks]
+    talk_row_texts = [re.sub(r"\s+", " ", talk.get_text()).strip() for talk in talks]
     assert sorted(talk_row_texts) == sorted([
         "My Talk (25 Minutes)",
         "Our Talk (40 Minutes, Alice Example and You)",

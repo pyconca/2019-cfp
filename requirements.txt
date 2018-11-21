@@ -4,41 +4,41 @@
 #
 #    pip-compile --output-file requirements.txt setup.py
 #
-alembic==0.9.9
-attrs==18.1.0
+alembic==1.0.3
+attrs==18.2.0
 blinker==1.4              # via flask-mail
-certifi==2018.4.16        # via requests
+certifi==2018.10.15       # via requests
 chardet==3.0.4            # via requests
-click==6.7                # via flask
+click==7.0                # via flask
 defusedxml==0.5.0         # via python3-openid, social-auth-core
 flask-login==0.4.1
 flask-mail==0.9.1
 flask-sqlalchemy==2.3.2
 flask-wtf==0.14.2
 flask==1.0.2
-idna==2.6                 # via requests
-itsdangerous==0.24
+idna==2.7                 # via requests
+itsdangerous==1.1.0
 jinja2==2.10              # via flask
 mako==1.0.7               # via alembic
-markdown==2.6.11
-markupsafe==1.0           # via jinja2, mako
+markdown==3.0.1
+markupsafe==1.1.0         # via jinja2, mako
 oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
 pyjwt==1.6.4              # via social-auth-core
-python-dateutil==2.7.3    # via alembic
+python-dateutil==2.7.5    # via alembic
 python-editor==1.0.3      # via alembic
-python-frontmatter==0.4.2
+python-frontmatter==0.4.4
 python-social-auth==0.3.6
 python3-openid==3.1.0     # via social-auth-core
-pyyaml==3.12              # via python-frontmatter
-requests-oauthlib==0.8.0  # via social-auth-core
-requests==2.18.4          # via requests-oauthlib, social-auth-core
+pyyaml==3.13              # via python-frontmatter
+requests-oauthlib==1.0.0  # via social-auth-core
+requests==2.20.1          # via requests-oauthlib, social-auth-core
 six==1.11.0               # via python-dateutil, python-frontmatter, social-auth-app-flask, social-auth-app-flask-sqlalchemy, social-auth-core, social-auth-storage-sqlalchemy
 social-auth-app-flask-sqlalchemy==1.0.1
 social-auth-app-flask==1.0.0  # via social-auth-app-flask-sqlalchemy
-social-auth-core==1.7.0   # via python-social-auth, social-auth-app-flask, social-auth-app-flask-sqlalchemy, social-auth-storage-sqlalchemy
+social-auth-core==2.0.0   # via python-social-auth, social-auth-app-flask, social-auth-app-flask-sqlalchemy, social-auth-storage-sqlalchemy
 social-auth-storage-sqlalchemy==1.1.0  # via social-auth-app-flask-sqlalchemy
-sqlalchemy==1.2.8
-toml==0.9.4
-urllib3==1.22             # via requests
+sqlalchemy==1.2.14
+toml==0.10.0
+urllib3==1.24.1           # via requests
 werkzeug==0.14.1          # via flask
-wtforms==2.2              # via flask-wtf
+wtforms==2.2.1            # via flask-wtf
