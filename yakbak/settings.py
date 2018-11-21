@@ -132,7 +132,7 @@ def find_settings_file() -> str:
 
 def load_settings_file(settings_path: str) -> Settings:
     with open(settings_path) as fp:
-        return load_settings(toml.load(fp))
+        return load_settings(dict(toml.load(fp)))
 
 
 def load_settings(settings_dict: Dict[str, Any]) -> Settings:
