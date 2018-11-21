@@ -1,9 +1,9 @@
 ---
-subject: Log In Link for {{ settings.site.title }}
+subject: Log In Link for {{ g.conference.full_name }}
 ---
 Hello,
 
-You can log in to {{ settings.site.title }} using the following link:
+You can log in to {{ g.conference.full_name }} using the following link:
 
 {{ magic_link }}
 
@@ -15,4 +15,4 @@ If you did not request this link, please reply or forward this email to
 
 Thanks!
 
-Your friends at {{ settings.site.conference }}
+Your friends at {{ g.conference.full_name }}

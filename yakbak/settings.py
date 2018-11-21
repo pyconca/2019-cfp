@@ -26,21 +26,6 @@ class AuthMethod:
         return url_for(self.view, **self.view_kwargs)
 
 
-def list_of(validator: ValidationFunc) -> ValidationFunc:
-    def list_validator(instance: Any, attribute: Any, value: Any) -> None:
-        if not isinstance(value, (list, tuple)):
-            raise TypeError("value must be a list or tuple")
-        for element in value:
-            validator(instance, attribute, element)
-
-    return list_validator
-
-
-@attrs(frozen=True)
-class CfpSettings:
-    talk_lengths: List[int] = attrib(validator=list_of(instance_of(int)))
-
-
 @attrs(frozen=True)
 class DbSettings:
     url: str = attrib(validator=instance_of(str))
@@ -56,13 +41,6 @@ class FlaskSettings:
 @attrs(frozen=True)
 class LoggingSettings:
     level: str = attrib(validator=instance_of(str), default="INFO")
-
-
-@attrs(frozen=True)
-class SiteSettings:
-    title: str = attrib(validator=instance_of(str))
-    conference: str = attrib(validator=instance_of(str))
-    copyright: str = attrib(validator=instance_of(str))
 
 
 @attrs(frozen=True)
@@ -136,11 +114,9 @@ class SMTPSettings:
 @attrs(frozen=True)
 class Settings:
     auth: AuthSettings = attrib()
-    cfp: CfpSettings = attrib()
     db: DbSettings = attrib()
     flask: FlaskSettings = attrib()
     logging: LoggingSettings = attrib()
-    site: SiteSettings = attrib()
     smtp: SMTPSettings = attrib()
 
 

@@ -17,10 +17,10 @@ used with modifications under <a href="https://creativecommons.org/licenses/by-n
 
 {% block container %}
 <div class="jumbotron">
-  <h1 class="display-4">{{ settings.site.conference }} Call for Proposals</h1>
+  <h1 class="display-4">{{ g.conference.full_name }} Call for Proposals</h1>
   <p class="lead">
   Everyone, no matter their job, age, level of experience, or background has
-  something interesting to share. Even you! {{ settings.site.conference }} wants
+  something interesting to share. Even you! {{ g.conference.full_name }} wants
   to hear your story. Won't you share it with us?
   </p>
   <hr class="my-4">
@@ -32,7 +32,7 @@ used with modifications under <a href="https://creativecommons.org/licenses/by-n
 </div>
 <div class="row py-3">
   <div class="col">
-    <h2>About {{ settings.site.conference }}</h2>
+    <h2>About {{ g.conference.full_name }}</h2>
 
     <p>
     Corrupti quos dolores et quas molestias excepturi sint occaecati.

@@ -20,15 +20,29 @@ Some style notes:
 
 """
 from datetime import datetime
-from typing import Iterable
+from typing import Iterable, List, Optional
 import logging
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import synonym
+from sqlalchemy.types import JSON
+from sqlalchemy_postgresql_json import JSONMutableList
 
 
 db = SQLAlchemy()
 logger = logging.getLogger("models")
+
+
+class Conference(db.Model):  # type: ignore
+    conference_id: int = db.Column(db.Integer, primary_key=True)
+
+    full_name: str = db.Column(db.String(256), nullable=False)
+    informal_name: str = db.Column(db.String(256), nullable=False)
+
+    talk_lengths: List[int] = db.Column(
+        JSONMutableList.as_mutable(JSON),
+        nullable=False,
+    )
 
 
 talk_speaker = db.Table(
@@ -89,9 +103,9 @@ class Talk(db.Model):  # type: ignore
 
     title: str = db.Column(db.String(512), nullable=False)
     length: int = db.Column(db.Integer, nullable=False)
-    description: str = db.Column(db.Text, nullable=True)
-    outline: str = db.Column(db.Text, nullable=True)
-    requirements: str = db.Column(db.Text, nullable=True)
+    description: Optional[str] = db.Column(db.Text)
+    outline: Optional[str] = db.Column(db.Text)
+    requirements: Optional[str] = db.Column(db.Text)
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(

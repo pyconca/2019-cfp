@@ -1,18 +1,13 @@
-from typing import Any, Dict, Sequence
+from typing import Any, Dict
 
-from attr import attrib, attrs
-from attr.validators import instance_of
 import pytest
 
-from yakbak.settings import InvalidSettings, list_of, load_settings
+from yakbak.settings import InvalidSettings, load_settings
 
 
 def valid_settings_dict() -> Dict[str, Any]:
     return {
         "auth": {},
-        "cfp": {
-            "talk_lengths": [30, 45],
-        },
         "db": {
             "url": "sqlite://",
         },
@@ -22,27 +17,8 @@ def valid_settings_dict() -> Dict[str, Any]:
         "logging": {
             "level": "ERROR",
         },
-        "site": {
-            "title": "A PyConference",
-            "conference": "PyConference 2018",
-            "copyright": "Copyright (C) 2018 PyConference Organizers",
-        },
         "smtp": {},
     }
-
-
-def test_list_of_validator() -> None:
-    @attrs
-    class Thing:
-        field: Sequence[int] = attrib(validator=list_of(instance_of(int)))
-
-    Thing(field=[1, 2, 3])  # ok
-    Thing(field=(1, 2, 3))  # ok
-
-    with pytest.raises(TypeError):
-        Thing(field=["foo"])  # type: ignore
-    with pytest.raises(TypeError):
-        Thing(field=1)        # type: ignore
 
 
 def test_it_parses_settings() -> None:

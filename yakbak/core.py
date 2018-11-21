@@ -4,15 +4,15 @@ import os
 import sys
 
 from attr import asdict
+from flask import g
 from flask_wtf.csrf import CSRFProtect
 from social_flask.routes import social_auth
 from social_flask_sqlalchemy.models import init_social
 
 from yakbak import view_helpers, views
 from yakbak.auth import login_manager
-from yakbak.forms import init_forms
 from yakbak.mail import mail
-from yakbak.models import db
+from yakbak.models import Conference, db
 from yakbak.settings import Settings
 from yakbak.types import Application
 
@@ -47,12 +47,13 @@ def create_app(settings: Settings, flask_config: Dict[str, Any] = {}) -> Applica
     set_up_database(app)
     set_up_auth(app)
     set_up_mail(app)
-    init_forms(app)
     CSRFProtect(app)
 
     app.register_blueprint(views.app)
     app.register_blueprint(view_helpers.app)  # filters etc
     app.register_blueprint(social_auth, url_prefix="/login/external")
+
+    set_up_handlers(app)
 
     return app
 
@@ -144,3 +145,10 @@ def set_up_mail(app: Application) -> None:
     app.config["MAIL_MAX_EMAILS"] = 10  # guess
 
     mail.init_app(app)
+
+
+def set_up_handlers(app: Application) -> None:
+    @app.before_request
+    def load_conference() -> None:
+        # TODO: load by URL or something
+        g.conference = Conference.query.one()

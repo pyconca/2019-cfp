@@ -27,7 +27,8 @@ setup(
         "python-frontmatter",
         "python-social-auth",
         "social-auth-app-flask-sqlalchemy",
-        "sqlalchemy",
+        "sqlalchemy >= 1.3.0b1",
+        "sqlalchemy-postgresql-json",
         "toml",
     ],
     entry_points={

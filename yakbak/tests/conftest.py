@@ -1,4 +1,5 @@
 from typing import Iterable
+import json
 import os.path
 
 from flask import abort, redirect, Response
@@ -9,7 +10,7 @@ import pytest
 
 from yakbak.auth import load_user
 from yakbak.core import APP_CACHE, create_app
-from yakbak.models import db, User
+from yakbak.models import Conference, db, User
 from yakbak.settings import load_settings_file
 from yakbak.types import Application
 
@@ -28,6 +29,17 @@ def app() -> Iterable[Application]:
     }
     app = create_app(settings, flask_config)
 
+    db.create_all()
+
+    # views will expect that there's a conference object in the DB
+    conference_json = os.path.join(here, "conference.json-test")
+    with open(conference_json) as fp:
+        conference_fields = json.load(fp)
+
+    conference = Conference(**conference_fields)
+    db.session.add(conference)
+    db.session.commit()
+
     test_templates_dir = os.path.join(here, "templates")
     my_loader = jinja2.ChoiceLoader([
         app.jinja_loader,
@@ -45,7 +57,6 @@ def app() -> Iterable[Application]:
         login_user(user)
         return redirect("/")
 
-    db.create_all()
     yield app
 
     # remove() clears any in-process state; because of where we

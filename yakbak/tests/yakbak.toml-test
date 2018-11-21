@@ -1,11 +1,3 @@
-[site]
-title="TestPyConf"
-conference="Test PyConference"
-copyright="Copyright &copy; 2018 PyConference Organizers"
-
-[cfp]
-talk_lengths=[25, 40]
-
 [db]
 url="sqlite://"  # in-memory DB
 

@@ -115,7 +115,7 @@ def edit_talk(talk_id: int) -> Response:
         # TODO: figure out how to do this in the query directly?
         abort(404)
 
-    form = TalkForm(obj=talk)
+    form = TalkForm(conference=g.conference, obj=talk)
     if form.validate_on_submit():
         form.populate_obj(talk)
         db.session.add(talk)
@@ -140,7 +140,7 @@ def preview_talk(talk_id: int) -> Response:
 @login_required
 def create_talk() -> Response:
     talk = Talk(speakers=[g.user])
-    form = TalkForm(obj=talk)
+    form = TalkForm(conference=g.conference, obj=talk)
     if form.validate_on_submit():
         form.populate_obj(talk)
         db.session.add(talk)
