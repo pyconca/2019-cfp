@@ -6,7 +6,7 @@ Future home of a tech conference call for proposals and program selection app.
 
 Yak-Bak requires Python 3.6 or newer.
 
-1. Install requirements: `pip install tox pip-tools -e .`
+1. Install requirements: `pip install -rtest-requirements.txt`
 
     You may want to use [virtualenv](https://virtualenv.pypa.io/en/stable/)
     or [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/)
