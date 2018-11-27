@@ -31,12 +31,19 @@ def sync_db() -> None:
 @click.argument("full_name")
 @click.argument("informal_name")
 @click.argument("talk_lengths")
-def add_conference(full_name: str, informal_name: str, talk_lengths: str) -> None:
+@click.argument("recording_release_url")
+def add_conference(
+    full_name: str,
+    informal_name: str,
+    talk_lengths: str,
+    recording_release_url: str,
+) -> None:
     lengths = [int(l) for l in talk_lengths.split(",")]
     conf = Conference(
         full_name=full_name,
         informal_name=informal_name,
         talk_lengths=lengths,
+        recording_release_url=recording_release_url,
     )
     db.session.add(conf)
     db.session.commit()

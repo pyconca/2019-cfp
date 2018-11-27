@@ -44,6 +44,8 @@ class Conference(db.Model):  # type: ignore
         nullable=False,
     )
 
+    recording_release_url: str = db.Column(db.String(1024), nullable=False)
+
 
 talk_speaker = db.Table(
     "talk_speaker",
@@ -106,6 +108,8 @@ class Talk(db.Model):  # type: ignore
     description: Optional[str] = db.Column(db.Text)
     outline: Optional[str] = db.Column(db.Text)
     requirements: Optional[str] = db.Column(db.Text)
+
+    accepted_recording_release: bool = db.Column(db.Boolean)
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(

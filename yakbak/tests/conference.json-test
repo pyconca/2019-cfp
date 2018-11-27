@@ -2,5 +2,6 @@
     "conference_id": 1,
     "full_name": "PyGotham 2019",
     "informal_name": "PyGotham",
+    "recording_release_url": "http://www.example.com/",
     "talk_lengths": [30]
 }

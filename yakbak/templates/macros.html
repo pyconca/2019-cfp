@@ -1,8 +1,8 @@
-{% macro render_field(field, placeholder) -%}
+{% macro render_field(field, placeholder="", class_="form-control") -%}
 {% if placeholder %}
-{{ field(placeholder=placeholder, class_="form-control", aria_describedby=field.id + "-help") }}
+{{ field(placeholder=placeholder, class_=class_, aria_describedby=field.id + "-help") }}
 {% else %}
-{{ field(class_="form-control", aria_describedby=field.id + "-help") }}
+{{ field(class_=class_, aria_describedby=field.id + "-help") }}
 {% endif %}
 {%- endmacro %}
 
