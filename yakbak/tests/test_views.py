@@ -210,3 +210,15 @@ def test_create_talk_goes_to_preview(client: Client, user: User) -> None:
     talks = Talk.query.filter(speakers_predicate).all()
     assert len(talks) == 1
     assert talks[0].title == "My Awesome Talk"
+
+
+def test_talk_form_uses_select_field_for_length(client: Client, user: User) -> None:
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks/new")
+
+    assert_html_response_contains(
+        resp,
+        re.compile(
+            '<select[^>]*(?:name="length"[^>]*required|required[^>]*name="length")',
+        ),
+    )
