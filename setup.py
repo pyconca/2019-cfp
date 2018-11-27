@@ -30,6 +30,7 @@ setup(
         "sqlalchemy >= 1.3.0b1",
         "sqlalchemy-postgresql-json",
         "toml",
+        "wtforms-alchemy",
     ],
     entry_points={
         "flask.commands": [

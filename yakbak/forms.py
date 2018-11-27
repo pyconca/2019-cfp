@@ -1,37 +1,47 @@
-from typing import Any
+from typing import Iterable, Tuple
 
+from flask import g
 from flask_wtf import FlaskForm
-from wtforms import Form
-from wtforms.ext.sqlalchemy.orm import model_form
-from wtforms.fields import StringField
-from wtforms.validators import Email
+from wtforms.fields import SelectField, StringField
+from wtforms.validators import DataRequired, Email
+from wtforms_alchemy import model_form_factory
 
-from yakbak.models import Conference, db, Talk, User
-
-
-_TalkForm: Form = model_form(
-    model=Talk,
-    db_session=db.session,
-    base_class=FlaskForm,
-    exclude={"talk_id", "speakers", "updated", "created"},
-)
+from yakbak.models import Talk, User
 
 
-class TalkForm(_TalkForm):
-    def __init__(self, conference: Conference, *args: Any, **kwargs: Any) -> None:
-        self.length.choices = [
+ModelForm = model_form_factory(FlaskForm)  # type: FlaskForm
+
+
+class TalkLengthChoices:
+    """
+    Defer the determination of choices for talk lengths to runtime.
+
+    Because each conference might have different talk lengths, we can't
+    pre-define the choices in the way WTF usually wants for a select field,
+    so we use this trickery instead.
+    """
+    def __iter__(self) -> Iterable[Tuple[int, str]]:
+        return iter([
             (length, f"{length} Minutes")
-            for length in conference.talk_lengths
-        ]
-        super().__init__(*args, **kwargs)
+            for length in g.conference.talk_lengths
+        ])
 
 
-UserForm = model_form(
-    model=User,
-    db_session=db.session,
-    base_class=FlaskForm,
-    exclude={"user_id", "email", "talks", "created", "updated"},
-)
+class TalkForm(ModelForm):
+    class Meta:
+        model = Talk
+
+    length = SelectField(
+        coerce=int,
+        choices=TalkLengthChoices(),
+        validators=[DataRequired()],
+    )
+
+
+class UserForm(ModelForm):
+    class Meta:
+        model = User
+        exclude = {"email"}
 
 
 class MagicLinkForm(FlaskForm):
