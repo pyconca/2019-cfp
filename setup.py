@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 setup(
     name="Yak-Bak",
     description=__doc__.strip().splitlines()[0],
-    long_escription=__doc__,
+    long_description=__doc__,
     author="Big Apple Py, Inc.",
     author_email="yakbak@bigapplepy.org",
     url="https://gitlab.com/bigapplepy/yak-bak",
