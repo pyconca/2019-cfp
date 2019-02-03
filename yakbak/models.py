@@ -67,12 +67,24 @@ class User(db.Model):  # type: ignore
         order_by="Talk.created",
     )
 
+    site_admin: bool = db.Column(
+        db.Boolean,
+        default=False,
+        server_default="false",
+        nullable=False,
+    )
+
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Flask-Social-Auth compatibility
     id: int = synonym("user_id")
+
+    # Flask-Admin compatibility
+    @property
+    def is_site_admin(self) -> bool:
+        return self.site_admin
 
     # Flask-Login compatibility
     def get_id(self) -> str:

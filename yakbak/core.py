@@ -9,7 +9,7 @@ from flask_wtf.csrf import CSRFProtect
 from social_flask.routes import social_auth
 from social_flask_sqlalchemy.models import init_social
 
-from yakbak import view_helpers, views
+from yakbak import admin, view_helpers, views
 from yakbak.auth import login_manager
 from yakbak.mail import mail
 from yakbak.models import Conference, db
@@ -47,6 +47,7 @@ def create_app(settings: Settings, flask_config: Dict[str, Any] = {}) -> Applica
     set_up_database(app)
     set_up_auth(app)
     set_up_mail(app)
+    set_up_admin(app)
     CSRFProtect(app)
 
     app.register_blueprint(views.app)
@@ -145,6 +146,10 @@ def set_up_mail(app: Application) -> None:
     app.config["MAIL_MAX_EMAILS"] = 10  # guess
 
     mail.init_app(app)
+
+
+def set_up_admin(app: Application) -> None:
+    admin.admin.init_app(app)
 
 
 def set_up_handlers(app: Application) -> None:

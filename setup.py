@@ -18,6 +18,7 @@ setup(
         "alembic",
         "attrs",
         "flask",
+        "flask-admin",
         "flask-login",
         "flask-mail",
         "flask-sqlalchemy",
