@@ -81,6 +81,9 @@ class User(db.Model):  # type: ignore
     # Flask-Social-Auth compatibility
     id: int = synonym("user_id")
 
+    def __str__(self) -> str:
+        return f"{self.fullname} ({self.email})"
+
     # Flask-Admin compatibility
     @property
     def is_site_admin(self) -> bool:
@@ -126,3 +129,6 @@ class Talk(db.Model):  # type: ignore
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __str__(self) -> str:
+        return self.title
