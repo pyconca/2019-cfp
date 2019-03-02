@@ -1,5 +1,3 @@
-from typing import Any, Dict, List
-
 from flask import Flask
 
 from yakbak.settings import Settings
