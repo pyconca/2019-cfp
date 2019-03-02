@@ -16,7 +16,7 @@ from flask_login import login_required, login_user, logout_user
 from yakbak import mail
 from yakbak.auth import get_magic_link_token_and_expiry, parse_magic_link_token
 from yakbak.forms import MagicLinkForm, TalkForm, UserForm
-from yakbak.models import db, Talk, User
+from yakbak.models import db, InvitationStatus, Talk, User
 
 
 app = Blueprint("views", __name__)
@@ -103,7 +103,7 @@ def user_profile() -> Response:
 @app.route("/dashboard")
 @login_required
 def dashboard() -> Response:
-    talks = g.user.talks
+    talks = [ts.talk for ts in g.user.talks]
     return render_template("dashboard.html", talks=talks)
 
 
@@ -111,7 +111,7 @@ def dashboard() -> Response:
 @login_required
 def edit_talk(talk_id: int) -> Response:
     talk = Talk.query.get_or_404(talk_id)
-    if g.user not in talk.speakers:
+    if g.user not in [s.user for s in talk.speakers]:
         # TODO: figure out how to do this in the query directly?
         abort(404)
 
@@ -125,11 +125,17 @@ def edit_talk(talk_id: int) -> Response:
     return render_template("edit_talk.html", talk=talk, form=form)
 
 
+@app.route("/talks/<int:talk_id>/speakers", methods=["GET", "POST"])
+@login_required
+def edit_speakers(talk_id: int) -> Response:
+    return "edit speakers page"
+
+
 @app.route("/talks/<int:talk_id>/preview")
 @login_required
 def preview_talk(talk_id: int) -> Response:
     talk = Talk.query.get_or_404(talk_id)
-    if g.user not in talk.speakers:
+    if g.user not in [s.user for s in talk.speakers]:
         # TODO: figure out how to do this in the query directly?
         abort(404)
 
@@ -139,7 +145,8 @@ def preview_talk(talk_id: int) -> Response:
 @app.route("/talks/new", methods=["GET", "POST"])
 @login_required
 def create_talk() -> Response:
-    talk = Talk(speakers=[g.user])
+    talk = Talk()
+    talk.add_speaker(g.user, InvitationStatus.CONFIRMED)
     form = TalkForm(conference=g.conference, obj=talk)
     if form.validate_on_submit():
         form.populate_obj(talk)

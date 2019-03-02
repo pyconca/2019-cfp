@@ -7,7 +7,7 @@ import bs4
 import mock
 
 from yakbak import mail, views
-from yakbak.models import db, Talk, User
+from yakbak.models import db, InvitationStatus, Talk, User
 
 
 def assert_html_response(resp: Response, status: int = 200) -> str:
@@ -162,9 +162,18 @@ def test_dashboard_lists_talks(client: Client, user: User) -> None:
     db.session.add(bob)
     db.session.commit()
 
-    one_talk = Talk(title="My Talk", speakers=[user], length=25)
-    two_talk = Talk(title="Our Talk", speakers=[user, alice], length=40)
-    all_talk = Talk(title="All Our Talk", speakers=[user, alice, bob], length=25)
+    one_talk = Talk(title="My Talk", length=25)
+    one_talk.add_speaker(user, InvitationStatus.CONFIRMED)
+
+    two_talk = Talk(title="Our Talk", length=40)
+    two_talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    two_talk.add_speaker(alice, InvitationStatus.CONFIRMED)
+
+    all_talk = Talk(title="All Our Talk", length=25)
+    all_talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    all_talk.add_speaker(alice, InvitationStatus.CONFIRMED)
+    all_talk.add_speaker(bob, InvitationStatus.CONFIRMED)
+
     db.session.add(one_talk)
     db.session.add(two_talk)
     db.session.add(all_talk)

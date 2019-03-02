@@ -9,6 +9,12 @@
   textarea {
     min-height: 15rem;
   }
+  ul#speakers {
+    padding: 0;
+  }
+  ul#speakers li {
+    list-style-type: none;
+  }
 </style>
 {% endblock %}
 
@@ -29,6 +35,29 @@
       {{ macros.render_error(field) }}
     </div>
   </div>
+  {% if talk.talk_id %}
+  <div class="row">
+    <div class="col-md-8 form-group">
+      <label>Speakers</label>
+      <ul id="speakers">
+        {% for speaker in talk.speakers %}
+        <li>{{ speaker.user.fullname }} ({{ speaker.user.email }}) &mdash; <em>{{ speaker.state.name|title }}</em></li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for("views.edit_speakers", talk_id=talk.talk_id) }}" class="btn btn-outline-primary btn-sm">Manage Speakers</a>
+    </div>
+    <div class="col-md-4">
+      <label></label>{# for spacing :( #}
+      <small id="speakers-help" class="form-text text-muted">
+        <p>
+        Click "Manage Speakers" to invite additional speakers to your talk.
+        Speakers must have an account, and must accept your invitation to
+        co-present with you.
+        </p>
+      </small>
+    </div>
+  </div>
+  {% endif %}
   <div class="row">
     {% set field = form["description"] %}
     <div class="col-md-8 form-group">

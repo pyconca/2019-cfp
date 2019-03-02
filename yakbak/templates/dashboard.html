@@ -3,7 +3,8 @@
 {% block title %}Dashboard - {{ super() }}{% endblock %}
 
 {% macro vitals(talk) %}
-{% set other_speakers = talk.speakers|remove(user)|map(attribute="fullname")|list %}
+{% set speakers = talk.speakers|map(attribute="user") %}
+{% set other_speakers = speakers|remove(user)|map(attribute="fullname")|list %}
 {% if other_speakers|length > 1 %}
 ({{ talk.length }} Minutes, {{ other_speakers|join(", ") }}, and You)
 {% elif other_speakers|length == 1 %}

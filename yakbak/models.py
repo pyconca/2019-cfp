@@ -20,17 +20,25 @@ Some style notes:
 
 """
 from datetime import datetime
-from typing import Iterable, List, Optional
+from typing import List, Optional
+import enum
 import logging
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import synonym
-from sqlalchemy.types import JSON
+from sqlalchemy.types import Enum, JSON
 from sqlalchemy_postgresql_json import JSONMutableList
 
 
 db = SQLAlchemy()
 logger = logging.getLogger("models")
+
+
+class InvitationStatus(enum.Enum):
+    PENDING = "pending"
+    CONFIRMED = "confirmed"
+    REJECTED = "rejected"
+    DELETED = "deleted"
 
 
 class Conference(db.Model):  # type: ignore
@@ -47,25 +55,11 @@ class Conference(db.Model):  # type: ignore
     recording_release_url: str = db.Column(db.String(1024), nullable=False)
 
 
-talk_speaker = db.Table(
-    "talk_speaker",
-    db.Column("talk_id", db.Integer, db.ForeignKey("talk.talk_id"), primary_key=True),
-    db.Column("user_id", db.Integer, db.ForeignKey("user.user_id"), primary_key=True),
-)
-
-
 class User(db.Model):  # type: ignore
     user_id: int = db.Column(db.Integer, primary_key=True)
 
     fullname: str = db.Column(db.String(256), nullable=False)
     email: str = db.Column(db.String(256), nullable=False, unique=True)
-
-    talks: Iterable["Talk"] = db.relationship(
-        "Talk",
-        secondary=talk_speaker,
-        back_populates="speakers",
-        order_by="Talk.created",
-    )
 
     site_admin: bool = db.Column(
         db.Boolean,
@@ -109,13 +103,6 @@ class User(db.Model):  # type: ignore
 class Talk(db.Model):  # type: ignore
     talk_id: int = db.Column(db.Integer, primary_key=True)
 
-    speakers: Iterable[User] = db.relationship(
-        "User",
-        secondary=talk_speaker,
-        back_populates="talks",
-        order_by="User.created",
-    )
-
     # talk type = ...
 
     title: str = db.Column(db.String(512), nullable=False)
@@ -132,3 +119,18 @@ class Talk(db.Model):  # type: ignore
 
     def __str__(self) -> str:
         return self.title
+
+    def add_speaker(self, speaker: User, state: InvitationStatus) -> None:
+        ts = TalkSpeaker(state=state)
+        ts.talk = self
+        ts.user = speaker
+        self.speakers.append(ts)
+
+
+class TalkSpeaker(db.Model):  # type: ignore
+    talk_id = db.Column(db.Integer, db.ForeignKey("talk.talk_id"), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), primary_key=True)
+    state = db.Column(Enum(InvitationStatus), nullable=False)
+
+    talk = db.relationship("Talk", backref=db.backref("speakers"))
+    user = db.relationship("User", backref=db.backref("talks"))
