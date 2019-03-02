@@ -8,10 +8,10 @@ from flask import (
     g,
     redirect,
     render_template,
-    Response,
     url_for,
 )
 from flask_login import login_required, login_user, logout_user
+from werkzeug.wrappers import Response
 
 from yakbak import mail
 from yakbak.auth import get_magic_link_token_and_expiry, parse_magic_link_token
@@ -128,7 +128,7 @@ def edit_talk(talk_id: int) -> Response:
 @app.route("/talks/<int:talk_id>/speakers", methods=["GET", "POST"])
 @login_required
 def edit_speakers(talk_id: int) -> Response:
-    return "edit speakers page"
+    return Response("edit speakers page")
 
 
 @app.route("/talks/<int:talk_id>/preview")

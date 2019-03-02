@@ -2,9 +2,10 @@ from typing import Iterable
 import json
 import os.path
 
-from flask import abort, redirect, Response
+from flask import abort, redirect
 from flask_login import login_user
 from werkzeug.test import Client
+from werkzeug.wrappers import Response
 import jinja2
 import pytest
 
@@ -45,7 +46,7 @@ def app() -> Iterable[Application]:
         app.jinja_loader,
         jinja2.FileSystemLoader(test_templates_dir),
     ])
-    app.jinja_loader = my_loader
+    setattr(app, "jinja_loader", my_loader)
 
     # cheeky: add a /test-login endpoint to the app,
     # logging in with social auth in tests is tough
