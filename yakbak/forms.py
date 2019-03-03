@@ -2,8 +2,8 @@ from typing import Iterable, Tuple
 
 from flask import g
 from flask_wtf import FlaskForm
-from wtforms.fields import SelectField, StringField
-from wtforms.validators import DataRequired, Email
+from wtforms.fields import Field, SelectField, StringField
+from wtforms.validators import DataRequired, Email, NoneOf
 from wtforms_alchemy import model_form_factory
 
 from yakbak.models import Talk, User
@@ -44,5 +44,19 @@ class UserForm(ModelForm):
         exclude = {"email"}
 
 
-class MagicLinkForm(FlaskForm):
+class EmailAddressForm(FlaskForm):
     email = StringField(validators=[Email()])
+
+
+class SpeakerEmailForm(EmailAddressForm):
+
+    def __init__(self, excluded_emails: Iterable[str]) -> None:
+        self.excluded_emails = excluded_emails
+        super().__init__()
+
+    def validate_email(self, field: Field) -> None:
+        validator = NoneOf(
+            self.excluded_emails,
+            message="Already a speaker",
+        )
+        validator(self, field)

@@ -11,16 +11,26 @@ from flask import (
     url_for,
 )
 from flask_login import login_required, login_user, logout_user
+from sqlalchemy.exc import IntegrityError
 from werkzeug.wrappers import Response
 
 from yakbak import mail
 from yakbak.auth import get_magic_link_token_and_expiry, parse_magic_link_token
-from yakbak.forms import MagicLinkForm, TalkForm, UserForm
-from yakbak.models import db, InvitationStatus, Talk, User
+from yakbak.forms import EmailAddressForm, SpeakerEmailForm, TalkForm, UserForm
+from yakbak.models import db, InvitationStatus, Talk, TalkSpeaker, User
 
 
 app = Blueprint("views", __name__)
 logger = logging.getLogger("views")
+
+
+def load_talk(talk_id: int) -> Talk:
+    talk = Talk.query.get_or_404(talk_id)
+    if g.user not in [s.user for s in talk.speakers]:
+        # TODO: figure out how to do this in the query directly?
+        abort(404)
+
+    return talk
 
 
 @app.route("/")
@@ -44,7 +54,7 @@ def logout() -> Response:
 
 @app.route("/login/email", methods=["GET", "POST"])
 def email_magic_link() -> Response:
-    form = MagicLinkForm()
+    form = EmailAddressForm()
     if form.validate_on_submit():
         token, expiry = get_magic_link_token_and_expiry(form.email.data)
         url = url_for(
@@ -110,11 +120,7 @@ def dashboard() -> Response:
 @app.route("/talks/<int:talk_id>", methods=["GET", "POST"])
 @login_required
 def edit_talk(talk_id: int) -> Response:
-    talk = Talk.query.get_or_404(talk_id)
-    if g.user not in [s.user for s in talk.speakers]:
-        # TODO: figure out how to do this in the query directly?
-        abort(404)
-
+    talk = load_talk(talk_id)
     form = TalkForm(conference=g.conference, obj=talk)
     if form.validate_on_submit():
         form.populate_obj(talk)
@@ -128,17 +134,96 @@ def edit_talk(talk_id: int) -> Response:
 @app.route("/talks/<int:talk_id>/speakers", methods=["GET", "POST"])
 @login_required
 def edit_speakers(talk_id: int) -> Response:
-    return Response("edit speakers page")
+    talk = load_talk(talk_id)
+    actions = {
+        InvitationStatus.PENDING: [("Uninvite", "danger", "views.uninvite_speaker")],
+        InvitationStatus.CONFIRMED: [],
+        InvitationStatus.REJECTED: [],
+        InvitationStatus.DELETED: [("Reinvite", "primary", "views.reinvite_speaker")],
+    }
+
+    speaker_emails = [s.user.email for s in talk.speakers]
+    form = SpeakerEmailForm(speaker_emails)
+    if form.validate_on_submit():
+        email = form.email.data
+        send_invite = True
+        try:
+            user = User(fullname=email, email=email)
+            db.session.add(user)
+            db.session.commit()
+            # don't spam users that don't exist
+            send_invite = False
+        except IntegrityError:
+            db.session.rollback()
+            user = User.query.filter_by(email=email).one()
+
+        try:
+            talk.add_speaker(user, InvitationStatus.PENDING)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+
+        if send_invite:
+            mail.send_mail(
+                to=[email],
+                template="email/speaker-invite",
+                talk=talk,
+            )
+
+        return redirect(url_for("views.edit_speakers", talk_id=talk.talk_id))
+
+    return render_template(
+        "edit_speakers.html",
+        talk=talk,
+        actions=actions,
+        form=form,
+    )
+
+
+@app.route("/talks/<int:talk_id>/speakers/uninvite/<int:user_id>")
+@login_required
+def uninvite_speaker(talk_id: int, user_id: int) -> Response:
+    talk = load_talk(talk_id)
+    user = User.query.get_or_404(user_id)
+
+    ts = TalkSpeaker.query.filter_by(
+        talk_id=talk.talk_id,
+        user_id=user.user_id,
+    ).one_or_none()
+    if not ts:
+        abort(404)
+
+    ts.state = InvitationStatus.DELETED
+    db.session.add(ts)
+    db.session.commit()
+    # TODO: send email?
+    return redirect(url_for("views.edit_speakers", talk_id=talk.talk_id))
+
+
+@app.route("/talks/<int:talk_id>/speakers/reinvite/<int:user_id>")
+@login_required
+def reinvite_speaker(talk_id: int, user_id: int) -> Response:
+    talk = load_talk(talk_id)
+    user = User.query.get_or_404(user_id)
+
+    ts = TalkSpeaker.query.filter_by(
+        talk_id=talk.talk_id,
+        user_id=user.user_id,
+    ).one_or_none()
+    if not ts:
+        abort(404)
+
+    ts.state = InvitationStatus.PENDING
+    db.session.add(ts)
+    db.session.commit()
+    # TODO: send email?
+    return redirect(url_for("views.edit_speakers", talk_id=talk.talk_id))
 
 
 @app.route("/talks/<int:talk_id>/preview")
 @login_required
 def preview_talk(talk_id: int) -> Response:
-    talk = Talk.query.get_or_404(talk_id)
-    if g.user not in [s.user for s in talk.speakers]:
-        # TODO: figure out how to do this in the query directly?
-        abort(404)
-
+    talk = load_talk(talk_id)
     return render_template("preview_talk.html", talk=talk)
 
 
