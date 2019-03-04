@@ -110,6 +110,31 @@
     </div>
   </div>
   <div class="row">
+    {% set field = form["take_aways"] %}
+    <div class="col-md-8 form-group">
+      {{ macros.render_label(field, "Audience Take-Aways") }}
+      {{ macros.render_field(field, "Attendees will learn how to foo and bar with the baz library") }}
+      {{ macros.render_error(field) }}
+    </div>
+    <div class="col-md-4">
+      <label></label>{# for spacing :( #}
+      <small id="{{ field.id }}-help" class="form-text text-muted">
+        <p>
+        Describe what attendees of your talk will learn from having attended.
+        Will they be empowered to utilize a new tool in their work? Will they
+        have a foundation on which to deepen their knowledge about a new
+        technique? Will they understand common problems in a new light?
+        </p>
+        <p>
+        Please be specific, as the program committee will use this to help
+        understand the impact your talk will have on the {{ g.conference.informal_name }}
+        audience. Supports
+        <a href="https://daringfireball.net/projects/markdown/syntax">Markdown</a>.
+        </p>
+      </small>
+    </div>
+  </div>
+  <div class="row">
     {% set field = form["requirements"] %}
     <div class="col-md-8 form-group">
       {{ macros.render_label(field, "Extra Requirements") }}

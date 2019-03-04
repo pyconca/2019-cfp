@@ -110,6 +110,7 @@ class Talk(db.Model):  # type: ignore
     description: Optional[str] = db.Column(db.Text)
     outline: Optional[str] = db.Column(db.Text)
     requirements: Optional[str] = db.Column(db.Text)
+    take_aways: Optional[str] = db.Column(db.Text)
 
     accepted_recording_release: bool = db.Column(db.Boolean)
 
