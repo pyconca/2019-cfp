@@ -113,8 +113,30 @@ def user_profile() -> Response:
 @app.route("/dashboard")
 @login_required
 def dashboard() -> Response:
-    talks = [ts.talk for ts in g.user.talks]
-    return render_template("dashboard.html", talks=talks)
+    talks = [
+        ts.talk for ts in g.user.talks
+        if ts.state == InvitationStatus.CONFIRMED
+    ]
+    invitations = TalkSpeaker.query.filter(
+        TalkSpeaker.user == g.user,
+        TalkSpeaker.state != InvitationStatus.CONFIRMED,
+        TalkSpeaker.state != InvitationStatus.DELETED,
+    ).all()
+    actions = {
+        InvitationStatus.PENDING: [
+            ("Reject", "danger", "views.reject_invite"),
+            ("Accept", "primary", "views.accept_invite"),
+        ],
+        InvitationStatus.REJECTED: [
+            ("Accept", "primary", "views.accept_invite"),
+        ],
+    }
+    return render_template(
+        "dashboard.html",
+        talks=talks,
+        invitations=invitations,
+        actions=actions,
+    )
 
 
 @app.route("/talks/<int:talk_id>", methods=["GET", "POST"])
@@ -218,6 +240,38 @@ def reinvite_speaker(talk_id: int, user_id: int) -> Response:
     db.session.commit()
     # TODO: send email?
     return redirect(url_for("views.edit_speakers", talk_id=talk.talk_id))
+
+
+@app.route("/talks/<int:talk_id>/speakers/accept")
+@login_required
+def accept_invite(talk_id: int) -> Response:
+    ts = TalkSpeaker.query.filter(
+        TalkSpeaker.talk_id == talk_id,
+        TalkSpeaker.user == g.user,
+    ).one_or_none()
+    if not ts:
+        abort(401)
+
+    ts.state = InvitationStatus.CONFIRMED
+    db.session.add(ts)
+    db.session.commit()
+    return redirect(url_for("views.dashboard"))
+
+
+@app.route("/talks/<int:talk_id>/speakers/reject")
+@login_required
+def reject_invite(talk_id: int) -> Response:
+    ts = TalkSpeaker.query.filter(
+        TalkSpeaker.talk_id == talk_id,
+        TalkSpeaker.user == g.user,
+    ).one_or_none()
+    if not ts:
+        abort(401)
+
+    ts.state = InvitationStatus.REJECTED
+    db.session.add(ts)
+    db.session.commit()
+    return redirect(url_for("views.dashboard"))
 
 
 @app.route("/talks/<int:talk_id>/preview")

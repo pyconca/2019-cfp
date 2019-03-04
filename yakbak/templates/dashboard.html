@@ -34,4 +34,30 @@
     <a class="btn btn-primary" href="{{ url_for("views.create_talk") }}">Add Talk</a>
   </div>
 </div>
+
+{% if invitations|length > 0 %}
+  <div class="row py-3">
+    <div class="col">
+      <h3>Speaker Invitations:</h3>
+    </div>
+  </div>
+  {% for invitation in invitations %}
+    <div class="row py-2 border-top border-right border-left{% if loop.last %} border-bottom{% endif %}">
+      <div class="col-md-9 talk">
+        {{ invitation.talk.title|truncate(100) }}
+        {{ vitals(invitation.talk) }}
+      </div>
+      <div class="col-md-3 text-right">
+        {% for label, cls, view in actions[invitation.state] %}
+        <a href="{{ url_for(view, talk_id=invitation.talk.talk_id) }}" class="btn btn-outline-{{cls}} btn-sm">{{ label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+  <div class="row py-2">
+    <div class="col text-right">
+      <a class="btn btn-primary" href="{{ url_for("views.create_talk") }}">Add Talk</a>
+    </div>
+  </div>
+{% endif %}
 {% endblock %}
