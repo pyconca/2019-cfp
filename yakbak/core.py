@@ -119,6 +119,20 @@ def set_up_auth(app: Application) -> None:
         "social_core.backends.github.GithubOAuth2",
     ]
 
+    # See https://python-social-auth.readthedocs.io/en/latest/pipeline.html for details
+    app.config["SOCIAL_AUTH_PIPELINE"] = (
+        "social_core.pipeline.social_auth.social_details",
+        "social_core.pipeline.social_auth.social_uid",
+        "social_core.pipeline.social_auth.auth_allowed",
+        "social_core.pipeline.social_auth.social_user",
+        "social_core.pipeline.social_auth.associate_by_email",  # <= inserted vs. default
+        "social_core.pipeline.user.get_username",
+        "social_core.pipeline.user.create_user",
+        "social_core.pipeline.social_auth.associate_user",
+        "social_core.pipeline.social_auth.load_extra_data",
+        "social_core.pipeline.user.user_details",
+    )
+
     cfg = app.settings.auth
     if cfg.github:
         app.config["SOCIAL_AUTH_GITHUB_KEY"] = cfg.github_key_id
