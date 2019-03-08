@@ -9,6 +9,7 @@ from yakbak.models import User
 
 
 login_manager = LoginManager()
+login_manager.login_view = "views.login"
 
 
 @login_manager.user_loader

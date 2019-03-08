@@ -187,3 +187,8 @@ def test_talk_form_uses_select_field_for_length(client: Client, user: User) -> N
             '<select[^>]*(?:name="length"[^>]*required|required[^>]*name="length")',
         ),
     )
+
+
+def test_it_redirects_to_login_page_if_youre_not_logged_in(client: Client) -> None:
+    resp = client.get("/talks/new")
+    assert_redirected(resp, "/login?next=%2Ftalks%2Fnew")
