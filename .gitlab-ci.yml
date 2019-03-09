@@ -5,13 +5,13 @@ py37:
     - tox -r -e py37
 
 style:
-  image: python:3.6-slim
+  image: python:3.7-slim
   script:
-    - python3.6 -m pip install tox
+    - python3.7 -m pip install tox
     - tox -r -e style
 
 mypy:
-  image: python:3.6-slim
+  image: python:3.7-slim
   script:
-    - python3.6 -m pip install tox
+    - python3.7 -m pip install tox
     - tox -r -e mypy
