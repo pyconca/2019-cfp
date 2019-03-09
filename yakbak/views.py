@@ -35,8 +35,6 @@ def load_talk(talk_id: int) -> Talk:
 
 @app.route("/")
 def index() -> Response:
-    if g.user.is_authenticated:
-        return redirect(url_for("views.dashboard"))
     return render_template("index.html")
 
 
@@ -86,7 +84,7 @@ def email_magic_link_login(magic_link_token: str) -> Response:
     user = User.query.filter_by(email=verified_email).first()
     if user:
         login_user(user)
-        return redirect(url_for("views.dashboard"))
+        return redirect(url_for("views.talks_list"))
 
     user = User(email=verified_email, fullname=verified_email)
     db.session.add(user)
@@ -105,14 +103,14 @@ def user_profile() -> Response:
         form.populate_obj(user)
         db.session.add(user)
         db.session.commit()
-        return redirect(url_for("views.dashboard"))
+        return redirect(url_for("views.index"))
 
     return render_template("profile.html", form=form)
 
 
-@app.route("/dashboard")
+@app.route("/talks")
 @login_required
-def dashboard() -> Response:
+def talks_list() -> Response:
     talks = [
         ts.talk for ts in g.user.talks
         if ts.state == InvitationStatus.CONFIRMED
@@ -132,7 +130,7 @@ def dashboard() -> Response:
         ],
     }
     return render_template(
-        "dashboard.html",
+        "talks_list.html",
         talks=talks,
         invitations=invitations,
         actions=actions,
@@ -255,7 +253,7 @@ def accept_invite(talk_id: int) -> Response:
     ts.state = InvitationStatus.CONFIRMED
     db.session.add(ts)
     db.session.commit()
-    return redirect(url_for("views.dashboard"))
+    return redirect(url_for("views.talks_list"))
 
 
 @app.route("/talks/<int:talk_id>/speakers/reject")
@@ -271,7 +269,7 @@ def reject_invite(talk_id: int) -> Response:
     ts.state = InvitationStatus.REJECTED
     db.session.add(ts)
     db.session.commit()
-    return redirect(url_for("views.dashboard"))
+    return redirect(url_for("views.talks_list"))
 
 
 @app.route("/talks/<int:talk_id>/preview")

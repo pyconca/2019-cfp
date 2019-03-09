@@ -112,7 +112,7 @@ def set_up_auth(app: Application) -> None:
     app.config["SOCIAL_AUTH_USER_FIELDS"] = ["email", "fullname"]
     app.config["SOCIAL_AUTH_STORAGE"] = "social_flask_sqlalchemy.models.FlaskStorage"
     app.config["SOCIAL_AUTH_PROTECTED_USER_FIELDS"] = ["email", "fullname"]
-    app.config["SOCIAL_AUTH_LOGIN_REDIRECT_URL"] = "/"
+    app.config["SOCIAL_AUTH_LOGIN_REDIRECT_URL"] = "/talks"
 
     app.config["SOCIAL_AUTH_AUTHENTICATION_BACKENDS"] = [
         "social_core.backends.google.GoogleOAuth2",

@@ -19,14 +19,7 @@ def test_root_shows_cfp_description_when_logged_out(client: Client) -> None:
     assert_html_response_contains(resp, "Our Call for Proposals is open through")
 
 
-def test_root_redirects_to_dashboard_when_logged_in(client: Client, user: User) -> None:
-    resp = client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
-
-    resp = client.get("/")
-    assert_redirected(resp, "/dashboard")
-
-
-def test_dashboard_shows_user_name(client: Client, user: User) -> None:
+def test_talks_list_shows_user_name(client: Client, user: User) -> None:
     resp = client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
     assert_html_response_contains(resp, f"Log Out ({user.fullname})")
 
@@ -76,7 +69,7 @@ def test_email_magic_link_login_for_returning_user(client: Client, user: User) -
         parse.return_value = user.email
         resp = client.get("/login/token/any-token-here", follow_redirects=True)
 
-    assert_html_response_contains(resp, "Dashboard")
+    assert_html_response_contains(resp, "Talks")
 
 
 def test_invalid_email_magic_link_login(client: Client) -> None:
@@ -103,7 +96,7 @@ def test_profile_updates_name_not_email(client: Client, user: User) -> None:
         "csrf_token": csrf_token,
     }
     resp = client.post("/profile", data=postdata, follow_redirects=True)
-    assert_html_response_contains(resp, "Dashboard")
+    assert_html_response_contains(resp, "Talks")
 
     db.session.add(user)
     db.session.refresh(user)
@@ -111,7 +104,7 @@ def test_profile_updates_name_not_email(client: Client, user: User) -> None:
     assert user.email == "test@example.com"  # the old address
 
 
-def test_dashboard_lists_talks(client: Client, user: User) -> None:
+def test_talks_list_page_lists_talks(client: Client, user: User) -> None:
     alice = User(email="alice@example.com", fullname="Alice Example")
     bob = User(email="bob@example.com", fullname="Bob Example")
     db.session.add(alice)
@@ -136,7 +129,7 @@ def test_dashboard_lists_talks(client: Client, user: User) -> None:
     db.session.commit()
 
     client.get("/test-login/{}".format(user.user_id))
-    resp = client.get("/dashboard")
+    resp = client.get("/talks")
     body = assert_html_response(resp)
     soup = bs4.BeautifulSoup(body, "html.parser")
 

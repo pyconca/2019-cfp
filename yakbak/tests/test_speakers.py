@@ -152,7 +152,7 @@ def test_inviting_a_speaker_adds_the_speaker(client: Client, user: User) -> None
         assert False, "alice@example.com did not get attached to the talk"
 
 
-def test_dashboard_shows_invitations(client: Client, user: User) -> None:
+def test_talks_list_shows_invitations(client: Client, user: User) -> None:
     alice = User(email="alice@example.com", fullname="Alice Example")
     db.session.add(alice)
 
@@ -163,7 +163,7 @@ def test_dashboard_shows_invitations(client: Client, user: User) -> None:
     db.session.commit()
 
     client.get("/test-login/{}".format(user.user_id))
-    resp = client.get("/dashboard")
+    resp = client.get("/talks")
 
     assert_html_response_contains(
         resp,
@@ -187,7 +187,7 @@ def test_accept_button_accepts_the_talk(client: Client, user: User) -> None:
 
     client.get("/test-login/{}".format(user.user_id))
     client.get("/talks/1/speakers/accept")
-    resp = client.get("/dashboard")
+    resp = client.get("/talks")
 
     assert_html_response_contains(
         resp,
@@ -214,7 +214,7 @@ def test_accept_button_rejects_the_talk(client: Client, user: User) -> None:
 
     client.get("/test-login/{}".format(user.user_id))
     client.get("/talks/1/speakers/reject")
-    resp = client.get("/dashboard")
+    resp = client.get("/talks")
 
     assert_html_response_contains(
         resp,

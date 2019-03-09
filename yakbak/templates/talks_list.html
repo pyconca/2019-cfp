@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - {{ super() }}{% endblock %}
+{% block title %}Talks - {{ super() }}{% endblock %}
 
 {% macro vitals(talk) %}
 {% set speakers = talk.speakers|map(attribute="user") %}
@@ -27,6 +27,12 @@
       {{ vitals(talk) }}
     </div>
     <div class="col-md-3 text-right">Updated {{ talk.updated|timesince }}</div>
+  </div>
+{% else %}
+  <div class="row py-2 border-top border-right border-left border-bottom">
+    <div class="col-md-12">
+      <em>No talks yet. Why not <a href="{{ url_for("views.create_talk") }}">add one now?</a></em>
+    </div>
   </div>
 {% endfor %}
 <div class="row py-2">
