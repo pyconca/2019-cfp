@@ -17,6 +17,7 @@ from yakbak.models import (
 from yakbak.tests.util import (
     assert_html_response,
     assert_html_response_contains,
+    assert_html_response_doesnt_contain,
     assert_redirected,
     extract_csrf_from,
 )
@@ -300,3 +301,20 @@ def test_demographic_survey_opt_out(client: Client, user: User) -> None:
     assert not survey.age_group
     assert not survey.programming_experience
     assert not survey.past_speaking
+
+
+def test_prompt_for_demographic_survey(client: Client, user: User) -> None:
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks")
+
+    assert_html_response_doesnt_contain(resp, "demographic survey")
+
+    talk = Talk(title="My Talk", length=25)
+    talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    db.session.add(talk)
+    db.session.commit()
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks")
+
+    assert_html_response_contains(resp, "demographic_survey")

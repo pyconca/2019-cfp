@@ -135,11 +135,13 @@ def talks_list() -> Response:
             ("Accept", "primary", "views.accept_invite"),
         ],
     }
+    prompt_for_survey = talks and not g.user.demographic_survey
     return render_template(
         "talks_list.html",
         talks=talks,
         invitations=invitations,
         actions=actions,
+        prompt_for_survey=prompt_for_survey,
     )
 
 
