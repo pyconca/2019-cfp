@@ -5,10 +5,19 @@ import bs4
 import mock
 
 from yakbak import mail, views
-from yakbak.models import db, InvitationStatus, Talk, User
+from yakbak.models import (
+    AgeGroup,
+    db,
+    DemographicSurvey,
+    InvitationStatus,
+    ProgrammingExperience,
+    Talk,
+    User,
+)
 from yakbak.tests.util import (
     assert_html_response,
     assert_html_response_contains,
+    assert_html_response_doesnt_contain,
     assert_redirected,
     extract_csrf_from,
 )
@@ -185,3 +194,127 @@ def test_talk_form_uses_select_field_for_length(client: Client, user: User) -> N
 def test_it_redirects_to_login_page_if_youre_not_logged_in(client: Client) -> None:
     resp = client.get("/talks/new")
     assert_redirected(resp, "/login?next=%2Ftalks%2Fnew")
+
+
+def test_demographic_survey_saves_data(client: Client, user: User) -> None:
+    assert user.demographic_survey is None
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/profile/demographic_survey")
+
+    assert_html_response_contains(
+        resp,
+        "I identify as a:",
+        "I identify my ethnicity as:",
+        "About my past speaking experience:",
+        "My age is:",
+        "I have been programming for:",
+    )
+
+    csrf_token = extract_csrf_from(resp)
+    postdata = {
+        "gender": [
+            "MAN",
+            "WOMAN",
+            "NONBINARY",
+            "free form text for 'other' gender",
+        ],
+        "ethnicity": [
+            "ASIAN",
+            "BLACK_AFRICAN_AMERICAN",
+            "HISPANIC_LATINX",
+            "NATIVE_AMERICAN",
+            "PACIFIC_ISLANDER",
+            "WHITE_CAUCASIAN",
+            "free form text for 'other' ethnicity",
+        ],
+        "past_speaking": [
+            "NEVER",
+            "PYGOTHAM",
+            "OTHER_PYTHON",
+            "OTHER_NONPYTHON",
+        ],
+        "age_group": "UNDER_45",
+        "programming_experience": "UNDER_10YR",
+        "csrf_token": csrf_token,
+    }
+    resp = client.post(
+        "/profile/demographic_survey",
+        data=postdata,
+        follow_redirects=True,
+    )
+    assert_html_response_contains(resp, "Thanks For Completing")
+
+    survey = DemographicSurvey.query.filter_by(user_id=user.user_id).one()
+
+    assert sorted(survey.gender) == sorted(postdata["gender"])
+    assert sorted(survey.ethnicity) == sorted(postdata["ethnicity"])
+    assert sorted(survey.past_speaking) == sorted(postdata["past_speaking"])
+    assert survey.age_group == AgeGroup.UNDER_45
+    assert survey.programming_experience == ProgrammingExperience.UNDER_10YR
+
+
+def test_demographic_survey_skips_blank_other_values(client: Client, user: User) -> None:
+    assert user.demographic_survey is None
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/profile/demographic_survey")
+
+    assert_html_response_contains(
+        resp,
+        "I identify as a:",
+        "I identify my ethnicity as:",
+        "About my past speaking experience:",
+        "My age is:",
+        "I have been programming for:",
+    )
+
+    csrf_token = extract_csrf_from(resp)
+    postdata = {
+        "gender": ["MAN", ""],
+        "csrf_token": csrf_token,
+    }
+    resp = client.post(
+        "/profile/demographic_survey",
+        data=postdata,
+        follow_redirects=True,
+    )
+    assert_html_response_contains(resp, "Thanks For Completing")
+
+    survey = DemographicSurvey.query.filter_by(user_id=user.user_id).one()
+
+    assert survey.gender == ["MAN"]
+
+
+def test_demographic_survey_opt_out(client: Client, user: User) -> None:
+    assert user.demographic_survey is None
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/profile/demographic_survey/opt-out")
+
+    assert_html_response_contains(resp, "You Have Opted Out")
+
+    survey = DemographicSurvey.query.filter_by(user_id=user.user_id).one()
+
+    assert not survey.gender
+    assert not survey.ethnicity
+    assert not survey.age_group
+    assert not survey.programming_experience
+    assert not survey.past_speaking
+
+
+def test_prompt_for_demographic_survey(client: Client, user: User) -> None:
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks")
+
+    assert_html_response_doesnt_contain(resp, "demographic survey")
+
+    talk = Talk(title="My Talk", length=25)
+    talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    db.session.add(talk)
+    db.session.commit()
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks")
+
+    assert_html_response_contains(resp, "demographic_survey")

@@ -135,3 +135,47 @@ class TalkSpeaker(db.Model):  # type: ignore
 
     talk = db.relationship("Talk", backref=db.backref("speakers"))
     user = db.relationship("User", backref=db.backref("talks"))
+
+
+class AgeGroup(enum.Enum):
+    UNDER_18 = "Under 18"
+    UNDER_25 = "18 - 24"
+    UNDER_35 = "25 - 34"
+    UNDER_45 = "35 - 44"
+    UNDER_55 = "45 - 54"
+    UNDER_65 = "55 - 64"
+    OVER_65 = "65 or older"
+
+
+class ProgrammingExperience(enum.Enum):
+    UNDER_1YR = "Under 1 year"
+    UNDER_3YR = "1 - 2 years"
+    UNDER_6YR = "3 - 5 years"
+    UNDER_10YR = "6 - 9 years"
+    UNDER_20YR = "10 - 20 years"
+    OVER_20YR = "20 years or more"
+
+
+class DemographicSurvey(db.Model):  # type: ignore
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), primary_key=True)
+    user = db.relationship(
+        "User",
+        backref=db.backref("demographic_survey", uselist=False),
+    )
+
+    # These fields are multi-select fields, some with "other" options;
+    # the choices are defined in the DemographicSurveyForm in forms.py
+    gender: Optional[List[str]] = db.Column(JSONMutableList.as_mutable(JSON))
+    ethnicity: Optional[List[str]] = db.Column(JSONMutableList.as_mutable(JSON))
+    past_speaking: Optional[List[str]] = db.Column(JSONMutableList.as_mutable(JSON))
+
+    # These fields are single-select and have choices defined above
+    age_group: Optional[AgeGroup] = db.Column(Enum(AgeGroup))
+    programming_experience: Optional[ProgrammingExperience] = db.Column(Enum(ProgrammingExperience))  # noqa: E501
+
+    def clear(self) -> None:
+        self.gender = None
+        self.ethnicity = None
+        self.past_speaking = None
+        self.age_group = None
+        self.programming_experience = None

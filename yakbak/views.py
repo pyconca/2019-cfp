@@ -16,8 +16,14 @@ from werkzeug.wrappers import Response
 
 from yakbak import mail
 from yakbak.auth import get_magic_link_token_and_expiry, parse_magic_link_token
-from yakbak.forms import EmailAddressForm, SpeakerEmailForm, TalkForm, UserForm
-from yakbak.models import db, InvitationStatus, Talk, TalkSpeaker, User
+from yakbak.forms import (
+    DemographicSurveyForm,
+    EmailAddressForm,
+    SpeakerEmailForm,
+    TalkForm,
+    UserForm,
+)
+from yakbak.models import db, DemographicSurvey, InvitationStatus, Talk, TalkSpeaker, User
 
 
 app = Blueprint("views", __name__)
@@ -129,11 +135,13 @@ def talks_list() -> Response:
             ("Accept", "primary", "views.accept_invite"),
         ],
     }
+    prompt_for_survey = talks and not g.user.demographic_survey
     return render_template(
         "talks_list.html",
         talks=talks,
         invitations=invitations,
         actions=actions,
+        prompt_for_survey=prompt_for_survey,
     )
 
 
@@ -292,3 +300,32 @@ def create_talk() -> Response:
         return redirect(url_for("views.preview_talk", talk_id=talk.talk_id))
 
     return render_template("edit_talk.html", talk=talk, form=form)
+
+
+@app.route("/profile/demographic_survey", methods=["GET", "POST"])
+@login_required
+def demographic_survey() -> Response:
+    survey = g.user.demographic_survey or DemographicSurvey(user=g.user)
+    form = DemographicSurveyForm(obj=survey)
+    if form.validate_on_submit():
+        form.populate_obj(survey)
+        db.session.add(survey)
+        db.session.commit()
+        return redirect(url_for("views.demographic_survey_done"))
+    return render_template("demographic_survey.html", form=form)
+
+
+@app.route("/profile/demographic_survey/opt-out")
+@login_required
+def demographic_survey_opt_out() -> Response:
+    survey = g.user.demographic_survey or DemographicSurvey(user=g.user)
+    survey.clear()
+    db.session.add(survey)
+    db.session.commit()
+    return render_template("demographic_survey_done.html", optout=True)
+
+
+@app.route("/profile/demographic_survey/done")
+@login_required
+def demographic_survey_done() -> Response:
+    return render_template("demographic_survey_done.html", optout=False)

@@ -17,4 +17,7 @@
   <button type="submit" class="btn btn-primary">Save Profile</button>
   {{ form.csrf_token }}
 </form>
+<p class="my-4">If you are submitting a talk to {{ g.conference.informal_name }}, you may want
+to fill out our <a href="{{ url_for("views.demographic_survey") }}">speaker demographic
+survey</a>.</p>
 {% endblock %}
