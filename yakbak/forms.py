@@ -1,6 +1,7 @@
 from typing import Any, Iterable, List, Optional, Tuple
 import enum
 
+from bunch import Bunch
 from flask import g
 from flask_wtf import FlaskForm
 from jinja2.utils import Markup
@@ -178,14 +179,20 @@ class DemographicSurveyForm(FlaskForm):
     )
 
     def __init__(self, obj: DemographicSurvey):
-        # do this before calling super __init__, since we don't want
-        # to overwrite values that __init__ parses from the request
-        if obj.age_group:
-            self.age_group.data = obj.age_group.name
-        if obj.programming_experience:
-            self.programming_experience.data = obj.programming_experience.name
+        # make a fake obj to pass in that adapts the enum values to their
+        # names which the select fields are more happy to work with
+        data = dict(
+            (col.name, getattr(obj, col.name, None))
+            for col in obj.__table__.columns
+        )
+        if data["age_group"]:
+            data["age_group"] = data["age_group"].name
+        if data["programming_experience"]:
+            data["programming_experience"] = data["programming_experience"].name
 
-        super().__init__(obj=obj)
+        # unfortunately, the obj must be a thing that supports attribute
+        # access, so use a bunch (see https://github.com/dsc/bunch)
+        super().__init__(obj=Bunch(data))
 
     def populate_obj(self, obj: DemographicSurvey) -> None:
         # all sorts of weird hackery because I can't figure out how to make

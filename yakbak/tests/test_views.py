@@ -318,3 +318,31 @@ def test_prompt_for_demographic_survey(client: Client, user: User) -> None:
     resp = client.get("/talks")
 
     assert_html_response_contains(resp, "demographic_survey")
+
+
+def test_demographic_survey_bug_with_age_field(client: Client, user: User) -> None:
+    # see https://gitlab.com/bigapplepy/yak-bak/issues/29
+    assert user.demographic_survey is None
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/profile/demographic_survey")
+
+    csrf_token = extract_csrf_from(resp)
+    postdata = {
+        "age_group": "UNDER_45",
+        "programming_experience": "UNDER_10YR",
+        "csrf_token": csrf_token,
+    }
+    resp = client.post(
+        "/profile/demographic_survey",
+        data=postdata,
+        follow_redirects=True,
+    )
+    assert_html_response_contains(resp, "Thanks For Completing")
+
+    resp = client.get("/profile/demographic_survey")
+    assert_html_response_contains(
+        resp,
+        re.compile('<input checked[^>]* value="UNDER_45">'),
+        re.compile('<input checked[^>]* value="UNDER_10YR">'),
+    )

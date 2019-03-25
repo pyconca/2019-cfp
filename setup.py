@@ -17,6 +17,7 @@ setup(
     install_requires=[
         "alembic",
         "attrs",
+        "bunch",
         "flask",
         "flask-admin",
         "flask-login",
