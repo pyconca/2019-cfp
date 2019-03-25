@@ -1,3 +1,4 @@
+from typing import List
 import re
 
 from werkzeug.test import Client
@@ -12,6 +13,15 @@ from yakbak.tests.util import (
     assert_html_response_doesnt_contain,
     extract_csrf_from,
 )
+
+
+def assert_talk_has_speakers(talk: Talk, speaker_emails: List[str]) -> None:
+    # check on the state of the talk in the DB, rather than the in-memory copy
+    talk = Talk.query.filter_by(talk_id=talk.talk_id).one()
+
+    talk_speaker_emails = set(ts.user.email for ts in talk.speakers)
+    for email in speaker_emails:
+        assert email in talk_speaker_emails
 
 
 def test_speakers_button_shows_up_on_existing_talks(client: Client, user: User) -> None:
@@ -137,19 +147,50 @@ def test_inviting_a_speaker_adds_the_speaker(client: Client, user: User) -> None
         talk=mock.ANY,
     )
 
-    # the Talk instances are not ==, but make sure it's the right one
     _, kwargs = send_mail.call_args
     assert kwargs["talk"].talk_id == talk.talk_id
 
-    talk = Talk.query.filter_by(title="My Talk").one()
-    alice = User.query.filter_by(email="alice@example.com").one()
+    assert_talk_has_speakers(talk, ["alice@example.com"])
 
-    for talk_speaker in talk.speakers:
-        if talk_speaker.user == alice:
-            assert talk_speaker.state == InvitationStatus.PENDING
-            break
-    else:
-        assert False, "alice@example.com did not get attached to the talk"
+
+def test_inviting_a_speaker_emails_the_speaker(client: Client, user: User) -> None:
+    talk = Talk(title="My Talk", length=25)
+    talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    db.session.add(talk)
+    db.session.commit()
+
+    assert User.query.filter_by(email="alice@example.com").one_or_none() is None
+
+    # reload from DB to avoid "not attached to session" error
+    talk = Talk.query.filter_by(title="My Talk").one()
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks/{}/speakers".format(talk.talk_id))
+    assert_html_response(resp)
+    csrf_token = extract_csrf_from(resp)
+
+    # this speaker doesn't exist, but we should still send the email
+    postdata = {"email": "alice@example.com", "csrf_token": csrf_token}
+    with mock.patch.object(mail, "send_mail") as send_mail:
+        resp = client.post(
+            "/talks/{}/speakers".format(talk.talk_id),
+            data=postdata,
+            follow_redirects=True,
+        )
+
+    assert_html_response_contains(resp, "alice@example.com")
+
+    send_mail.assert_called_once_with(
+        to=["alice@example.com"],
+        template="email/speaker-invite",
+        talk=mock.ANY,
+    )
+
+    _, kwargs = send_mail.call_args
+    assert kwargs["talk"].talk_id == talk.talk_id
+
+    # this also implies a user with that email was created
+    assert_talk_has_speakers(talk, ["alice@example.com"])
 
 
 def test_talks_list_shows_invitations(client: Client, user: User) -> None:

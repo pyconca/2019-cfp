@@ -174,13 +174,10 @@ def edit_speakers(talk_id: int) -> Response:
     form = SpeakerEmailForm(speaker_emails)
     if form.validate_on_submit():
         email = form.email.data
-        send_invite = True
         try:
             user = User(fullname=email, email=email)
             db.session.add(user)
             db.session.commit()
-            # don't spam users that don't exist
-            send_invite = False
         except IntegrityError:
             db.session.rollback()
             user = User.query.filter_by(email=email).one()
@@ -191,12 +188,11 @@ def edit_speakers(talk_id: int) -> Response:
         except IntegrityError:
             db.session.rollback()
 
-        if send_invite:
-            mail.send_mail(
-                to=[email],
-                template="email/speaker-invite",
-                talk=talk,
-            )
+        mail.send_mail(
+            to=[email],
+            template="email/speaker-invite",
+            talk=talk,
+        )
 
         return redirect(url_for("views.edit_speakers", talk_id=talk.talk_id))
 
