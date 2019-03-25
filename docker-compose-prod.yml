@@ -1,0 +1,68 @@
+version: "3"
+services:
+  web:
+    build: .
+    command: /code/start-web.sh
+    environment:
+      VIRTUAL_HOST: cfp-demo.pygotham.org
+      VIRTUAL_PORT: 5000
+      LETSENCRYPT_HOST: cfp-demo.pygotham.org
+      # TODO: this should really go to a group or ailias
+      LETSENCRYPT_EMAIL: jon@pygotham.org
+    links:
+      - db
+    volumes:
+      - ./yakbak.toml-prod:/code/yakbak.toml
+    restart: unless-stopped
+
+  db:
+    image: "postgres:10-alpine"
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    env_file:
+      # Don't store database secrets in source control
+      - ./database-secrets.env
+    restart: unless-stopped
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    labels:
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy"
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs:ro
+      - conf:/etc/nginx/conf.d
+      - dhparam:/etc/nginx/dhparam
+      - html:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
+
+
+  nginx-proxy-letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx-proxy-letsencrypt
+    restart: unless-stopped
+    depends_on:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - dhparam:/etc/nginx/dhparam:ro
+      - html:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
+
+volumes:
+  certs:
+  conf:
+  dhparam:
+  html:
+  vhost:
+
+networks:
+  default:
+    external:
+      name: nginx-proxy
