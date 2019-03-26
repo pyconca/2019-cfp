@@ -91,19 +91,13 @@ def email_magic_link_done() -> Response:
 
 @app.route("/login/token/<magic_link_token>")
 def email_magic_link_login(magic_link_token: str) -> Response:
-    used_magic_link = UsedMagicLink.query.filter_by(token=magic_link_token).one_or_none()
-    if used_magic_link:
-        return current_app.response_class(
-            render_template("email_magic_link_used.html"),
-            status=401,
-        )
-
     try:
         used_magic_link = UsedMagicLink(token=magic_link_token)
         db.session.add(used_magic_link)
         db.session.commit()
     except IntegrityError:
         # race condition, UsedMagicLink row exists
+        db.session.rollback()
         return current_app.response_class(
             render_template("email_magic_link_used.html"),
             status=401,
