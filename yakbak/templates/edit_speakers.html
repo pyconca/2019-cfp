@@ -34,4 +34,9 @@
   </div>
   {{ form["csrf_token"] }}
 </form>
+<div class="row">
+  <div class="col text-right">
+    <small><a href="{{ url_for("views.edit_talk", talk_id=talk.talk_id) }}">Return to {{ talk.title }}</a></small>
+  </div>
+</div>
 {% endblock %}
