@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 import re
 
 from werkzeug.test import Client
@@ -87,6 +88,32 @@ def test_invalid_email_magic_link_login(client: Client) -> None:
         resp = client.get("/login/token/any-token-here", follow_redirects=True)
 
     assert_html_response(resp, status=404)
+
+
+def test_email_magic_link_tokens_only_work_once(client: Client) -> None:
+    resp = client.get("/login/email")
+    csrf_token = extract_csrf_from(resp)
+
+    with mock.patch.object(mail, "send_mail") as send_mail:
+        postdata = {
+            "email": "jane@example.com",
+            "csrf_token": csrf_token,
+        }
+        client.post("/login/email", data=postdata, follow_redirects=True)
+
+    _, kwargs = send_mail.call_args
+    magic_link_url = kwargs["magic_link"]
+    assert not urlparse(magic_link_url).query
+
+    magic_link_path = urlparse(magic_link_url).path
+
+    # first time should work
+    resp = client.get(magic_link_path)
+    assert_redirected(resp, "/profile")  # new user, go to profile
+
+    # second time should get a 401
+    resp = client.get(magic_link_path)
+    assert_html_response(resp, status=401)
 
 
 def test_profile_updates_name_not_email(client: Client, user: User) -> None:
