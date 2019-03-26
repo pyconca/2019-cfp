@@ -4,9 +4,9 @@ services:
     build: .
     command: /code/start-web.sh
     environment:
-      VIRTUAL_HOST: cfp-demo.pygotham.org
+      VIRTUAL_HOST: cfp.pygotham.org
       VIRTUAL_PORT: 5000
-      LETSENCRYPT_HOST: cfp-demo.pygotham.org
+      LETSENCRYPT_HOST: cfp.pygotham.org
       # TODO: this should really go to a group or ailias
       LETSENCRYPT_EMAIL: jon@pygotham.org
     links:
@@ -18,7 +18,7 @@ services:
   db:
     image: "postgres:10-alpine"
     volumes:
-      - ./db_data:/var/lib/postgresql/data
+      - /home/pygotham/docker-volumes/db_data:/var/lib/postgresql/data
     env_file:
       # Don't store database secrets in source control
       - ./database-secrets.env
