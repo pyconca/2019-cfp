@@ -15,3 +15,10 @@ mypy:
   script:
     - python3.7 -m pip install tox
     - tox -r -e mypy
+
+docker:
+  image: docker:git
+  services:
+    - docker:dind
+  script:
+    - docker build .
