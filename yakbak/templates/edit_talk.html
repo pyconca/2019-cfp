@@ -15,7 +15,14 @@
   ul#speakers li {
     list-style-type: none;
   }
+  textarea.multiline-placeholder.active {
+    color: #6c757d !important;
+  }
 </style>
+{% endblock %}
+
+{% block morescripts %}
+<script src="{{ url_for("static", filename="multiline-placeholder.js") }}" crossorigin="anonymous"></script>
 {% endblock %}
 
 {% block container %}
