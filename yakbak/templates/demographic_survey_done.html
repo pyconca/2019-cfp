@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}Demographic Survey - {{ super() }}{% endblock %}
+
+{% block container %}
+<div class="row">
+  <div class="col-md-8">
+    {% if optout %}
+    <h1>You Have Opted Out of the PyGotham Demographic Survey</h1>
+    <p>
+    If you change your mind, you can always return here from your
+    <a href="{{ url_for("views.user_profile") }}">profile</a>
+    </p>
+    {% else %}
+    <h1>Thanks For Completing the PyGotham Demographic Survey</h1>
+    <p>
+    You can always edit your responses from your
+    <a href="{{ url_for("views.user_profile") }}">profile</a>.
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

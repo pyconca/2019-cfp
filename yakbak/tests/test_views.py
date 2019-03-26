@@ -1,119 +1,34 @@
-from typing import Iterable, Pattern, Union
-import os.path
 import re
 
-from flask import abort, redirect, Response
-from flask_login import login_user
 from werkzeug.test import Client
 import bs4
 import mock
-import pytest
 
 from yakbak import mail, views
-from yakbak.auth import load_user
-from yakbak.core import APP_CACHE, create_app
-from yakbak.models import db, Talk, User
-from yakbak.settings import load_settings_file
-from yakbak.types import Application
+from yakbak.models import (
+    AgeGroup,
+    db,
+    DemographicSurvey,
+    InvitationStatus,
+    ProgrammingExperience,
+    Talk,
+    User,
+)
+from yakbak.tests.util import (
+    assert_html_response,
+    assert_html_response_contains,
+    assert_html_response_doesnt_contain,
+    assert_redirected,
+    extract_csrf_from,
+)
 
 
-@pytest.fixture
-def app() -> Iterable[Application]:
-    APP_CACHE.clear()
-
-    here = os.path.dirname(__file__)
-    test_toml = os.path.join(here, "yakbak.toml-test")
-
-    settings = load_settings_file(test_toml)
-    app = create_app(settings)
-    app.config["TESTING"] = True
-
-    # cheeky: add a /test-login endpoint to the app,
-    # logging in with social auth in tests is tough
-    @app.route("/test-login/<user_id>")
-    def test_login(user_id: str) -> Response:
-        user = load_user(user_id)
-        if not user:
-            abort(401)
-        login_user(user)
-        return redirect("/")
-
-    db.create_all()
-    yield app
-
-    # remove() clears any in-process state; because of where we
-    # define the session, a new one is not created when we call
-    # create_app()
-    db.session.remove()
-    db.drop_all()
-
-
-@pytest.fixture
-def client(app: Application) -> Client:
-    return app.test_client()
-
-
-@pytest.fixture
-def user(app: Application) -> User:
-    user = User(fullname="Test User", email="test@example.com")
-    db.session.add(user)
-    db.session.commit()
-
-    return user
-
-
-def assert_html_response(resp: Response, status: int = 200) -> str:
-    """
-    Ensure ``resp`` has certain common HTTP headers for HTML responses.
-
-    Returns the decoded HTTP response body.
-
-    """
-    assert resp.status_code == status
-    assert resp.headers["Content-Type"].startswith("text/html")
-    if status == 200:
-        assert "charset" in resp.headers["Content-Type"]
-
-    data = resp.data
-    assert resp.content_length == len(data)
-
-    return data.decode(resp.charset or "utf8")
-
-
-def assert_html_response_contains(resp: Response, *snippets: Union[str, Pattern], status: int = 200) -> None:  # noqa: E501
-    """
-    Ensure that each of the ``snippets`` is in the body of ``resp``.
-
-    """
-    content = assert_html_response(resp, status)
-    for snippet in snippets:
-        if isinstance(snippet, Pattern):
-            assert re.search(snippet, content), f"could not match {snippet!r} in {content!r}"
-        else:
-            assert snippet in content
-
-
-def assert_redirected(resp: Response, to: str) -> None:
-    assert_html_response(resp, 302)
-
-    landing_url = f"http://localhost{to}"
-    assert resp.headers["Location"] == landing_url
-
-
-def extract_csrf_from(resp: Response) -> str:
-    data = resp.data
-    body = data.decode(resp.mimetype_params["charset"])
-    tags = re.findall('(<input[^>]*type="hidden"[^>]*>)', body)
-    assert len(tags) == 1
-    return re.search('value="([^"]*)"', tags[0]).group(1)
-
-
-def test_homepage_redirects_to_login(client: Client) -> None:
+def test_root_shows_cfp_description_when_logged_out(client: Client) -> None:
     resp = client.get("/")
-    assert_redirected(resp, "/login")
+    assert_html_response_contains(resp, "Our Call for Proposals is open through")
 
 
-def test_homepage_shows_user_name(client: Client, user: User) -> None:
+def test_talks_list_shows_user_name(client: Client, user: User) -> None:
     resp = client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
     assert_html_response_contains(resp, f"Log Out ({user.fullname})")
 
@@ -124,6 +39,12 @@ def test_logout_logs_you_out(client: Client, user: User) -> None:
 
     resp = client.get("/logout", follow_redirects=True)
     assert_html_response_contains(resp, "Log In")
+
+
+def test_login_shows_auth_methods(client: Client) -> None:
+    # only the email auth method is enabled in test config :\
+    resp = client.get("/login")
+    assert_html_response_contains(resp, "Magic Link")
 
 
 def test_email_magic_link_form(client: Client) -> None:
@@ -157,7 +78,7 @@ def test_email_magic_link_login_for_returning_user(client: Client, user: User) -
         parse.return_value = user.email
         resp = client.get("/login/token/any-token-here", follow_redirects=True)
 
-    assert_html_response_contains(resp, "Dashboard")
+    assert_html_response_contains(resp, "Talks")
 
 
 def test_invalid_email_magic_link_login(client: Client) -> None:
@@ -184,7 +105,7 @@ def test_profile_updates_name_not_email(client: Client, user: User) -> None:
         "csrf_token": csrf_token,
     }
     resp = client.post("/profile", data=postdata, follow_redirects=True)
-    assert_html_response_contains(resp, "Dashboard")
+    assert_html_response_contains(resp, "Talks")
 
     db.session.add(user)
     db.session.refresh(user)
@@ -192,32 +113,236 @@ def test_profile_updates_name_not_email(client: Client, user: User) -> None:
     assert user.email == "test@example.com"  # the old address
 
 
-def test_dashboard_lists_talks(client: Client, user: User) -> None:
+def test_talks_list_page_lists_talks(client: Client, user: User) -> None:
     alice = User(email="alice@example.com", fullname="Alice Example")
     bob = User(email="bob@example.com", fullname="Bob Example")
     db.session.add(alice)
     db.session.add(bob)
     db.session.commit()
 
-    one_talk = Talk(title="My Talk", speakers=[user], length=25)
-    two_talk = Talk(title="Our Talk", speakers=[user, alice], length=40)
-    all_talk = Talk(title="All Our Talk", speakers=[user, alice, bob], length=25)
+    one_talk = Talk(title="My Talk", length=25)
+    one_talk.add_speaker(user, InvitationStatus.CONFIRMED)
+
+    two_talk = Talk(title="Our Talk", length=40)
+    two_talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    two_talk.add_speaker(alice, InvitationStatus.CONFIRMED)
+
+    all_talk = Talk(title="All Our Talk", length=25)
+    all_talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    all_talk.add_speaker(alice, InvitationStatus.CONFIRMED)
+    all_talk.add_speaker(bob, InvitationStatus.CONFIRMED)
+
     db.session.add(one_talk)
     db.session.add(two_talk)
     db.session.add(all_talk)
     db.session.commit()
 
     client.get("/test-login/{}".format(user.user_id))
-    resp = client.get("/dashboard")
+    resp = client.get("/talks")
     body = assert_html_response(resp)
     soup = bs4.BeautifulSoup(body, "html.parser")
 
     talks = soup.find_all("div", class_="talk")
     assert len(talks) == 3
 
-    talk_row_texts = [re.sub("\s+", " ", talk.get_text()).strip() for talk in talks]
+    talk_row_texts = [re.sub(r"\s+", " ", talk.get_text()).strip() for talk in talks]
     assert sorted(talk_row_texts) == sorted([
         "My Talk (25 Minutes)",
         "Our Talk (40 Minutes, Alice Example and You)",
         "All Our Talk (25 Minutes, Alice Example, Bob Example, and You)",
     ])
+
+
+def test_create_talk_goes_to_preview(client: Client, user: User) -> None:
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks/new")
+    csrf_token = extract_csrf_from(resp)
+
+    postdata = {
+        "title": "My Awesome Talk",
+        "length": "25",
+        "csrf_token": csrf_token,
+    }
+
+    resp = client.post("/talks/new", data=postdata, follow_redirects=True)
+    assert_html_response_contains(
+        resp,
+        "Reviewers will see voting instructions here",
+        "Save &amp; Return",
+        "Edit Again",
+    )
+
+    # but at this point the talk is saved
+    speakers_predicate = Talk.speakers.any(user_id=user.user_id)  # type: ignore
+    talks = Talk.query.filter(speakers_predicate).all()
+    assert len(talks) == 1
+    assert talks[0].title == "My Awesome Talk"
+
+
+def test_talk_form_uses_select_field_for_length(client: Client, user: User) -> None:
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks/new")
+
+    assert_html_response_contains(
+        resp,
+        re.compile(
+            '<select[^>]*(?:name="length"[^>]*required|required[^>]*name="length")',
+        ),
+    )
+
+
+def test_it_redirects_to_login_page_if_youre_not_logged_in(client: Client) -> None:
+    resp = client.get("/talks/new")
+    assert_redirected(resp, "/login?next=%2Ftalks%2Fnew")
+
+
+def test_demographic_survey_saves_data(client: Client, user: User) -> None:
+    assert user.demographic_survey is None
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/profile/demographic_survey")
+
+    assert_html_response_contains(
+        resp,
+        "I identify as a:",
+        "I identify my ethnicity as:",
+        "About my past speaking experience:",
+        "My age is:",
+        "I have been programming for:",
+    )
+
+    csrf_token = extract_csrf_from(resp)
+    postdata = {
+        "gender": [
+            "MAN",
+            "WOMAN",
+            "NONBINARY",
+            "free form text for 'other' gender",
+        ],
+        "ethnicity": [
+            "ASIAN",
+            "BLACK_AFRICAN_AMERICAN",
+            "HISPANIC_LATINX",
+            "NATIVE_AMERICAN",
+            "PACIFIC_ISLANDER",
+            "WHITE_CAUCASIAN",
+            "free form text for 'other' ethnicity",
+        ],
+        "past_speaking": [
+            "NEVER",
+            "PYGOTHAM",
+            "OTHER_PYTHON",
+            "OTHER_NONPYTHON",
+        ],
+        "age_group": "UNDER_45",
+        "programming_experience": "UNDER_10YR",
+        "csrf_token": csrf_token,
+    }
+    resp = client.post(
+        "/profile/demographic_survey",
+        data=postdata,
+        follow_redirects=True,
+    )
+    assert_html_response_contains(resp, "Thanks For Completing")
+
+    survey = DemographicSurvey.query.filter_by(user_id=user.user_id).one()
+
+    assert sorted(survey.gender) == sorted(postdata["gender"])
+    assert sorted(survey.ethnicity) == sorted(postdata["ethnicity"])
+    assert sorted(survey.past_speaking) == sorted(postdata["past_speaking"])
+    assert survey.age_group == AgeGroup.UNDER_45
+    assert survey.programming_experience == ProgrammingExperience.UNDER_10YR
+
+
+def test_demographic_survey_skips_blank_other_values(client: Client, user: User) -> None:
+    assert user.demographic_survey is None
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/profile/demographic_survey")
+
+    assert_html_response_contains(
+        resp,
+        "I identify as a:",
+        "I identify my ethnicity as:",
+        "About my past speaking experience:",
+        "My age is:",
+        "I have been programming for:",
+    )
+
+    csrf_token = extract_csrf_from(resp)
+    postdata = {
+        "gender": ["MAN", ""],
+        "csrf_token": csrf_token,
+    }
+    resp = client.post(
+        "/profile/demographic_survey",
+        data=postdata,
+        follow_redirects=True,
+    )
+    assert_html_response_contains(resp, "Thanks For Completing")
+
+    survey = DemographicSurvey.query.filter_by(user_id=user.user_id).one()
+
+    assert survey.gender == ["MAN"]
+
+
+def test_demographic_survey_opt_out(client: Client, user: User) -> None:
+    assert user.demographic_survey is None
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/profile/demographic_survey/opt-out")
+
+    assert_html_response_contains(resp, "You Have Opted Out")
+
+    survey = DemographicSurvey.query.filter_by(user_id=user.user_id).one()
+
+    assert not survey.gender
+    assert not survey.ethnicity
+    assert not survey.age_group
+    assert not survey.programming_experience
+    assert not survey.past_speaking
+
+
+def test_prompt_for_demographic_survey(client: Client, user: User) -> None:
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks")
+
+    assert_html_response_doesnt_contain(resp, "demographic survey")
+
+    talk = Talk(title="My Talk", length=25)
+    talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    db.session.add(talk)
+    db.session.commit()
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks")
+
+    assert_html_response_contains(resp, "demographic_survey")
+
+
+def test_demographic_survey_bug_with_age_field(client: Client, user: User) -> None:
+    # see https://gitlab.com/bigapplepy/yak-bak/issues/29
+    assert user.demographic_survey is None
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/profile/demographic_survey")
+
+    csrf_token = extract_csrf_from(resp)
+    postdata = {
+        "age_group": "UNDER_45",
+        "programming_experience": "UNDER_10YR",
+        "csrf_token": csrf_token,
+    }
+    resp = client.post(
+        "/profile/demographic_survey",
+        data=postdata,
+        follow_redirects=True,
+    )
+    assert_html_response_contains(resp, "Thanks For Completing")
+
+    resp = client.get("/profile/demographic_survey")
+    assert_html_response_contains(
+        resp,
+        re.compile('<input checked[^>]* value="UNDER_45">'),
+        re.compile('<input checked[^>]* value="UNDER_10YR">'),
+    )

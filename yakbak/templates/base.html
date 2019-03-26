@@ -11,11 +11,12 @@
     {%- endblock metas %}
 
     {%- block head %}
-    <title>{% block title %}{{ settings.site.title }}{% endblock %}</title>
+    <title>{% block title %}{{ g.conference.informal_name }}{% endblock %}</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for("static", filename="site.css") }}">
     {% block morestyles %}
     {%- endblock morestyles %}
     {%- endblock head %}
@@ -25,7 +26,7 @@
     {% block navbar %}
     <nav class="navbar navbar-expand-md navbar-light bg-light">
       <div class="container">
-        <a class="navbar-brand" href="{{ url_for("views.index") }}">{{ settings.site.title }}</a>
+        <a class="navbar-brand" href="{{ url_for("views.index") }}">{{ g.conference.informal_name }}</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -49,6 +50,7 @@
       </div>
     </nav>
     {%- endblock navbar %}
+
     {% block content %}
     {% set messages = get_flashed_messages(with_categories=True) %}
     {% if messages %}
@@ -67,7 +69,7 @@
     </div>
     {% endif %}
 
-    <div class="container pt-3">
+    <div class="main-container container pt-3">
       {% block container %}
       <div class="row">
         <div class="col">{% block main %}{% endblock %}</div>
@@ -75,6 +77,26 @@
       {% endblock %}
     </div>
     {%- endblock content %}
+
+    {% block footer %}
+    <footer class="footer bg-light">
+      <div class="container">
+        <p>
+        <small class="text-muted">
+          Copyright &copy; 2019 Big Apple Py, Inc.
+          &mdash; <a href="https://www.flickr.com/photos/zkorb/39927898670/">Sumner M. Redstone Theater image</a>
+          by <a href="https://www.flickr.com/photos/zkorb/">Zach Korb</a>
+          used with modifications under <a href="https://creativecommons.org/licenses/by-nc/2.0/">CC BY-NC 2.0</a>
+        </small>
+        </p>
+        <p>
+        <small class="text-muted">
+          Spot a problem? Email <a href="mailto:{{ g.conference.cfp_email }}">{{ g.conference.cfp_email }}</a>.
+        </small>
+        </p>
+      </div>
+    </footer>
+    {% endblock footer %}
 
     {% block scripts %}
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

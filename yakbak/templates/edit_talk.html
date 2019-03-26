@@ -9,11 +9,17 @@
   textarea {
     min-height: 15rem;
   }
+  ul#speakers {
+    padding: 0;
+  }
+  ul#speakers li {
+    list-style-type: none;
+  }
 </style>
 {% endblock %}
 
 {% block container %}
-<form method="post">
+<form method="post" class="pb-3">
   <div class="row">
     {% set field = form["title"] %}
     <div class="col-md-8 form-group">
@@ -27,6 +33,37 @@
       {{ macros.render_label(field, "Length") }}
       {{ macros.render_field(field, "") }}
       {{ macros.render_error(field) }}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-8 form-group">
+      <label>Speakers</label>
+      <ul id="speakers">
+        {% if talk.talk_id %}
+        {% for speaker in talk.speakers %}
+        <li>{{ speaker.user.fullname }} ({{ speaker.user.email }}) &mdash; <em>{{ speaker.state.name|title }}</em></li>
+        {% endfor %}
+        {% else %}
+        <li>{{ g.user.fullname }} ({{ g.user.email }}) &mdash; <em>Confirmed</em></li>
+        {% endif %}
+      </ul>
+      {% if talk.talk_id %}
+      <a href="{{ url_for("views.edit_speakers", talk_id=talk.talk_id) }}" class="btn btn-outline-primary btn-sm">Manage Speakers</a>
+      {% endif %}
+    </div>
+    <div class="col-md-4">
+      <label></label>{# for spacing :( #}
+      <small id="speakers-help" class="form-text text-muted">
+        {% if talk.talk_id %}
+        <p>
+        Click "Manage Speakers" to invite additional speakers to your talk.
+        Speakers must have an account, and must accept your invitation to
+        co-present with you.
+        </p>
+        {% else %}
+        <p>You may add additional speakers after you save this talk.</p>
+        {% endif %}
+      </small>
     </div>
   </div>
   <div class="row">
@@ -81,6 +118,31 @@
     </div>
   </div>
   <div class="row">
+    {% set field = form["take_aways"] %}
+    <div class="col-md-8 form-group">
+      {{ macros.render_label(field, "Audience Take-Aways") }}
+      {{ macros.render_field(field, "Attendees will learn how to foo and bar with the baz library") }}
+      {{ macros.render_error(field) }}
+    </div>
+    <div class="col-md-4">
+      <label></label>{# for spacing :( #}
+      <small id="{{ field.id }}-help" class="form-text text-muted">
+        <p>
+        Describe what attendees of your talk will learn from having attended.
+        Will they be empowered to utilize a new tool in their work? Will they
+        have a foundation on which to deepen their knowledge about a new
+        technique? Will they understand common problems in a new light?
+        </p>
+        <p>
+        Please be specific, as the program committee will use this to help
+        understand the impact your talk will have on the {{ g.conference.informal_name }}
+        audience. Supports
+        <a href="https://daringfireball.net/projects/markdown/syntax">Markdown</a>.
+        </p>
+      </small>
+    </div>
+  </div>
+  <div class="row">
     {% set field = form["requirements"] %}
     <div class="col-md-8 form-group">
       {{ macros.render_label(field, "Extra Requirements") }}
@@ -100,7 +162,32 @@
         <p>
         This field will not be shown to public voters, but will be available
         to the program committee. If your talk has truly unusual requirements,
-        we may not be able to accept it.
+        we may not be able to accept it. We may not be able to accommodate extra
+        requirements added after the close of the CfP.
+        </p>
+      </small>
+    </div>
+  </div>
+  <div class="row">
+    {% set field = form["accepted_recording_release"] %}
+    <style type="text/css">#release input{display: inline-block} #release label{display: block}</style>
+    <div class="col-md-8 form-group" id="release">
+      {{ macros.render_label(field, "Recording Release") }}
+      {{ macros.render_field(field, class_="form-check") }}
+      <span class="text-muted">I accept the {{ g.conference.full_name }} <a href="{{ g.conference.recording_release_url }}">recording release</a></span>
+      {{ macros.render_error(field) }}
+    </div>
+    <div class="col-md-4">
+      <label></label>{# for spacing :( #}
+      <small id="{{ field.id }}-help" class="form-text text-muted">
+        <p>
+        Please consider accepting the recording release. If you don't or can't,
+        we won't be able to post video of your talk to YouTube and
+        <a href="https://pyvideo.org/">PyVideo.org</a> after the conference.
+        </p>
+        <p>
+        You will be able to edit this field at any time, including after the
+        conference itself.
         </p>
       </small>
     </div>

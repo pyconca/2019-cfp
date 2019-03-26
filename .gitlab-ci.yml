@@ -1,24 +1,17 @@
-py36:
-  image: python:3.6-slim
-  script:
-    - python3.6 -m pip install tox
-    - tox -r -e py36
-
 py37:
-  image: python:3.7-rc-slim
+  image: python:3.7-slim
   script:
     - python3.7 -m pip install tox
     - tox -r -e py37
-  allow_failure: true
 
 style:
-  image: python:3.6-slim
+  image: python:3.7-slim
   script:
-    - python3.6 -m pip install tox
+    - python3.7 -m pip install tox
     - tox -r -e style
 
 mypy:
-  image: python:3.6-slim
+  image: python:3.7-slim
   script:
-    - python3.6 -m pip install tox
+    - python3.7 -m pip install tox
     - tox -r -e mypy

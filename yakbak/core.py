@@ -1,18 +1,18 @@
-from typing import Dict
+from typing import Any, Dict
 import logging
 import os
 import sys
 
 from attr import asdict
+from flask import g
 from flask_wtf.csrf import CSRFProtect
 from social_flask.routes import social_auth
 from social_flask_sqlalchemy.models import init_social
 
-from yakbak import view_helpers, views
+from yakbak import admin, view_helpers, views
 from yakbak.auth import login_manager
-from yakbak.forms import init_forms
 from yakbak.mail import mail
-from yakbak.models import db
+from yakbak.models import Conference, db
 from yakbak.settings import Settings
 from yakbak.types import Application
 
@@ -26,7 +26,7 @@ logger = logging.getLogger("core")
 APP_CACHE: Dict[int, Application] = {}
 
 
-def create_app(settings: Settings) -> Application:
+def create_app(settings: Settings, flask_config: Dict[str, Any] = {}) -> Application:
     """
     Bootstrap the application.
 
@@ -43,16 +43,18 @@ def create_app(settings: Settings) -> Application:
         APP_CACHE.clear()
         APP_CACHE[os.getpid()] = app
 
-    set_up_flask(app)
+    set_up_flask(app, flask_config)
     set_up_database(app)
     set_up_auth(app)
     set_up_mail(app)
-    init_forms(app)
+    set_up_admin(app)
     CSRFProtect(app)
 
     app.register_blueprint(views.app)
     app.register_blueprint(view_helpers.app)  # filters etc
     app.register_blueprint(social_auth, url_prefix="/login/external")
+
+    set_up_handlers(app)
 
     return app
 
@@ -71,7 +73,7 @@ def set_up_logging(settings: Settings) -> None:
     root_logger.addHandler(stream_handler)
 
 
-def set_up_flask(app: Application) -> None:
+def set_up_flask(app: Application, flask_config: Dict[str, Any]) -> None:
     """
     Some of Flask's default settings make no sense for us.
 
@@ -85,9 +87,11 @@ def set_up_flask(app: Application) -> None:
     for key, value in asdict(app.settings.flask).items():
         app.config[key.upper()] = value
 
+    app.config.update(flask_config)
+
 
 def set_up_database(app: Application) -> None:
-    app.config["SQLALCHEMY_DATABASE_URI"] = app.settings.db.uri
+    app.config["SQLALCHEMY_DATABASE_URI"] = app.settings.db.url
 
     # Disable signals (callbacks) on model changes
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -108,12 +112,26 @@ def set_up_auth(app: Application) -> None:
     app.config["SOCIAL_AUTH_USER_FIELDS"] = ["email", "fullname"]
     app.config["SOCIAL_AUTH_STORAGE"] = "social_flask_sqlalchemy.models.FlaskStorage"
     app.config["SOCIAL_AUTH_PROTECTED_USER_FIELDS"] = ["email", "fullname"]
-    app.config["SOCIAL_AUTH_LOGIN_REDIRECT_URL"] = "/"
+    app.config["SOCIAL_AUTH_LOGIN_REDIRECT_URL"] = "/talks"
 
     app.config["SOCIAL_AUTH_AUTHENTICATION_BACKENDS"] = [
         "social_core.backends.google.GoogleOAuth2",
         "social_core.backends.github.GithubOAuth2",
     ]
+
+    # See https://python-social-auth.readthedocs.io/en/latest/pipeline.html for details
+    app.config["SOCIAL_AUTH_PIPELINE"] = (
+        "social_core.pipeline.social_auth.social_details",
+        "social_core.pipeline.social_auth.social_uid",
+        "social_core.pipeline.social_auth.auth_allowed",
+        "social_core.pipeline.social_auth.social_user",
+        "social_core.pipeline.social_auth.associate_by_email",  # <= inserted vs. default
+        "social_core.pipeline.user.get_username",
+        "social_core.pipeline.user.create_user",
+        "social_core.pipeline.social_auth.associate_user",
+        "social_core.pipeline.social_auth.load_extra_data",
+        "social_core.pipeline.user.user_details",
+    )
 
     cfg = app.settings.auth
     if cfg.github:
@@ -142,3 +160,14 @@ def set_up_mail(app: Application) -> None:
     app.config["MAIL_MAX_EMAILS"] = 10  # guess
 
     mail.init_app(app)
+
+
+def set_up_admin(app: Application) -> None:
+    admin.admin.init_app(app)
+
+
+def set_up_handlers(app: Application) -> None:
+    @app.before_request
+    def load_conference() -> None:
+        # TODO: load by URL or something
+        g.conference = Conference.query.one()

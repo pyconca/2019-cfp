@@ -1,20 +1,14 @@
-[site]
-title="A PyConference"
-
-[cfp]
-talk_lengths=[25, 40]
-
 [db]
-uri="postgres+psycopg2://localhost/yakbak"
+url="postgres+psycopg2://yakbak:y4kb4k@db/yakbak"
 
 [logging]
 level="INFO"
 
 [smtp]
-host="..."
-port=25
-username="..."
-password="..."
+host="smtp"
+port=1025
+username=""
+password=""
 sender="Yak-Bak <yakbak@example.com>"
 
 [flask]

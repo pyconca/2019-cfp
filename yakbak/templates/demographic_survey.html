@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}Demographic Survey - {{ super() }}{% endblock %}
+
+{% block morestyles %}
+{{ super() }}
+<style type="text/css">
+  ul {
+    padding: 0;
+  }
+  ul li {
+    list-style-type: none;
+  }
+  ul input[type="checkbox"] {
+    display: inline;
+    width: auto;
+  }
+  ul li input[type="text"] {
+    display: inline-block;
+    width: 80%;
+  }
+</style>
+{% endblock %}
+
+{% block container %}
+<form method="post" class="pb-3">
+  <div class="row">
+    <div class="col-md-8">
+      <h1>PyGotham Demographic Survey</h1>
+      <p>
+      {{ g.conference.full_name }} is committed to creating a welcoming and
+      inclusive environment for people of all backgrounds. We actively seek to
+      increase the diversity of our attendees and speakers. In order to help
+      measure and improve our efforts in this area, we are asking speakers to
+      help us by completing this form. The
+      <a href="https://2019.pygotham.org/diversity/speaker-survey">PyGotham
+      website</a> has more about our diversity efforts and how we will use this
+      information.
+      </p>
+
+      <p>
+      All answers are optional, and will only be accessible to the PyGotham
+      organizers in order to ensure a diverse and awesome conference. We will
+      never make individual answers public, but we may publish aggregate
+      statistics based on this survey.
+      </p>
+
+      <p>If you do not wish to be prompted to fill out the survey again,
+      you may <a href="{{ url_for("views.demographic_survey_opt_out") }}">opt
+      out</a>.
+      </p>
+
+    </div>
+  </div>
+  <div class="row">
+    {% set field = form["gender"] %}
+    <div class="col-md-8 form-group">
+      <h4>{{ macros.render_label(field, "I identify as a:") }}</h4>
+      <p><small>Choose all that apply.</small></p>
+      {{ macros.render_field(field) }}
+    </div>
+  </div>
+
+  <div class="row">
+    {% set field = form["ethnicity"] %}
+    <div class="col-md-8 form-group">
+      <h4>{{ macros.render_label(field, "I identify my ethnicity as:") }}</h4>
+      <p><small>Choose all that apply.</small></p>
+      {{ macros.render_field(field) }}
+    </div>
+  </div>
+
+  <div class="row">
+    {% set field = form["past_speaking"] %}
+    <div class="col-md-8 form-group">
+      <h4>{{ macros.render_label(field, "About my past speaking experience:") }}</h4>
+      <p><small>Choose all that apply.</small></p>
+      {{ macros.render_field(field) }}
+    </div>
+  </div>
+  <div class="row">
+    {% set field = form["age_group"] %}
+    <div class="col-md-8 form-group">
+      <h4>{{ macros.render_label(field, "My age is:") }}</h4>
+      {{ macros.render_field(field, class_="") }}
+    </div>
+  </div>
+  <div class="row">
+    {% set field = form["programming_experience"] %}
+    <div class="col-md-8 form-group">
+      <h4>{{ macros.render_label(field, "I have been programming for:") }}</h4>
+      <p><small>Include all programming experience in any language, not only Python.</small></p>
+      {{ macros.render_field(field, class_="") }}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-auto">
+      <button type="submit" class="btn btn-primary" style="min-width: 7em">Save</button>
+    </div>
+    <div class="col-md-6">
+      <small id="{{ field.id }}-help" class="form-text text-muted" style="margin-top:0">
+        The demographic information collected here is entirely optional. If you wish,
+        you may <a href="{{ url_for("views.demographic_survey_opt_out") }}">opt out</a>
+        of the survey. If you change your mind, you can always return here from your
+        <a href="{{ url_for("views.user_profile") }}">profile</a>.
+      </small>
+    </div>
+  </div>
+  {{ form["csrf_token"] }}
+</form>
+{% endblock %}

@@ -1,0 +1,36 @@
+[db]
+url="postgres+psycopg2://localhost/yakbak"
+
+[logging]
+level="INFO"
+
+[smtp]
+host="..."
+port=25
+username="..."
+password="..."
+sender="Yak-Bak <yakbak@example.com>"
+
+[flask]
+# Set this to somtething long and randomly-generated, but constant
+# across all servers serving the same Yak-Bak instance
+secret_key="hlIuOBFBsKZBbq41BEE9XJUKipy2TC5b"
+
+# Useful for development, but you probably want to leave this off
+# (the default) in production deployments
+templates_auto_reload=true
+
+[auth]
+github_key_id="..."
+github_secret="..."
+
+google_key_id="..."
+google_secret="..."
+
+# Also be sure to configure the [smtp] section!
+email_magic_link=true
+email_magic_link_expiry=28800  # 8 hours
+
+# Set this to somtething long and randomly-generated, but constant
+# across all servers serving the same Yak-Bak instance
+signing_key="yb0x3foVZl65DHaq8tSwCyOhbivgF8rU"

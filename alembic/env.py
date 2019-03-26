@@ -45,7 +45,7 @@ def inject_uri_from_settings():
     yakbak_toml = os.path.join(alembic_dir, "..", "yakbak.toml")
     logging.getLogger("alembic").info("Loading database URI from %s", yakbak_toml)
     settings = load_settings_file(yakbak_toml)
-    config.set_main_option("sqlalchemy.url", settings.db.uri)
+    config.set_main_option("sqlalchemy.url", settings.db.url)
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.

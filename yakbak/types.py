@@ -1,5 +1,3 @@
-from typing import Any, Dict, List
-
 from flask import Flask
 
 from yakbak.settings import Settings
@@ -15,8 +13,6 @@ class Application(Flask):
     def __init__(
         self,
         settings: Settings,
-        *args: List[Any],
-        **kwargs: Dict[str, Any],
     ) -> None:
-        super(Application, self).__init__("yakbak", *args, **kwargs)
+        super(Application, self).__init__("yakbak")
         self.settings = settings

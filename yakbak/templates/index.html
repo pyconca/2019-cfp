@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block morestyles %}
+<style type="text/css">
+  .jumbotron {
+    background-image: url('{{ url_for("static", filename="seats.jpg") }}');
+    background-size: cover;
+  }
+</style>
+{% endblock %}
+
+{% block container %}
+<div class="jumbotron">
+  <h1 class="display-4">{{ g.conference.full_name }} Call for Proposals</h1>
+  <p class="lead">
+  Everyone, no matter their job, age, background, or level of experience has
+  something interesting to share. Even you! You've developed a technique, or
+  discovered a library, squashed a bug or solved a problem. Whatever it may
+  be, {{ g.conference.full_name }} wants to hear your story. Won't you share
+  it with us?
+  </p>
+  <hr class="my-4">
+  <p>
+  <strong>There's still time!</strong>
+  Our Call for Proposals is open through May 12, <a href="https://time.is/Anywhere_on_Earth">AoE</a>.
+  </p>
+  <a class="btn btn-lg btn-light border" href="{{ url_for("views.create_talk") }}">
+    {% if g.user.is_anonymous %}Log In and{%endif %}
+    Submit a Talk Now
+  </a>
+</div>
+<div class="row py-3">
+  <div class="col">
+    <h2>About {{ g.conference.full_name }}</h2>
+
+    <p>{{ g.conference.full_name }} is taking place from October 4-5 at the Hotel Pennsylvania
+    in New York City. It will feature three tracks of talks on Friday, October
+    4th and Saturday, October 5th.</p>
+
+    <h3>Background</h3>
+
+    <p>PyGotham is a New York City based, eclectic, Py-centric conference
+    covering many topics. There’s a diverse speaker list, and some things which
+    will be quite different. PyGotham attracts developers of various
+    backgrounds and skill levels from the New York metropolitan area and
+    beyond. Activities include two full days of talks, lightning talk sessions,
+    and a social event.</p>
+
+    <h3>History</h3>
+
+    <p>PyGotham began in 2011 and was comprised largely of the NYC Python
+    community. Since then, the conference has taken place (almost) every year
+    and grown significantly. While the conference has gotten larger, PyGotham
+    has always been and remains a conference for developers and run by
+    developers.</p>
+
+    <h3>Who?</h3>
+
+    <p>PyGotham is a production of <a href="https://bigapplepy.org/">Big Apple Py</a>
+    and made possible by a very generous and overworked group of volunteers.
+    To reach them, send a message to
+    <a href="mailto:organizers@pygotham.org">organizers@pygotham.org</a>.</p>
+
+
+    <h2>Who should submit? What topics are OK?</h2>
+
+    <p>Anyone interested in speaking is encouraged to submit a proposal. There
+    are no restrictions on topics, but we recommend they be of interest to
+    Pythonistas. Talks will fill slots of 25 minutes and 40 minutes, including
+    time for questions and answers.</p>
+
+    <p>Everyone is encouraged to submit a proposal. We are looking for speakers
+    of all different speaking and Python experience levels, from first-timers
+    to experienced veterans.</p>
+
+    <p>The audience’s experience level will be just as diverse, so feel free to
+    cater your talk to a specific experience level.</p>
+
+    <h3>Looking for Ideas?</h3>
+
+    <p>One of the best ways to come up with an idea is to think about something
+    you want to learn about. It’s a great way to learn about the topic and
+    you’ll be able to share your experiences with the audience.</p>
+
+    <p>Another great source of topics is challenges you’ve recently overcome.
+    Did you recently use a unique profiler to identify a performance
+    bottleneck? Perhaps you had to dive deep into a protocol or library and
+    discovered something everyday users might not know. Experiences like these
+    are usually full of great tips and tricks to share.</p>
+
+    <p>Still looking for ideas? Here are some ideas to help get you started:</p>
+
+    <ul>
+      <li>What’s new in web frameworks in 2018</li>
+      <li>How to design software for safety and reliability</li>
+      <li>Ethics of big data and software development</li>
+      <li>Effective use of linters and other static analysis tools</li>
+      <li>Recent changes to standard Python tools</li>
+    </ul>
+
+    <p>Also see the talks from
+    <a href="https://2018.pygotham.org/talks/">2018</a>,
+    <a href="https://2017.pygotham.org/talks/">2017</a>, and
+    <a href="https://2016.pygotham.org/talks/">2016</a> for ideas.</p>
+
+    <h3>Talk Selection</h3>
+
+    <p>PyGotham’s talk review process encompasses two phases: immediately after
+    the CFP closes, we will have a round of public, anonymous voting, so that
+    we can get a feel for which of the talks are of greatest interest to our
+    audience. After that, the program committee will assemble the final
+    schedule using the ratings as a guide.</p>
+
+    <p>We will share information on how to sign up for voting and the program
+    committee on pygotham.org near the end of the CFP.</p>
+
+    {% if g.user.is_anonymous %}
+    <h2>OK, I'm sold!</h2>
+
+    <p>
+    Fantastic! If you have an idea, turning it into a proposal is a
+    snap -- why not <a href="{{ url_for("views.create_talk") }}">submit
+    a talk</a> right now?
+    </p>
+    {% endif %}
+  </div>
+</div>
+</div>
+{% endblock %}

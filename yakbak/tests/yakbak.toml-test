@@ -1,12 +1,5 @@
-[site]
-title="TestPyConf"
-conference="Test PyConference"
-
-[cfp]
-talk_lengths=[25, 40]
-
 [db]
-uri="sqlite://"  # in-memory DB
+url="sqlite://"  # in-memory DB
 
 [logging]
 level="INFO"
@@ -22,3 +15,4 @@ email_magic_link_expiry=1800
 signing_key="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 [smtp]
+sender="sender@example.com"

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Talks - {{ super() }}{% endblock %}
+
+{% macro vitals(talk) %}
+{% set speakers = talk.speakers|map(attribute="user") %}
+{% set other_speakers = speakers|remove(user)|map(attribute="fullname")|list %}
+{% if other_speakers|length > 1 %}
+({{ talk.length }} Minutes, {{ other_speakers|join(", ") }}, and You)
+{% elif other_speakers|length == 1 %}
+({{ talk.length }} Minutes, {{ other_speakers|join("") }} and You)
+{% else %}
+({{ talk.length }} Minutes)
+{% endif %}
+{% endmacro %}
+
+{% block container %}
+{% if prompt_for_survey %}
+<div class="alert alert-info" role="alert">
+  <p class="mt-3">Thanks for submitting {% if talks|length == 1 %}a talk{% else %}talks{% endif %}!
+  In order to help us ensure a diverse and inclusive {{ g.conference.informal_name }},
+  please consider filling out the <a href="{{ url_for("views.demographic_survey") }}">demographic
+  survey</a>.</p>
+  <p>You may <a href="{{ url_for("views.demographic_survey_opt_out") }}">opt
+  out</a> to dismiss this message.</p>
+</div>
+{% endif %}
+
+<div class="row py-3">
+  <div class="col">
+    <h3>Talks:</h3>
+  </div>
+</div>
+{% for talk in talks %}
+  <div class="row py-2 border-top border-right border-left{% if loop.last %} border-bottom{% endif %}">
+    <div class="col-md-7 talk">
+      <a href="{{ url_for("views.edit_talk", talk_id=talk.talk_id) }}">{{ talk.title|truncate(100) }}</a>
+      {{ vitals(talk) }}
+    </div>
+    <div class="col-md-5 text-right">
+      Updated {{ talk.updated|timesince }}
+      <a href="{{ url_for("views.edit_speakers", talk_id=talk.talk_id) }}" class="btn btn-outline-primary btn-sm ml-2">Manage Speakers</a>
+    </div>
+  </div>
+{% else %}
+  <div class="row py-2 border-top border-right border-left border-bottom">
+    <div class="col-md-12">
+      <em>No talks yet. Why not <a href="{{ url_for("views.create_talk") }}">add one now?</a></em>
+    </div>
+  </div>
+{% endfor %}
+<div class="row py-2">
+  <div class="col text-right">
+    <a class="btn btn-primary" href="{{ url_for("views.create_talk") }}">Add Talk</a>
+  </div>
+</div>
+
+{% if invitations|length > 0 %}
+  <div class="row py-3">
+    <div class="col">
+      <h3>Speaker Invitations:</h3>
+    </div>
+  </div>
+  {% for invitation in invitations %}
+    <div class="row py-2 border-top border-right border-left{% if loop.last %} border-bottom{% endif %}">
+      <div class="col-md-9 talk">
+        {{ invitation.talk.title|truncate(100) }}
+        {{ vitals(invitation.talk) }}
+      </div>
+      <div class="col-md-3 text-right">
+        {% for label, cls, view in actions[invitation.state] %}
+        <a href="{{ url_for(view, talk_id=invitation.talk.talk_id) }}" class="btn btn-outline-{{cls}} btn-sm">{{ label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+  <div class="row py-2">
+    <div class="col text-right">
+      <a class="btn btn-primary" href="{{ url_for("views.create_talk") }}">Add Talk</a>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

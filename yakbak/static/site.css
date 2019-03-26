@@ -1,0 +1,11 @@
+/* sticky footer bootstrap template */
+.main-container {
+  min-height: 85vh;
+}
+.footer {
+  width: 100%;
+  padding: 20px 0;
+}
+.footer div p:last-child {
+  margin-bottom: 0;
+}

@@ -1,0 +1,30 @@
+# vim:ts=2:
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+    - "5000:5000"
+    links:
+    - db
+    - smtp
+    volumes:
+    - ./yakbak.toml-compose:/code/yakbak.toml
+  db:
+    image: "postgres:10-alpine"
+    volumes:
+    - db_data:/var/lib/postgresql/data
+    environment:
+    - POSTGRES_DB=yakbak
+    - POSTGRES_USER=yakbak
+    - POSTGRES_PASSWORD=y4kb4k
+    ports:
+    - "5432:5432"
+  
+  smtp:
+    image: mailhog/mailhog
+    ports:
+    - "1025:1025"
+    - "8025:8025"
+volumes:
+  db_data:
