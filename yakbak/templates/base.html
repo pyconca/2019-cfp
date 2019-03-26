@@ -69,7 +69,7 @@
     </div>
     {% endif %}
 
-    <div class="container pt-3">
+    <div class="main-container container pt-3">
       {% block container %}
       <div class="row">
         <div class="col">{% block main %}{% endblock %}</div>
@@ -81,10 +81,14 @@
     {% block footer %}
     <footer class="footer bg-light">
       <div class="container">
+        <p>
         <small class="text-muted">
           Copyright &copy; 2019 Big Apple Py, Inc.
-          {% block morefooter %}{% endblock %}
+          &mdash; <a href="https://www.flickr.com/photos/zkorb/39927898670/">Sumner M. Redstone Theater image</a>
+          by <a href="https://www.flickr.com/photos/zkorb/">Zach Korb</a>
+          used with modifications under <a href="https://creativecommons.org/licenses/by-nc/2.0/">CC BY-NC 2.0</a>
         </small>
+        </p>
       </div>
     </footer>
     {% endblock footer %}
