@@ -1,4 +1,5 @@
 {
+    "cfp_email": "cfp@example.com",
     "conference_id": 1,
     "full_name": "PyGotham 2019",
     "informal_name": "PyGotham",

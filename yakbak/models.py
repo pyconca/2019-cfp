@@ -53,6 +53,7 @@ class Conference(db.Model):  # type: ignore
     )
 
     recording_release_url: str = db.Column(db.String(1024), nullable=False)
+    cfp_email: str = db.Column(db.String(256), nullable=False)
 
 
 class User(db.Model):  # type: ignore
