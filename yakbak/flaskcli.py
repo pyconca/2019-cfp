@@ -59,6 +59,6 @@ def clean_magic_links(older_than_days: str) -> None:
     now = datetime.utcnow()
     threshold = now - timedelta(days=int(older_than_days))
     UsedMagicLink.query.filter(
-        UsedMagicLink.used_on <= threshold
+        UsedMagicLink.used_on <= threshold,
     ).delete()
     db.session.commit()
