@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Invalid Login Link - {{ super() }}{% endblock %}
+
+{% block container %}
+<p>
+That magic link is invalid. You can <a href="{{ url_for("views.email_magic_link") }}">create another</a>
+or <a href="{{ url_for("views.login") }}">choose another login method</a>.
+</p>
+{% endblock %}

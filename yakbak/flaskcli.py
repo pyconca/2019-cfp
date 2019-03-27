@@ -1,9 +1,10 @@
+from datetime import datetime, timedelta
 import os.path
 
 import click
 
 from yakbak.core import create_app
-from yakbak.models import Conference, db
+from yakbak.models import Conference, db, UsedMagicLink
 from yakbak.settings import find_settings_file, load_settings_file
 
 
@@ -49,4 +50,15 @@ def add_conference(
         cfp_email=cfp_email,
     )
     db.session.add(conf)
+    db.session.commit()
+
+
+@app.cli.command()
+@click.argument("older_than_days")
+def clean_magic_links(older_than_days: str) -> None:
+    now = datetime.utcnow()
+    threshold = now - timedelta(days=int(older_than_days))
+    UsedMagicLink.query.filter(
+        UsedMagicLink.used_on <= threshold,
+    ).delete()
     db.session.commit()

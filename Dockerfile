@@ -19,6 +19,9 @@ ADD wsgi.py /code/
 ADD uwsgi.ini /code/
 ADD start-web.sh /code/
 
+ADD crontab-prod /code/
+RUN crontab /code/crontab-prod
+
 EXPOSE 5000
 
-CMD ["uwsgi", "--ini", "/code/uwsgi.ini"]
+CMD crond -b && uwsgi --ini /code/uwsgi.ini

@@ -180,3 +180,10 @@ class DemographicSurvey(db.Model):  # type: ignore
         self.past_speaking = None
         self.age_group = None
         self.programming_experience = None
+
+
+class UsedMagicLink(db.Model):  # type: ignore
+    token: str = db.Column(db.String(512), primary_key=True)
+
+    used_on: datetime = db.Column(
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
