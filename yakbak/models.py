@@ -55,6 +55,10 @@ class Conference(db.Model):  # type: ignore
     recording_release_url: str = db.Column(db.String(1024), nullable=False)
     cfp_email: str = db.Column(db.String(256), nullable=False)
 
+    created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
+    updated = db.Column(
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 
 class User(db.Model):  # type: ignore
     user_id: int = db.Column(db.Integer, primary_key=True)
@@ -137,6 +141,10 @@ class TalkSpeaker(db.Model):  # type: ignore
     talk = db.relationship("Talk", backref=db.backref("speakers"))
     user = db.relationship("User", backref=db.backref("talks"))
 
+    created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
+    updated = db.Column(
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 
 class AgeGroup(enum.Enum):
     UNDER_18 = "Under 18"
@@ -173,6 +181,10 @@ class DemographicSurvey(db.Model):  # type: ignore
     # These fields are single-select and have choices defined above
     age_group: Optional[AgeGroup] = db.Column(Enum(AgeGroup))
     programming_experience: Optional[ProgrammingExperience] = db.Column(Enum(ProgrammingExperience))  # noqa: E501
+
+    created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
+    updated = db.Column(
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def clear(self) -> None:
         self.gender = None
