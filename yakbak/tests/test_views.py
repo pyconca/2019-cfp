@@ -116,19 +116,21 @@ def test_email_magic_link_tokens_only_work_once(client: Client) -> None:
     assert_html_response(resp, status=401)
 
 
-def test_profile_updates_name_not_email(client: Client, user: User) -> None:
+def test_profile_updates_name_and_bio_not_email(client: Client, user: User) -> None:
     resp = client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
     resp = client.get("/profile")
     assert_html_response_contains(
         resp,
         re.compile('<input[^>]*name="fullname"'),
         re.compile('<input[^>]*id="email"[^>]*disabled'),
+        re.compile('<textarea[^>]*name="speaker_bio"'),
     )
 
     csrf_token = extract_csrf_from(resp)
     postdata = {
         "email": "jane@example.com",
         "fullname": "Jane Doe",
+        "speaker_bio": "This is Jane's biography.",
         "csrf_token": csrf_token,
     }
     resp = client.post("/profile", data=postdata, follow_redirects=True)
@@ -137,6 +139,33 @@ def test_profile_updates_name_not_email(client: Client, user: User) -> None:
     db.session.add(user)
     db.session.refresh(user)
     assert user.fullname == "Jane Doe"
+    assert user.speaker_bio == "This is Jane's biography."
+    assert user.email == "test@example.com"  # the old address
+
+
+def test_profile_lets_you_delete_speaker_bio(client: Client, user: User) -> None:
+    user.speaker_bio = "This is the speaker bio"
+    db.session.add(user)
+    db.session.commit()
+
+    client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
+    resp = client.get("/profile")
+    assert_html_response_contains(resp, "This is the speaker bio")
+
+    csrf_token = extract_csrf_from(resp)
+    postdata = {
+        "email": "jane@example.com",
+        "fullname": "Jane Doe",
+        "speaker_bio": "",
+        "csrf_token": csrf_token,
+    }
+    resp = client.post("/profile", data=postdata, follow_redirects=True)
+    assert_html_response_contains(resp, "Talks")
+
+    db.session.add(user)
+    db.session.refresh(user)
+    assert user.fullname == "Jane Doe"
+    assert user.speaker_bio == ""
     assert user.email == "test@example.com"  # the old address
 
 
