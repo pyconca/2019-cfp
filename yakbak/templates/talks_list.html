@@ -25,6 +25,14 @@
   out</a> to dismiss this message.</p>
 </div>
 {% endif %}
+{% if prompt_for_bio %}
+<div class="alert alert-info" role="alert">
+  <p class="mt-3">Thanks for submitting {% if talks|length == 1 %}a talk{% else %}talks{% endif %}!
+  Please add a <a href="{{ url_for("views.user_profile") }}">speaker biography</a> to your profile,
+  for inclusion in the conference program.
+  </p>
+</div>
+{% endif %}
 
 <div class="row py-3">
   <div class="col">

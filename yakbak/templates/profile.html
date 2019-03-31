@@ -14,6 +14,16 @@
     <input type="text" class="form-control" id="email" disabled value="{{ user.email }}" aria-describedby="email-help">
     <small class="form-text" id="email-help">Your email address cannot be changed, since it is derived from your login method</small>
   </div>
+  <div class="form-group">
+    <label for="email">Speaker Bio</label>
+    <textarea name="speaker_bio" id="speaker_bio" class="form-control" aria-describedby="speaker_bio-help">{{ user.speaker_bio|default("", true) }}</textarea>
+    <small class="form-text" id="speaker_bio-help">
+      If you are submitting a talk to {{ g.conference.informal_name }}, please provide a
+      brief speaker biography for inclusion in the conference program. This field will not
+      be visible to reviewers during talk selection. Supports
+      <a href="https://daringfireball.net/projects/markdown/syntax">Markdown</a>.
+    </small>
+  </div>
   <button type="submit" class="btn btn-primary">Save Profile</button>
   {{ form.csrf_token }}
 </form>
