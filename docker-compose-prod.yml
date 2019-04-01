@@ -13,7 +13,7 @@ services:
       - db
     volumes:
       - ./yakbak.toml-prod:/code/yakbak.toml
-    restart: unless-stopped
+    restart: on-failure
 
   db:
     image: "postgres:10-alpine"
@@ -22,7 +22,7 @@ services:
     env_file:
       # Don't store database secrets in source control
       - ./database-secrets.env
-    restart: unless-stopped
+    restart: on-failure
 
   nginx-proxy:
     image: jwilder/nginx-proxy
@@ -32,7 +32,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    restart: unless-stopped
+    restart: on-failure
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - certs:/etc/nginx/certs:ro
@@ -45,7 +45,7 @@ services:
   nginx-proxy-letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
     container_name: nginx-proxy-letsencrypt
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       - nginx-proxy
     volumes:
