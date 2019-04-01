@@ -3,14 +3,22 @@
 {% block morestyles %}
 <style type="text/css">
   .jumbotron {
-    background-image: url('{{ url_for("static", filename="seats.jpg") }}');
-    background-size: cover;
+    background-color: #50484f;
+    border-radius: 0;
+    padding: 1rem;
+    text-align: center;
+  }
+  .jumbotron img {
+    max-width: 50%;
   }
 </style>
 {% endblock %}
 
 {% block container %}
 <div class="jumbotron">
+  <img src="{{ url_for("static", filename="pygotham-logo.svg") }}">
+</div>
+<div class="row py-3">
   <h1 class="display-4">{{ g.conference.full_name }} Call for Proposals</h1>
   <p class="lead">
   Everyone, no matter their job, age, background, or level of experience has
@@ -19,11 +27,11 @@
   be, {{ g.conference.full_name }} wants to hear your story. Won't you share
   it with us?
   </p>
-  <hr class="my-4">
   <p>
-  <strong>There's still time!</strong>
-  Our Call for Proposals is open through May 12, <a href="https://time.is/Anywhere_on_Earth">AoE</a>.
+    <strong>There's still time!</strong>
+    Our Call for Proposals is open through May 12, <a href="https://time.is/Anywhere_on_Earth">Anywhere on Earth</a>.
   </p>
+  <br>
   <a class="btn btn-lg btn-light border" href="{{ url_for("views.create_talk") }}">
     {% if g.user.is_anonymous %}Log In and{%endif %}
     Submit a Talk Now
