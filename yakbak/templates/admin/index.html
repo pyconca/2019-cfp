@@ -1,5 +1,22 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-<p>Hello world</p>
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>Submissions</h1>
+      <ul>
+        <li>
+          <a href="{{ url_for("talk.index_view") }}">
+            Talks: {{ num_talks }}</a>
+        </li>
+        <li>
+          <a href="{{ url_for("demographicsurvey.index_view") }}">
+            Demographic Surveys: {{ num_surveys }}</a>
+          ({{ num_non_man }} non-man / {{ num_non_white}} non-white)
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
 {% endblock %}
