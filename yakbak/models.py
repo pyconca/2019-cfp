@@ -66,6 +66,7 @@ class User(db.Model):  # type: ignore
     fullname: str = db.Column(db.String(256), nullable=False)
     email: str = db.Column(db.String(256), nullable=False, unique=True)
 
+    twitter_username: str = db.Column(db.String(15), nullable=True)
     speaker_bio: str = db.Column(db.Text, nullable=True)
 
     site_admin: bool = db.Column(
