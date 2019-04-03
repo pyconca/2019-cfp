@@ -18,6 +18,7 @@ def valid_settings_dict() -> Dict[str, Any]:
             "level": "ERROR",
         },
         "smtp": {},
+        "sentry": {},
     }
 
 

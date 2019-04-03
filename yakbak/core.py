@@ -6,8 +6,10 @@ import sys
 from attr import asdict
 from flask import g
 from flask_wtf.csrf import CSRFProtect
+from sentry_sdk.integrations.flask import FlaskIntegration
 from social_flask.routes import social_auth
 from social_flask_sqlalchemy.models import init_social
+import sentry_sdk
 
 from yakbak import admin, view_helpers, views
 from yakbak.auth import login_manager
@@ -32,6 +34,7 @@ def create_app(settings: Settings, flask_config: Dict[str, Any] = {}) -> Applica
 
     """
     set_up_logging(settings)
+    set_up_sentry(settings)
 
     app = APP_CACHE.get(os.getpid())
     if app is not None:
@@ -71,6 +74,11 @@ def set_up_logging(settings: Settings) -> None:
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.NOTSET)
     root_logger.addHandler(stream_handler)
+
+
+def set_up_sentry(settings: Settings) -> None:
+    if settings.sentry.dsn:
+        sentry_sdk.init(dsn=settings.sentry.dsn, integrations=[FlaskIntegration()])
 
 
 def set_up_flask(app: Application, flask_config: Dict[str, Any]) -> None:

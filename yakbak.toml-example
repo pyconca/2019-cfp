@@ -34,3 +34,8 @@ email_magic_link_expiry=28800  # 8 hours
 # Set this to somtething long and randomly-generated, but constant
 # across all servers serving the same Yak-Bak instance
 signing_key="yb0x3foVZl65DHaq8tSwCyOhbivgF8rU"
+
+[sentry]
+# If you do not have a Sentry DSN, keep the section heading, but omit
+# the dsn key (or leave it commented out as shown here)
+# dsn=""
