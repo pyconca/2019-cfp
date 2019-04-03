@@ -16,3 +16,6 @@ signing_key="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 [smtp]
 sender="sender@example.com"
+
+[sentry]
+# no sentry in tests!

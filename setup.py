@@ -28,6 +28,7 @@ setup(
         "markdown",
         "python-frontmatter",
         "python-social-auth",
+        "sentry-sdk[flask]",
         "social-auth-app-flask-sqlalchemy",
         "sqlalchemy >= 1.3.0b1",
         "sqlalchemy-postgresql-json",

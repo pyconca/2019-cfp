@@ -110,12 +110,18 @@ class SMTPSettings:
 
 
 @attrs(frozen=True)
+class SentrySettings:
+    dsn: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
+
+
+@attrs(frozen=True)
 class Settings:
     auth: AuthSettings = attrib()
     db: DbSettings = attrib()
     flask: FlaskSettings = attrib()
     logging: LoggingSettings = attrib()
     smtp: SMTPSettings = attrib()
+    sentry: SentrySettings = attrib()
 
 
 def find_settings_file() -> str:
