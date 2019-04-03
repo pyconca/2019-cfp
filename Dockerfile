@@ -8,10 +8,12 @@ RUN addgroup uwsgi && adduser -DH -G uwsgi uwsgi
 
 WORKDIR /code
 ADD requirements.txt /code/
+RUN python3 -m pip install -r requirements.txt
+
 ADD setup.py /code/
 RUN echo 0.0.0-0-fakeForDocker > version.txt
 ADD yakbak /code/yakbak/
-RUN python3 -m pip install -r requirements.txt -e .
+RUN python3 -m pip install -e .
 
 ADD alembic /code/alembic/
 ADD alembic.ini /code/
