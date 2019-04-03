@@ -77,8 +77,7 @@ def set_up_logging(settings: Settings) -> None:
 
 
 def set_up_sentry(settings: Settings) -> None:
-    if settings.sentry.dsn:
-        sentry_sdk.init(dsn=settings.sentry.dsn, integrations=[FlaskIntegration()])
+    sentry_sdk.init(dsn=settings.sentry.dsn, integrations=[FlaskIntegration()])
 
 
 def set_up_flask(app: Application, flask_config: Dict[str, Any]) -> None:
