@@ -8,7 +8,7 @@ from yakbak.models import Conference, db, DemographicSurvey, Talk, User
 class AdminDashboard(AdminIndexView):
 
     @expose("/")
-    def dashboard(self):
+    def dashboard(self) -> None:
         num_talks = Talk.query.count()
 
         # TODO: figure out how to do this with "not in JSON list" queires
@@ -31,16 +31,16 @@ class AdminDashboard(AdminIndexView):
         )
 
 
+class DemographicSurveyView(ModelView):
+    column_exclude_list = ("user", )
+
+    def __init__(self) -> None:
+        super().__init__(DemographicSurvey, db.session)
+
+
 admin = Admin(index_view=AdminDashboard(), template_mode="bootstrap3")
 
 admin.add_view(ModelView(Conference, db.session))
 admin.add_view(ModelView(User, db.session))
 admin.add_view(ModelView(Talk, db.session))
-
-class DemographicSurveyView(ModelView):
-    column_exclude_list = ("user", )
-
-    def __init__(self):
-        super().__init__(DemographicSurvey, db.session)
-
 admin.add_view(DemographicSurveyView())
