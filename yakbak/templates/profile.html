@@ -1,12 +1,27 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros %}
 
 {% block title %}User Profile - {{ super() }}{% endblock %}
 
+{% block morestyles %}
+{{ super() }}
+<style type="text/css">
+  textarea {
+    min-height: 8rem;
+  }
+</style>
+{% endblock %}
+
+
 {% block container %}
 <form method="post">
+  {% if form.errors %}
+  {{ form.errors }}
+  {% endif %}
   <div class="form-group">
     <label for="{{ form.fullname.id }}">Display Name</label>
-    {{ form.fullname(class_="form-control", ariaDescribedby=form.fullname.id + "-help") }}
+    {{ macros.render_error(form.fullname) }}
+    {{ macros.render_field(form.fullname) }}
     <small class="form-text" id="{{ form.fullname.id }}-help">This will be printed in the program if your talk is accepted</small>
   </div>
   <div class="form-group">
@@ -15,8 +30,18 @@
     <small class="form-text" id="email-help">Your email address cannot be changed, since it is derived from your login method</small>
   </div>
   <div class="form-group">
+    <label for="email">Twitter Username</label>
+    {{ macros.render_error(form.twitter_username) }}
+    {{ macros.render_field(form.twitter_username) }}
+    <small class="form-text" id="twitter_username-help">
+      If you are submitting a talk to {{ g.conference.informal_name }}, please provide
+      your Twitter username for inclusion in the conference program.
+    </small>
+  </div>
+  <div class="form-group">
     <label for="email">Speaker Bio</label>
-    <textarea name="speaker_bio" id="speaker_bio" class="form-control" aria-describedby="speaker_bio-help">{{ user.speaker_bio|default("", true) }}</textarea>
+    {{ macros.render_error(form.speaker_bio) }}
+    {{ macros.render_field(form.speaker_bio) }}
     <small class="form-text" id="speaker_bio-help">
       If you are submitting a talk to {{ g.conference.informal_name }}, please provide a
       brief speaker biography for inclusion in the conference program. This field will not
