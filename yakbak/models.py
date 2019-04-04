@@ -41,6 +41,15 @@ class InvitationStatus(enum.Enum):
     DELETED = "deleted"
 
 
+class TalkStatus(enum.Enum):
+    PROPOSED = "proposed"
+    WITHDRAWN = "withdrawn"
+    # REJECTED = "rejected"
+    # ACCEPTED = "deleted"
+    # CONFIRMED = "confirmed"
+    # WAITLISTED = "waitlisted"
+
+
 class Conference(db.Model):  # type: ignore
     conference_id: int = db.Column(db.Integer, primary_key=True)
 
@@ -110,8 +119,8 @@ class User(db.Model):  # type: ignore
 
 class Talk(db.Model):  # type: ignore
     talk_id: int = db.Column(db.Integer, primary_key=True)
-
-    # talk type = ...
+    state: TalkStatus = db.Column(
+        Enum(TalkStatus), server_default=TalkStatus.PROPOSED.name)
 
     title: str = db.Column(db.String(512), nullable=False)
     length: int = db.Column(db.Integer, nullable=False)

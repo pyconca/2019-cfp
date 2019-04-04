@@ -17,7 +17,7 @@
 {% block container %}
 {% if prompt_for_survey %}
 <div class="alert alert-info" role="alert">
-  <p class="mt-3">Thanks for submitting {% if talks|length == 1 %}a talk{% else %}talks{% endif %}!
+  <p class="mt-3">Thanks for submitting {% if num_talks == 1 %}a talk{% else %}talks{% endif %}!
   In order to help us ensure a diverse and inclusive {{ g.conference.informal_name }},
   please consider filling out the <a href="{{ url_for("views.demographic_survey") }}">demographic
   survey</a>.</p>
@@ -27,18 +27,14 @@
 {% endif %}
 {% if prompt_for_bio %}
 <div class="alert alert-info" role="alert">
-  <p class="mt-3">Thanks for submitting {% if talks|length == 1 %}a talk{% else %}talks{% endif %}!
+  <p class="mt-3">Thanks for submitting {% if num_talks == 1 %}a talk{% else %}talks{% endif %}!
   Please add a <a href="{{ url_for("views.user_profile") }}">speaker biography</a> to your profile,
   for inclusion in the conference program.
   </p>
 </div>
 {% endif %}
 
-<div class="row py-3">
-  <div class="col">
-    <h3>Talks:</h3>
-  </div>
-</div>
+{% macro talk_table(talks) %}
 {% for talk in talks %}
   <div class="row py-2 border-top border-right border-left{% if loop.last %} border-bottom{% endif %}">
     <div class="col-md-7 talk">
@@ -48,20 +44,45 @@
     <div class="col-md-5 text-right">
       Updated {{ talk.updated|timesince }}
       <a href="{{ url_for("views.edit_speakers", talk_id=talk.talk_id) }}" class="btn btn-outline-primary btn-sm ml-2">Manage Speakers</a>
-    </div>
-  </div>
-{% else %}
-  <div class="row py-2 border-top border-right border-left border-bottom">
-    <div class="col-md-12">
-      <em>No talks yet. Why not <a href="{{ url_for("views.create_talk") }}">add one now?</a></em>
+      {% for label, cls, view in talk_actions[talk.state] %}
+      <a href="{{ url_for(view, talk_id=talk.talk_id) }}" class="btn btn-outline-{{cls}} btn-sm">{{ label }}</a>
+      {% endfor %}
     </div>
   </div>
 {% endfor %}
+{% endmacro %}
+
+{% set has_proposed_talks = proposed_talks|length > 0 %}
+{% set has_withdrawn_talks = withdrawn_talks|length > 0 %}
+
+<div class="row py-3">
+  <div class="col">
+    <h3>{% if has_withdrawn_talks %}Proposed {% endif %}Talks:</h3>
+    {% if has_proposed_talks %}
+    {{ talk_table(proposed_talks) }}
+    {% else %}
+    <div class="row py-2 border-top border-right border-left border-bottom">
+      <div class="col-md-12">
+        <em>No talks yet. Why not <a href="{{ url_for("views.create_talk") }}">add one now?</a></em>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
 <div class="row py-2">
   <div class="col text-right">
     <a class="btn btn-primary" href="{{ url_for("views.create_talk") }}">Add Talk</a>
   </div>
 </div>
+{% if has_withdrawn_talks %}
+<div class="row py-3">
+  <div class="col">
+    <h3 class="my-3">Withdrawn Talks:</h3>
+    <p><em>Withdrawn talks will not be considered for inclusion in {{ g.conference.informal_name }}.</em></p>
+    {{ talk_table(withdrawn_talks) }}
+  </div>
+</div>
+{% endif %}
 
 {% if invitations|length > 0 %}
   <div class="row py-3">
@@ -76,7 +97,7 @@
         {{ vitals(invitation.talk) }}
       </div>
       <div class="col-md-3 text-right">
-        {% for label, cls, view in actions[invitation.state] %}
+        {% for label, cls, view in speaker_actions[invitation.state] %}
         <a href="{{ url_for(view, talk_id=invitation.talk.talk_id) }}" class="btn btn-outline-{{cls}} btn-sm">{{ label }}</a>
         {% endfor %}
       </div>
