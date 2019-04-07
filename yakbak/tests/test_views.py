@@ -13,6 +13,7 @@ from yakbak.models import (
     InvitationStatus,
     ProgrammingExperience,
     Talk,
+    TalkStatus,
     User,
 )
 from yakbak.tests.util import (
@@ -207,6 +208,49 @@ def test_talks_list_page_lists_talks(client: Client, user: User) -> None:
         "Our Talk (40 Minutes, Alice Example and You)",
         "All Our Talk (25 Minutes, Alice Example, Bob Example, and You)",
     ])
+
+
+def test_talks_list_page_shows_proposed_and_withdrawn_talks(client: Client, user: User) -> None:  # noqa: E501
+    in_talk = Talk(title="In Talk", length=25)
+    in_talk.add_speaker(user, InvitationStatus.CONFIRMED)
+
+    out_talk = Talk(title="Out Talk", length=40, state=TalkStatus.WITHDRAWN)
+    out_talk.add_speaker(user, InvitationStatus.CONFIRMED)
+
+    db.session.add(in_talk)
+    db.session.add(out_talk)
+    db.session.commit()
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks")
+    body = assert_html_response(resp)
+    soup = bs4.BeautifulSoup(body, "html.parser")
+
+    talks = soup.find_all("div", class_="talk")
+    assert len(talks) == 2
+
+    talk_row_texts = [re.sub(r"\s+", " ", talk.parent.get_text()).strip() for talk in talks]  # noqa: E501
+    talk_row_texts.sort()
+
+    assert re.match("In Talk.*Withdraw", talk_row_texts[0])
+    assert re.match("Out Talk.*Re-Submit", talk_row_texts[1])
+
+    # lazy: also test withdraw/resubmit here in the same test
+    client.get(f"/talks/1/withdraw")
+    client.get(f"/talks/2/resubmit")
+
+    resp = client.get("/talks")
+    body = assert_html_response(resp)
+    soup = bs4.BeautifulSoup(body, "html.parser")
+
+    talks = soup.find_all("div", class_="talk")
+    assert len(talks) == 2
+
+    talk_row_texts = [re.sub(r"\s+", " ", talk.parent.get_text()).strip() for talk in talks]  # noqa: E501
+    talk_row_texts.sort()
+
+    assert re.match("In Talk.*Re-Submit", talk_row_texts[0])
+    assert re.match("Out Talk.*Withdraw", talk_row_texts[1])
 
 
 def test_create_talk_goes_to_preview(client: Client, user: User) -> None:

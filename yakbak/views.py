@@ -29,6 +29,7 @@ from yakbak.models import (
     InvitationStatus,
     Talk,
     TalkSpeaker,
+    TalkStatus,
     UsedMagicLink,
     User,
 )
@@ -141,12 +142,15 @@ def talks_list() -> Response:
         ts.talk for ts in g.user.talks
         if ts.state == InvitationStatus.CONFIRMED
     ]
+    proposed_talks = [t for t in talks if t.state == TalkStatus.PROPOSED]
+    withdrawn_talks = [t for t in talks if t.state == TalkStatus.WITHDRAWN]
+
     invitations = TalkSpeaker.query.filter(
         TalkSpeaker.user == g.user,
         TalkSpeaker.state != InvitationStatus.CONFIRMED,
         TalkSpeaker.state != InvitationStatus.DELETED,
     ).all()
-    actions = {
+    speaker_actions = {
         InvitationStatus.PENDING: [
             ("Reject", "danger", "views.reject_invite"),
             ("Accept", "primary", "views.accept_invite"),
@@ -155,15 +159,27 @@ def talks_list() -> Response:
             ("Accept", "primary", "views.accept_invite"),
         ],
     }
-    prompt_for_survey = talks and not g.user.demographic_survey
-    prompt_for_bio = talks and not g.user.speaker_bio
+    talk_actions = {
+        TalkStatus.PROPOSED: [
+            ("Withdraw", "danger", "views.withdraw_proposal"),
+        ],
+        TalkStatus.WITHDRAWN: [
+            ("Re-Submit", "primary", "views.resubmit_proposal"),
+        ],
+    }
+    prompt_for_survey = proposed_talks and not g.user.demographic_survey
+    prompt_for_bio = proposed_talks and not g.user.speaker_bio
     return render_template(
         "talks_list.html",
-        talks=talks,
+        proposed_talks=proposed_talks,
+        withdrawn_talks=withdrawn_talks,
+        num_talks=len(proposed_talks),
         invitations=invitations,
-        actions=actions,
+        speaker_actions=speaker_actions,
+        talk_actions=talk_actions,
         prompt_for_survey=prompt_for_survey,
         prompt_for_bio=prompt_for_bio,
+        TalkStatus=TalkStatus,
     )
 
 
@@ -179,6 +195,28 @@ def edit_talk(talk_id: int) -> Response:
         return redirect(url_for("views.preview_talk", talk_id=talk.talk_id))
 
     return render_template("edit_talk.html", talk=talk, form=form)
+
+
+@app.route("/talks/<int:talk_id>/withdraw")
+@login_required
+def withdraw_proposal(talk_id: int) -> Response:
+    talk = load_talk(talk_id)
+    talk.state = TalkStatus.WITHDRAWN
+    db.session.add(talk)
+    db.session.commit()
+    flash(f"{talk.title!r} withdrawn")
+    return redirect(url_for("views.talks_list"))
+
+
+@app.route("/talks/<int:talk_id>/resubmit")
+@login_required
+def resubmit_proposal(talk_id: int) -> Response:
+    talk = load_talk(talk_id)
+    talk.state = TalkStatus.PROPOSED
+    db.session.add(talk)
+    db.session.commit()
+    flash(f"{talk.title!r} re-submitted")
+    return redirect(url_for("views.talks_list"))
 
 
 @app.route("/talks/<int:talk_id>/speakers", methods=["GET", "POST"])
