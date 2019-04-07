@@ -6,7 +6,7 @@ from yakbak.tests.util import assert_html_response
 
 def test_ordinary_users_cant_access_admin(client: Client, user: User) -> None:
     client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
-    resp = client.get("/admin/")
+    resp = client.get("/manage/")
     assert_html_response(resp, status=404)
 
 
@@ -17,5 +17,5 @@ def test_site_admins_can_access_admin(client: Client, user: User) -> None:
     db.session.add(user)
     db.session.commit()
 
-    resp = client.get("/admin/")
+    resp = client.get("/manage/")
     assert_html_response(resp, status=200)

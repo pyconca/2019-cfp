@@ -170,7 +170,8 @@ def set_up_mail(app: Application) -> None:
 
 
 def set_up_admin(app: Application) -> None:
-    admin.admin.init_app(app)
+    app.register_blueprint(admin.app, url_prefix="/manage")
+    admin.flask_admin.init_app(app)
 
 
 def set_up_handlers(app: Application) -> None:

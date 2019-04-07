@@ -18,10 +18,11 @@ def top_nav() -> Dict[str, List[Tuple[str, str, bool]]]:
     user = getattr(g, "user", None)
 
     left_nav = []
-    if user and not user.is_anonymous and user.is_site_admin:
-        left_nav.append(navtuple("Admin", "admin.index"))
     if user and not user.is_anonymous:
         left_nav.append(navtuple("My Proposals", "views.talks_list"))
+    if user and not user.is_anonymous and user.is_site_admin:
+        left_nav.append(navtuple("Admin", "manage.index"))
+        left_nav.append(navtuple("DB Entries", "admin.index"))
 
     right_nav = []
     if user and user.is_authenticated:
