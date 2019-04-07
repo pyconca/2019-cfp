@@ -1,5 +1,8 @@
+from typing import Any
+
+from flask import abort, g
 from flask_admin import Admin, AdminIndexView, expose
-from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib import sqla
 
 from yakbak.forms import Ethnicity, Gender
 from yakbak.models import (
@@ -12,7 +15,15 @@ from yakbak.models import (
 )
 
 
-class AdminDashboard(AdminIndexView):
+class AuthMixin:
+    def is_accessible(self) -> bool:
+        return g.user.site_admin
+
+    def inaccessible_callback(self, name: str, **kwargs: Any) -> None:
+        abort(404)
+
+
+class AdminDashboard(AuthMixin, AdminIndexView):
 
     @expose("/")
     def dashboard(self) -> None:
@@ -38,6 +49,10 @@ class AdminDashboard(AdminIndexView):
             num_non_man=num_non_man,
             num_non_white=num_non_white,
         )
+
+
+class ModelView(AuthMixin, sqla.ModelView):
+    pass
 
 
 class DemographicSurveyView(ModelView):
