@@ -2,14 +2,23 @@ from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 
 from yakbak.forms import Ethnicity, Gender
-from yakbak.models import Conference, db, DemographicSurvey, Talk, User
+from yakbak.models import (
+    Conference,
+    db,
+    DemographicSurvey,
+    Talk,
+    TalkStatus,
+    User,
+)
 
 
 class AdminDashboard(AdminIndexView):
 
     @expose("/")
     def dashboard(self) -> None:
-        num_talks = Talk.query.count()
+        num_talks = Talk.query.filter(
+            Talk.state == TalkStatus.PROPOSED,
+        ).count()
 
         # TODO: figure out how to do this with "not in JSON list" queires
         num_surveys = 0
