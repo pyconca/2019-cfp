@@ -20,7 +20,7 @@ app = Blueprint("manage", __name__)
 
 @app.before_request
 def require_admin() -> None:
-    if not g.user or not g.user.site_admin:
+    if not g.user or g.user.is_anonymous or not g.user.site_admin:
         abort(404)
 
 
