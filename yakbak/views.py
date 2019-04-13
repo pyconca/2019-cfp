@@ -190,6 +190,7 @@ def edit_talk(talk_id: int) -> Response:
     form = TalkForm(conference=g.conference, obj=talk)
     if form.validate_on_submit():
         form.populate_obj(talk)
+        del talk.categories[:]  # prompt admins to re-categorize
         db.session.add(talk)
         db.session.commit()
         return redirect(url_for("views.preview_talk", talk_id=talk.talk_id))

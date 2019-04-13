@@ -8,6 +8,7 @@ import mock
 from yakbak import mail, views
 from yakbak.models import (
     AgeGroup,
+    Category,
     db,
     DemographicSurvey,
     InvitationStatus,
@@ -289,6 +290,35 @@ def test_talk_form_uses_select_field_for_length(client: Client, user: User) -> N
             '<select[^>]*(?:name="length"[^>]*required|required[^>]*name="length")',
         ),
     )
+
+
+def test_saving_a_talk_clears_categories(client: Client, user: User) -> None:
+    category = Category(name="The Category")
+    talk = Talk(title="Old Title", length=25)
+    talk.categories.append(category)
+    talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    db.session.add(talk)
+    db.session.add(category)
+    db.session.commit()
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks/1")
+
+    csrf_token = extract_csrf_from(resp)
+    postdata = {
+        "title": "New Title",
+        "csrf_token": csrf_token,
+    }
+    resp = client.post(
+        "/talks/1",
+        data=postdata,
+        follow_redirects=True,
+    )
+    assert_html_response(resp, status=200)
+
+    talk = Talk.query.first()
+    assert talk.title == "New Title"
+    assert talk.categories == []
 
 
 def test_it_redirects_to_login_page_if_youre_not_logged_in(client: Client) -> None:

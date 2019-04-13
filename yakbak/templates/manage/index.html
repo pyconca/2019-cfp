@@ -7,13 +7,17 @@
       <h1>Submissions</h1>
       <ul>
         <li>
-          <a href="{{ url_for("talk.index_view") }}">
-            Talks: {{ num_talks }}</a>
+          Talks: {{ num_talks }} total, {{ num_without_category }} need categorization.
+          <ul>
+            <li><a href="{{ url_for("manage.categorize_talks") }}">Categorize</a></li>
+            <li><a href="{{ url_for("talk.index_view") }}">View All</a></li>
+          </ul>
         </li>
         <li>
-          <a href="{{ url_for("demographicsurvey.index_view") }}">
-            Demographic Surveys: {{ num_surveys }}</a>
-          ({{ num_non_man }} non-man / {{ num_non_white}} non-white)
+          Demographic Surveys: {{num_surveys}} total, {{ num_non_man }} non-man, {{ num_non_white}} non-white
+          <ul>
+            <li><a href="{{ url_for("demographicsurvey.index_view") }}">View All</a></li>
+          </ul>
         </li>
       </ul>
     </div>

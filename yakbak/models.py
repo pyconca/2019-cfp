@@ -25,7 +25,7 @@ import enum
 import logging
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import synonym
+from sqlalchemy.orm import Query, synonym
 from sqlalchemy.types import Enum, JSON
 from sqlalchemy_postgresql_json import JSONMutableList
 
@@ -117,6 +117,19 @@ class User(db.Model):  # type: ignore
         return False
 
 
+class TalkCategory(db.Model):  # type: ignore
+    talk_id = db.Column(db.Integer, db.ForeignKey("talk.talk_id"), primary_key=True)
+    category_id = db.Column(
+        db.Integer, db.ForeignKey("category.category_id"), primary_key=True)
+
+
+class Category(db.Model):  # type: ignore
+    category_id: int = db.Column(db.Integer, primary_key=True)
+    name: str = db.Column(db.String(64), nullable=False, unique=True)
+
+    talks = db.relationship("Talk", secondary=TalkCategory.__table__)
+
+
 class Talk(db.Model):  # type: ignore
     talk_id: int = db.Column(db.Integer, primary_key=True)
     state: TalkStatus = db.Column(
@@ -131,12 +144,18 @@ class Talk(db.Model):  # type: ignore
 
     accepted_recording_release: bool = db.Column(db.Boolean)
 
+    categories = db.relationship("Category", secondary=TalkCategory.__table__)
+
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __str__(self) -> str:
         return self.title
+
+    @classmethod
+    def active(cls) -> Query:
+        return cls.query.filter(cls.state != TalkStatus.WITHDRAWN)
 
     def add_speaker(self, speaker: User, state: InvitationStatus) -> None:
         ts = TalkSpeaker(state=state)

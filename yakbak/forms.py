@@ -13,12 +13,19 @@ from wtforms.fields import (
     SelectMultipleField,
     StringField,
 )
-from wtforms.validators import DataRequired, Email, NoneOf, Optional as OptionalValidator
+from wtforms.validators import (
+    DataRequired,
+    Email,
+    NoneOf,
+    Optional as OptionalValidator,
+    ValidationError,
+)
 from wtforms.widgets import html_params
 from wtforms_alchemy import model_form_factory
 
 from yakbak.models import (
     AgeGroup,
+    Category,
     DemographicSurvey,
     ProgrammingExperience,
     Talk,
@@ -217,3 +224,30 @@ class DemographicSurveyForm(FlaskForm):
                 obj.programming_experience = None
             else:
                 obj.programming_experience = ProgrammingExperience[self.programming_experience.data]  # noqa: E501
+
+
+class CategoryChoices:
+    """
+    Defer the determination of choices for categories to runtime.
+
+    Because each conference might have different talk lengths, we can't
+    pre-define the choices in the way WTF usually wants for a select field,
+    so we use this trickery instead.
+    """
+    def __iter__(self) -> Iterable[Tuple[int, str]]:
+        return iter([
+            (category.category_id, category.name)
+            for category in Category.query.order_by(Category.name).all()
+        ])
+
+
+class CategorizeForm(FlaskForm):
+    category_ids = SelectMultipleField(
+        coerce=int,
+        choices=CategoryChoices(),
+        widget=select_multi_checkbox,
+    )
+
+    def validate_category_ids(self, field: Field) -> None:
+        if len(field.data) > 2:
+            raise ValidationError("You may pick up to 2 categories")

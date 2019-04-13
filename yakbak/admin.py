@@ -1,18 +1,16 @@
 from typing import Any
+import random
 
-from flask import abort, Blueprint, g, render_template, Response
+from bunch import Bunch
+from flask import abort, Blueprint, flash, g, redirect, render_template, url_for
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib import sqla
+from sqlalchemy import not_
+from sqlalchemy.orm import joinedload
+from werkzeug import Response
 
-from yakbak.forms import Ethnicity, Gender
-from yakbak.models import (
-    Conference,
-    db,
-    DemographicSurvey,
-    Talk,
-    TalkStatus,
-    User,
-)
+from yakbak.forms import CategorizeForm, Ethnicity, Gender
+from yakbak.models import Category, Conference, db, DemographicSurvey, Talk, User
 
 
 app = Blueprint("manage", __name__)
@@ -26,9 +24,8 @@ def require_admin() -> None:
 
 @app.route("/")
 def index() -> Response:
-    num_talks = Talk.query.filter(
-        Talk.state == TalkStatus.PROPOSED,
-    ).count()
+    num_talks = Talk.active().count()
+    num_without_category = Talk.active().filter(not_(Talk.categories.any())).count()
 
     # TODO: figure out how to do this with "not in JSON list" queires
     num_surveys = 0
@@ -44,9 +41,48 @@ def index() -> Response:
     return render_template(
         "manage/index.html",
         num_talks=num_talks,
+        num_without_category=num_without_category,
         num_surveys=num_surveys,
         num_non_man=num_non_man,
         num_non_white=num_non_white,
+    )
+
+
+@app.route("/categorize")
+def categorize_talks() -> Response:
+    count = Talk.active().filter(not_(Talk.categories.any())).count()
+    if count == 0:
+        flash("All talks categorized")
+        talks = Talk.active().options(joinedload(Talk.categories)).all()
+        return render_template(
+            "manage/category_list.html",
+            talks=talks,
+        )
+
+    offset = int(random.random() * count)
+    talk = Talk.active().filter(not_(Talk.categories.any())).offset(offset).limit(1).one()
+    return redirect(url_for("manage.categorize_talk", talk_id=talk.talk_id))
+
+
+@app.route("/categorize/<int:talk_id>", methods=["GET", "POST"])
+def categorize_talk(talk_id: int) -> Response:
+    talk = Talk.query.get_or_404(talk_id)
+    category_ids = [c.category_id for c in talk.categories]
+    form = CategorizeForm(obj=Bunch(category_ids=category_ids))
+    if form.validate_on_submit():
+        categories = Category.query.filter(
+            Category.category_id.in_(form.category_ids.data),  # type: ignore
+        ).all()
+        del talk.categories[:]
+        talk.categories.extend(categories)
+        db.session.add(talk)
+        db.session.commit()
+        return redirect(url_for("manage.categorize_talks"))
+
+    return render_template(
+        "manage/categorize.html",
+        form=form,
+        talk=talk,
     )
 
 
@@ -86,5 +122,6 @@ flask_admin = Admin(
 )
 flask_admin.add_view(ModelView(Conference, db.session))
 flask_admin.add_view(ModelView(Talk, db.session))
+flask_admin.add_view(ModelView(Category, db.session))
 flask_admin.add_view(ModelView(User, db.session))
 flask_admin.add_view(DemographicSurveyView())

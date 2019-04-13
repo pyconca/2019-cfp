@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}Talk Categories - {{ super() }}{% endblock %}
+
+{% block container %}
+{% for talk in talks %}
+<div class="row py-1 border-top border-right border-left{% if loop.last %} border-bottom{% endif %}">
+  <div class="col-lg-6">
+    <a href="{{ url_for("manage.categorize_talk", talk_id=talk.talk_id) }}">{{ talk.title }}</a>
+  </div>
+  {% for category in talk.categories|sort(attribute="name") %}
+  <div class="col-lg-3">{{ category.name }}</div>
+  {% endfor %}
+</div>
+{% endfor %}
+{% endblock %}

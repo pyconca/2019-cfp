@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}Categorize "{{ talk.title|default("Talk") }}" - {{ super() }}{% endblock %}
+
+{% block morestyles %}
+{{ super() }}
+<style type="text/css">
+  ul {
+    padding: 0;
+  }
+  ul li {
+    list-style-type: none;
+  }
+  ul input[type="checkbox"] {
+    display: inline;
+    width: auto;
+  }
+  ul li input[type="text"] {
+    display: inline-block;
+    width: 80%;
+  }
+  input[type="checkbox"] + label {
+    display: inline;
+  }
+  ul.multi-select li {
+    margin-bottom: 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block container %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="row">
+      <div class="col"><h1>{{ talk.title }}</h1></div>
+      <div class="w-100"></div>
+      <div class="col"><h4>{{ talk.length }} Minutes</h2></div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-8">
+    <div class="row">
+      <div class="col">
+        {{ talk.description|markdown }}
+      </div>
+    </div>
+    <div class="row border bg-light my-2 py-2">
+      <div class="col"><h2>Outline:</h2></div>
+      <div class="w-100"></div>
+      <div class="col">
+        {{ talk.outline|markdown }}
+      </div>
+    </div>
+    <div class="row border bg-light my-2 py-2">
+      <div class="col"><h2>Audience Take-Aways:</h2></div>
+      <div class="w-100"></div>
+      <div class="col">
+        {{ talk.take_aways|markdown }}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <p>Pick one or two categories:</p>
+    <form method="POST">
+      {{ macros.render_field(form.category_ids) }}
+      {{ macros.render_error(form.category_ids) }}
+
+      <button class="btn btn-primary">Save</button> or
+      <a class="btn btn-light border" href="{{ url_for("manage.categorize_talks") }}">Skip</a>
+      {{ form["csrf_token"] }}
+    </form>
+  </div>
+</div>
+<div class="row py-3">
+  <div class="col">
+    <a class="btn btn-primary" href="{{ url_for("views.talks_list") }}">Save &amp; Return</a> or
+    <a class="btn btn-light border" href="{{ url_for("views.edit_talk", talk_id=talk.talk_id) }}">Edit Again</a>
+  </div>
+</div>
+{% endblock %}
