@@ -137,7 +137,7 @@ class SpeakerEmailForm(EmailAddressForm):
 
 class PastSpeaking(enum.Enum):
     NEVER = "I have never spoken at a conference before"
-    PYGOTHAM = "I have spoken at PyGotham in the past"
+    PYCONCA = "I have spoken at PyCon Canada in the past"
     OTHER_PYTHON = "I have spoken at another Python-related conference in the past"
     OTHER_NONPYTHON = (
         "I have spoken at another non-Python-related conference in the past"

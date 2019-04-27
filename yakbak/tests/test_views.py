@@ -372,7 +372,12 @@ def test_demographic_survey_saves_data(client: Client, user: User) -> None:
             "WHITE_CAUCASIAN",
             "free form text for 'other' ethnicity",
         ],
-        "past_speaking": ["NEVER", "PYGOTHAM", "OTHER_PYTHON", "OTHER_NONPYTHON"],
+        "past_speaking": [
+            "NEVER",
+            "PYCONCA",
+            "OTHER_PYTHON",
+            "OTHER_NONPYTHON",
+        ],
         "age_group": "UNDER_45",
         "programming_experience": "UNDER_10YR",
         "csrf_token": csrf_token,
