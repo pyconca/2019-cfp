@@ -2,7 +2,6 @@ from operator import attrgetter
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar
 import os
 import os.path
-import os.getenv
 
 from dotenv import load_dotenv
 from attr import attrib, attrs, fields
