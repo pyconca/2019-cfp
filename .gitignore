@@ -2,6 +2,8 @@
 _version.py
 version.txt
 yakbak.toml
+.env
+Yak_Bak.egg-info
 
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python
