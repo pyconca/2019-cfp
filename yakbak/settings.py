@@ -189,7 +189,7 @@ def load_settings_from_env() -> Settings:
         },
         "smtp": {
             "host": os.getenv("MAILGUN_SMTP_SERVER"),
-            "port": os.getenv("MAILGUN_SMTP_PORT"),
+            "port": int(os.getenv("MAILGUN_SMTP_PORT", 587)),
             "username": os.getenv("MAILGUN_SMTP_LOGIN"),
             "password": os.getenv("MAILGUN_SMTP_PASSWORD"),
             "sender": os.getenv("SMPT_SENDER", "Yak-Bak <yakbak@example.com>")
