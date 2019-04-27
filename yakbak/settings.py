@@ -2,6 +2,7 @@ from operator import attrgetter
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar
 import os
 import os.path
+import os.getenv
 
 from attr import attrib, attrs, fields
 from attr.validators import instance_of, optional
@@ -174,6 +175,42 @@ def find_settings_file() -> str:
 def load_settings_file(settings_path: str) -> Settings:
     with open(settings_path) as fp:
         return load_settings(dict(toml.load(fp)))
+
+
+def load_settings_from_env() -> Settings:
+    settings_data = {
+        "db": {
+            "url": os.getenv("DATABASE_URL")
+        },
+        "logging": {
+            "level": os.getenv("LOGGING_LEVEL", "INFO")
+        },
+        "smtp": {
+            "host": os.getenv("MAILGUN_SMTP_SERVER"),
+            "port": os.getenv("MAILGUN_SMTP_PORT"),
+            "username": os.getenv("MAILGUN_SMTP_LOGIN"),
+            "password": os.getenv("MAILGUN_SMTP_PASSWORD"),
+            "sender": os.getenv("SMPT_SENDER", "Yak-Bak <yakbak@example.com>")
+        },
+        "flask": {
+            "secret_key": os.getenv("FLASK_SECRET_KEY"),
+            "templates_auto_reload": os.getenv("FLASK_TEMPLATES_AUTO_RELOAD", False)
+        },
+        "auth": {
+            "github_key_id": os.getenv("AUTH_GITHUB_KEY_ID"),
+            "github_secret": os.getenv("AUTH_GITHUB_SECRET"),
+            "google_key_id": os.getenv("AUTH_GOOGLE_KEY_ID"),
+            "google_secret": os.getenv("AUTH_GOOGLE_SECRET"),
+            "email_magic_link": os.getenv("AUTH_EMAIL_MAGIC_LINK", True),
+            "email_magic_link_expiry": os.getenv("AUTH_EMAIL_MAGIC_LINK_EXPIRY", 28800),
+            "signing_key": os.getenv("AUTH_SIGNING_KEY")
+        },
+        "sentry": {
+            "dsn": os.getenv("SENTRY_DSN")
+        }
+    }
+
+    return load_settings(settings_data)
 
 
 def load_settings(settings_dict: Dict[str, Any]) -> Settings:

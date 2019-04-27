@@ -8,7 +8,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from yakbak.models import db
-from yakbak.settings import load_settings_file
+from yakbak.settings import load_settings_from_env
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -44,7 +44,7 @@ def inject_uri_from_settings():
     alembic_dir = os.path.dirname(__file__)
     yakbak_toml = os.path.join(alembic_dir, "..", "yakbak.toml")
     logging.getLogger("alembic").info("Loading database URI from %s", yakbak_toml)
-    settings = load_settings_file(yakbak_toml)
+    settings = load_settings_from_env()
     config.set_main_option("sqlalchemy.url", settings.db.url)
 
 def run_migrations_offline():
