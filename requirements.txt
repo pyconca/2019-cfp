@@ -56,3 +56,4 @@ wtforms-alchemy==0.16.9
 wtforms-components==0.10.4  # via wtforms-alchemy
 wtforms==2.2.1            # via flask-admin, flask-wtf, wtforms-alchemy, wtforms-components
 python-dotenv==0.10.1
+gunicorn==19.9.0
