@@ -41,6 +41,6 @@ setup(
             "sync_db=yakbak.flaskcli:sync_db",
         ],
     },
-    setup_requires=["vcversioner"],
-    vcversioner={"version_module_paths" : ["yakbak/_version.py"]},
+    # setup_requires=["vcversioner"],
+    # vcversioner={"version_module_paths" : ["yakbak/_version.py"]},
 )
