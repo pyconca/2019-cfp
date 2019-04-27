@@ -4,10 +4,13 @@ import os
 import os.path
 import os.getenv
 
+from dotenv import load_dotenv
 from attr import attrib, attrs, fields
 from attr.validators import instance_of, optional
 from flask import url_for
 import toml
+
+load_dotenv()
 
 ValidationFunc = Callable[[Any, Any, Any], None]
 
