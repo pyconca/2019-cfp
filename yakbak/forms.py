@@ -27,6 +27,8 @@ from yakbak.models import (
     AgeGroup,
     Category,
     DemographicSurvey,
+    Ethnicity,
+    Gender,
     ProgrammingExperience,
     Talk,
     User,
@@ -84,23 +86,6 @@ class SpeakerEmailForm(EmailAddressForm):
             message="Already a speaker",
         )
         validator(self, field)
-
-
-class Gender(enum.Enum):
-    WOMAN = "Woman"
-    MAN = "Man"
-    NONBINARY = "Non-binary / third gender person"
-    OTHER = "Other"
-
-
-class Ethnicity(enum.Enum):
-    ASIAN = "Asian"
-    BLACK_AFRICAN_AMERICAN = "Black / African-American"
-    HISPANIC_LATINX = "Hispanic / Latinx"
-    NATIVE_AMERICAN = "Native American"
-    PACIFIC_ISLANDER = "Pacific Islander"
-    WHITE_CAUCASIAN = "White / Caucasian"
-    OTHER = "Other"
 
 
 class PastSpeaking(enum.Enum):

@@ -177,6 +177,23 @@ class TalkSpeaker(db.Model):  # type: ignore
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class Gender(enum.Enum):
+    WOMAN = "Woman"
+    MAN = "Man"
+    NONBINARY = "Non-binary / third gender person"
+    OTHER = "Other"
+
+
+class Ethnicity(enum.Enum):
+    ASIAN = "Asian"
+    BLACK_AFRICAN_AMERICAN = "Black / African-American"
+    HISPANIC_LATINX = "Hispanic / Latinx"
+    NATIVE_AMERICAN = "Native American"
+    PACIFIC_ISLANDER = "Pacific Islander"
+    WHITE_CAUCASIAN = "White / Caucasian"
+    OTHER = "Other"
+
+
 class AgeGroup(enum.Enum):
     UNDER_18 = "Under 18"
     UNDER_25 = "18 - 24"
@@ -223,6 +240,16 @@ class DemographicSurvey(db.Model):  # type: ignore
         self.past_speaking = None
         self.age_group = None
         self.programming_experience = None
+
+    def doesnt_have_gender(self, gender: Gender) -> bool:
+        if not self.gender:
+            return False
+        return gender.name not in self.gender
+
+    def doesnt_have_ethnicity(self, ethnicity: Ethnicity) -> bool:
+        if not self.ethnicity:
+            return False
+        return ethnicity.name not in self.ethnicity
 
 
 class UsedMagicLink(db.Model):  # type: ignore

@@ -9,8 +9,17 @@ from sqlalchemy import not_
 from sqlalchemy.orm import joinedload
 from werkzeug import Response
 
-from yakbak.forms import CategorizeForm, Ethnicity, Gender
-from yakbak.models import Category, Conference, db, DemographicSurvey, Talk, User
+from yakbak.forms import CategorizeForm
+from yakbak.models import (
+    Category,
+    Conference,
+    db,
+    DemographicSurvey,
+    Ethnicity,
+    Gender,
+    Talk,
+    User,
+)
 
 
 app = Blueprint("manage", __name__)
@@ -33,9 +42,9 @@ def index() -> Response:
     num_non_white = 0
     for survey in DemographicSurvey.query.all():
         num_surveys += 1
-        if Gender.MAN.name not in survey.gender:
+        if survey.doesnt_have_gender(Gender.MAN):
             num_non_man += 1
-        if Ethnicity.WHITE_CAUCASIAN.name not in survey.ethnicity:
+        if survey.doesnt_have_ethnicity(Ethnicity.WHITE_CAUCASIAN):
             num_non_white += 1
 
     return render_template(
