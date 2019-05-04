@@ -1,5 +1,4 @@
 from typing import Any
-import random
 
 from bunch import Bunch
 from flask import abort, Blueprint, flash, g, redirect, render_template, request, url_for
