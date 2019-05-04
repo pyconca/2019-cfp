@@ -180,7 +180,7 @@ class Talk(db.Model):  # type: ignore
         ts.user = speaker
         self.speakers.append(ts)
 
-    def was_edited(self) -> None:
+    def reset_after_edits(self) -> None:
         # prompt admins to re-categorize
         del self.categories[:]
 

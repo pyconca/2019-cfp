@@ -190,7 +190,7 @@ def edit_talk(talk_id: int) -> Response:
     form = TalkForm(conference=g.conference, obj=talk)
     if form.validate_on_submit():
         form.populate_obj(talk)
-        talk.was_edited()
+        talk.reset_after_edits()
         db.session.add(talk)
         db.session.commit()
         return redirect(url_for("views.preview_talk", talk_id=talk.talk_id))
