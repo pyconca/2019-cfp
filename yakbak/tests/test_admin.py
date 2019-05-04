@@ -1,7 +1,6 @@
 from werkzeug.test import Client
 import mock
 
-from yakbak import mail
 from yakbak.models import db, InvitationStatus, Talk, User
 from yakbak.tests.util import (
     assert_html_response,
@@ -32,7 +31,7 @@ def test_site_admins_can_access_admin(client: Client, user: User) -> None:
     assert_html_response(resp, status=200)
 
 
-def test_talk_anonymization(client: Client, user: User) -> None:
+def test_talk_anonymization(client: Client, user: User, send_mail: mock.Mock) -> None:
     user.site_admin = True
     db.session.add(user)
 
@@ -58,8 +57,7 @@ def test_talk_anonymization(client: Client, user: User) -> None:
         "outline": "(Speaker name redacted)!",
         "csrf_token": extract_csrf_from(resp),
     }
-    with mock.patch.object(mail, "send_mail") as send_mail:
-        client.post(f"/manage/anonymize/{talk.talk_id}", data=postdata)
+    client.post(f"/manage/anonymize/{talk.talk_id}", data=postdata)
 
     talk = Talk.query.get(talk.talk_id)
     assert talk.is_anonymized is True
@@ -79,7 +77,7 @@ def test_talk_anonymization(client: Client, user: User) -> None:
     )
 
 
-def test_talk_anonymization_doesnt_set_is_anonymized_if_no_changes(client: Client, user: User) -> None:  # noqa: E501
+def test_talk_anonymization_doesnt_set_is_anonymized_if_no_changes(client: Client, user: User, send_mail: mock.Mock) -> None:  # noqa: E501
     user.site_admin = True
     db.session.add(user)
 
@@ -105,8 +103,7 @@ def test_talk_anonymization_doesnt_set_is_anonymized_if_no_changes(client: Clien
         "outline": talk.outline,
         "csrf_token": extract_csrf_from(resp),
     }
-    with mock.patch.object(mail, "send_mail") as send_mail:
-        client.post(f"/manage/anonymize/{talk.talk_id}", data=postdata)
+    client.post(f"/manage/anonymize/{talk.talk_id}", data=postdata)
 
     talk = Talk.query.get(talk.talk_id)
     assert talk.is_anonymized is True

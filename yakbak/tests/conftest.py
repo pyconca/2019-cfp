@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Generator, Iterable
 import json
 import os.path
 
@@ -7,8 +7,10 @@ from flask_login import login_user
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 import jinja2
+import mock
 import pytest
 
+from yakbak import mail
 from yakbak.auth import load_user
 from yakbak.core import APP_CACHE, create_app
 from yakbak.models import Conference, db, User
@@ -70,6 +72,12 @@ def app() -> Iterable[Application]:
 @pytest.fixture
 def client(app: Application) -> Client:
     return app.test_client()
+
+
+@pytest.yield_fixture
+def send_mail() -> Generator[mock.Mock, None, None]:
+    with mock.patch.object(mail, "send_mail") as send_mail:
+        yield send_mail
 
 
 @pytest.fixture

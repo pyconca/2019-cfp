@@ -5,7 +5,6 @@ from werkzeug.test import Client
 import bs4
 import mock
 
-from yakbak import mail
 from yakbak.models import db, InvitationStatus, Talk, User
 from yakbak.tests.util import (
     assert_html_response,
@@ -114,7 +113,9 @@ def test_manage_speakers_page_shows_other_speakers(client: Client, user: User) -
     ])
 
 
-def test_inviting_a_speaker_adds_the_speaker(client: Client, user: User) -> None:
+def test_inviting_a_speaker_adds_the_speaker(
+        client: Client, user: User, send_mail: mock.Mock,
+) -> None:
     talk = Talk(title="My Talk", length=25)
     talk.add_speaker(user, InvitationStatus.CONFIRMED)
     db.session.add(talk)
@@ -132,12 +133,11 @@ def test_inviting_a_speaker_adds_the_speaker(client: Client, user: User) -> None
     csrf_token = extract_csrf_from(resp)
 
     postdata = {"email": "alice@example.com", "csrf_token": csrf_token}
-    with mock.patch.object(mail, "send_mail") as send_mail:
-        resp = client.post(
-            "/talks/{}/speakers".format(talk.talk_id),
-            data=postdata,
-            follow_redirects=True,
-        )
+    resp = client.post(
+        "/talks/{}/speakers".format(talk.talk_id),
+        data=postdata,
+        follow_redirects=True,
+    )
 
     assert_html_response_contains(resp, "Alice Example")
 
@@ -153,7 +153,9 @@ def test_inviting_a_speaker_adds_the_speaker(client: Client, user: User) -> None
     assert_talk_has_speakers(talk, ["alice@example.com"])
 
 
-def test_inviting_a_speaker_emails_the_speaker(client: Client, user: User) -> None:
+def test_inviting_a_speaker_emails_the_speaker(
+        client: Client, user: User, send_mail: mock.Mock,
+) -> None:
     talk = Talk(title="My Talk", length=25)
     talk.add_speaker(user, InvitationStatus.CONFIRMED)
     db.session.add(talk)
@@ -171,12 +173,11 @@ def test_inviting_a_speaker_emails_the_speaker(client: Client, user: User) -> No
 
     # this speaker doesn't exist, but we should still send the email
     postdata = {"email": "alice@example.com", "csrf_token": csrf_token}
-    with mock.patch.object(mail, "send_mail") as send_mail:
-        resp = client.post(
-            "/talks/{}/speakers".format(talk.talk_id),
-            data=postdata,
-            follow_redirects=True,
-        )
+    resp = client.post(
+        "/talks/{}/speakers".format(talk.talk_id),
+        data=postdata,
+        follow_redirects=True,
+    )
 
     assert_html_response_contains(resp, "alice@example.com")
 
