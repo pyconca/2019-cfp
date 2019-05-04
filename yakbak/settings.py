@@ -192,7 +192,7 @@ def load_settings_from_env() -> Settings:
             "port": int(os.getenv("MAILGUN_SMTP_PORT", 587)),
             "username": os.getenv("MAILGUN_SMTP_LOGIN"),
             "password": os.getenv("MAILGUN_SMTP_PASSWORD"),
-            "sender": os.getenv("SMPT_SENDER", "Yak-Bak <yakbak@example.com>")
+            "sender": os.getenv("SMTP_SENDER", "Yak-Bak <yakbak@example.com>")
         },
         "flask": {
             "secret_key": os.getenv("FLASK_SECRET_KEY"),
