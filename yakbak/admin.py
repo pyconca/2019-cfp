@@ -2,14 +2,15 @@ from typing import Any
 import random
 
 from bunch import Bunch
-from flask import abort, Blueprint, flash, g, redirect, render_template, url_for
+from flask import abort, Blueprint, flash, g, redirect, render_template, request, url_for
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib import sqla
 from sqlalchemy import not_
 from sqlalchemy.orm import joinedload
 from werkzeug import Response
 
-from yakbak.forms import CategorizeForm
+from yakbak import mail
+from yakbak.forms import CategorizeForm, TalkForm
 from yakbak.models import (
     Category,
     Conference,
@@ -17,6 +18,7 @@ from yakbak.models import (
     DemographicSurvey,
     Ethnicity,
     Gender,
+    InvitationStatus,
     Talk,
     User,
 )
@@ -35,6 +37,7 @@ def require_admin() -> None:
 def index() -> Response:
     num_talks = Talk.active().count()
     num_without_category = Talk.active().filter(not_(Talk.categories.any())).count()
+    num_without_anonymization = Talk.active().filter_by(is_anonymized=False).count()
 
     # TODO: figure out how to do this with "not in JSON list" queires
     num_surveys = 0
@@ -51,6 +54,7 @@ def index() -> Response:
         "manage/index.html",
         num_talks=num_talks,
         num_without_category=num_without_category,
+        num_without_anonymization=num_without_anonymization,
         num_surveys=num_surveys,
         num_non_man=num_non_man,
         num_non_white=num_non_white,
@@ -92,6 +96,82 @@ def categorize_talk(talk_id: int) -> Response:
         "manage/categorize.html",
         form=form,
         talk=talk,
+    )
+
+
+@app.route("/anonymize")
+def anonymize_talks() -> Response:
+    count = Talk.active().filter_by(is_anonymized=False).count()
+    if count == 0:
+        flash("All talks anonymized")
+        return redirect(url_for("manage.index"))
+
+    offset = int(random.random() * count)
+    talk = Talk.active().filter_by(is_anonymized=False).offset(offset).limit(1).one()
+    return redirect(url_for("manage.anonymize_talk", talk_id=talk.talk_id))
+
+
+@app.route("/anonymize/<int:talk_id>", methods=["GET", "POST"])
+def anonymize_talk(talk_id: int) -> Response:
+    talk = Talk.query.get_or_404(talk_id)
+    if request.method == "GET" and talk.is_anonymized:
+        # the TalkForm uses the regular fields; if we've already
+        # anonymized, an admin is looking at a past anonymization,
+        # so show that instead of the original versions
+        talk.title = talk.anonymized_title
+        talk.description = talk.anonymized_description
+        talk.outline = talk.anonymized_outline
+
+    form = TalkForm(obj=talk)
+    if form.validate_on_submit():
+        talk.anonymized_title = form.title.data
+        talk.anonymized_description = form.description.data
+        talk.anonymized_outline = form.outline.data
+        talk.is_anonymized = True
+        talk.has_anonymization_changes = (
+            talk.anonymized_title != talk.title or
+            talk.anonymized_description != talk.description or
+            talk.anonymized_outline != talk.outline
+        )
+        db.session.add(talk)
+        db.session.commit()
+
+        db.session.refresh(talk)
+        speakers = [
+            talk_speaker.user for talk_speaker in talk.speakers
+            if talk_speaker.state == InvitationStatus.CONFIRMED
+        ]
+
+        if talk.has_anonymization_changes:
+            mail.send_mail(
+                to=[speaker.email for speaker in speakers],
+                template="email/talk-anonymized",
+                talk_id=talk.talk_id,
+                title=talk.title,
+            )
+
+        if request.form.get("save-and-next"):
+            return redirect(url_for("manage.anonymize_talks"))
+        else:
+            return redirect(url_for(
+                "manage.preview_anonymized_talk",
+                talk_id=talk.talk_id,
+            ))
+
+    return render_template(
+        "manage/anonymize_talk.html",
+        form=form,
+        talk=talk,
+    )
+
+
+@app.route("/anonymize/<int:talk_id>/preview")
+def preview_anonymized_talk(talk_id: int) -> Response:
+    talk = Talk.query.get_or_404(talk_id)
+    return render_template(
+        "anonymized_talk_preview.html",
+        talk=talk,
+        mode="admin",
     )
 
 

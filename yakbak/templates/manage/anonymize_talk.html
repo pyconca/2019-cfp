@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}Anonymize "{{ talk.title }}" - {{ super() }}{% endblock %}
+
+{% block morestyles %}
+{{ super() }}
+<style type="text/css">
+  textarea {
+    min-height: 15rem;
+  }
+</style>
+{% endblock %}
+
+{% block container %}
+<form method="post" class="pb-3">
+  <div class="row">
+    {% set field = form["title"] %}
+    <div class="col-md-8 form-group">
+      {{ macros.render_label(field, "Title") }}
+      {{ macros.render_field(field, "My Incredible Talk") }}
+      {{ macros.render_error(field) }}
+    </div>
+  </div>
+  <div class="row">
+    {% set field = form["description"] %}
+    <div class="col-md-8 form-group">
+      {{ macros.render_label(field, "Description") }}
+      {{ macros.render_field(field, "Markdown supports **bold**, _italic_, [links](http://www.example.com/), and lots more!") }}
+      {{ macros.render_error(field) }}
+    </div>
+    <div class="col-md-4">
+      <label></label>{# for spacing :( #}
+      <small id="{{ field.id }}-help" class="form-text text-muted">
+        <p>
+        Anonymize the talk description by replacing any identifying information
+        with a short parenthesized phrase. For example, replace the speaker's
+        name with "(speaker name)".
+        </p>
+        <p>
+        Use your judgement, but especially keep an eye out for:
+        <ul>
+          <li>Speaker's name (judge from context)</li>
+          <li>Speaker's employer</li>
+          <li>Speaker's age, gender, or other demographic information, unless
+            it is essential to the talk topic</li>
+          <li>Links to GitHub, slide sharing sites, YouTube, etc</li>
+        </ul>
+        </p>
+      </small>
+    </div>
+  </div>
+  <div class="row">
+    {% set field = form["outline"] %}
+    <div class="col-md-8 form-group">
+      {{ macros.render_label(field, "Outline") }}
+      {% if field.data %}
+      {{ macros.render_field(field) }}
+      {% else %}
+      {{ macros.render_field(field, "It's nice to:\n\n* Format bullet points, using Markdown\n* So that\n  * You can write it easily, and\n  * It is nicely formatted for reviewers") }}
+      {% endif %}
+      {{ macros.render_error(field) }}
+    </div>
+  </div>
+  <div class="row">
+    {% set field = form["take_aways"] %}
+    <div class="col-md-8 form-group">
+      {{ macros.render_label(field, "Audience Take-Aways") }}
+      {{ macros.render_field(field, "Attendees will learn how to foo and bar with the baz library") }}
+      {{ macros.render_error(field) }}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-auto">
+      <input type="submit" class="btn btn-primary" name="save-and-preview" value="Save &amp; Preview">
+      or
+      <input type="submit" class="btn btn-light border" name="save-and-next" value="Save &amp; Anonymize Next Talk">
+    </div>
+  </div>
+  {{ form["csrf_token"] }}
+</form>
+{% endblock %}

@@ -18,6 +18,7 @@ setup(
         "alembic",
         "attrs",
         "bunch",
+        "diff-match-patch",
         "flask",
         "flask-admin",
         "flask-login",

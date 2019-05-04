@@ -190,12 +190,22 @@ def edit_talk(talk_id: int) -> Response:
     form = TalkForm(conference=g.conference, obj=talk)
     if form.validate_on_submit():
         form.populate_obj(talk)
-        del talk.categories[:]  # prompt admins to re-categorize
+        talk.was_edited()
         db.session.add(talk)
         db.session.commit()
         return redirect(url_for("views.preview_talk", talk_id=talk.talk_id))
 
     return render_template("edit_talk.html", talk=talk, form=form)
+
+
+@app.route("/talks/<int:talk_id>/anonymized", methods=["GET", "POST"])
+@login_required
+def anonymized_talk(talk_id: int) -> Response:
+    talk = load_talk(talk_id)
+    if not talk.is_anonymized:
+        flash("This talk has not yet been anonymized for review")
+
+    return render_template("anonymized_talk_preview.html", talk=talk)
 
 
 @app.route("/talks/<int:talk_id>/withdraw")

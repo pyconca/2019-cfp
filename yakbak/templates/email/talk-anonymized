@@ -1,0 +1,23 @@
+---
+subject: Your {{ g.conference.informal_name }} talk was anonymized
+---
+Hello,
+
+
+While previewing your proposal, {{ title }}, we have identified
+some information that could be used by voters or the program
+committee to identify who you are. It's very important to us at
+{{ g.conference.informal_name }} to have a truly anonymous
+review process, so we have edited the version that will be seen
+by voters and reviewers to remove this identifying information.
+
+You can view the differences between your original proposal and the
+anonymized version at {{ url_for("views.anonymized_talk", talk_id=talk_id, _external=True) }}.
+
+If you'd like, you may edit your proposal to re-word and remove the
+identifying information. This will trigger re-review by {{ g.conference.informal_name }}
+staff.
+
+Thanks!
+
+Your friends at {{ g.conference.full_name }}

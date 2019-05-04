@@ -1,9 +1,14 @@
-# This is copied from [1], and is used under the Apache License, Version 2.0.
+# Per Google's recommendation [1], this is copied from [2], with
+# the line ending match adjusted to find spans of whitespace.
 #
-# [1] https://github.com/google/diff-match-patch/blob/858b3812cc02e7d48da4beebb21d4d80dc1d3062/python3/diff_match_patch.py
+# The original [2] is used under the Apache License, Version 2.0.
+#
+# [1] https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#word-mode
+# [2] https://github.com/google/diff-match-patch/blob/858b3812cc02e7d48da4beebb21d4d80dc1d3062/python3/diff_match_patch.py
+import re
 
 
-def diff_linesToChars(self, text1, text2):
+def diff_wordsToChars(text1, text2):
   """Split two texts into an array of strings.  Reduce the texts to a string
   of hashes where each Unicode character represents one line.
 
@@ -23,6 +28,15 @@ def diff_linesToChars(self, text1, text2):
   # So we'll insert a junk entry to avoid generating a null character.
   lineArray.append('')
 
+  def next_word_end(text, start):
+    """Find the next word end (any whitespace) after `start`.
+    """
+    pattern = re.compile(r"([^ \t\n]+)[ \t\n]")
+    match = pattern.search(text, start)
+    if not match:
+      return -1
+    return start + len(match.group(1))
+
   def diff_linesToCharsMunge(text):
     """Split a text into an array of strings.  Reduce the texts to a string
     of hashes where each Unicode character represents one line.
@@ -41,7 +55,7 @@ def diff_linesToChars(self, text1, text2):
     lineStart = 0
     lineEnd = -1
     while lineEnd < len(text) - 1:
-      lineEnd = text.find('\n', lineStart)
+      lineEnd = next_word_end(text, lineStart)
       if lineEnd == -1:
         lineEnd = len(text) - 1
       line = text[lineStart:lineEnd + 1]

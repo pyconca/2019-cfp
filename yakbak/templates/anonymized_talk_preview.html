@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Anonymization of "{{ talk.title|default("Talk") }}" - {{ super() }}{% endblock %}
+
+{% block morestyles %}
+<style type="text/css">
+pre {
+  white-space: pre-wrap;       /* css-3 */
+}
+span.diff_add {
+  background-color: #98FB98;
+}
+span.diff_sub {
+  background-color: #F08080;
+}
+</style>
+{% endblock %}
+
+{% block container %}
+{% if mode != "admin" %}
+<div class="row">
+  <div class="col">
+    <div class="alert alert-warning" role="alert">
+      <p>
+      While previewing this proposal, we have identified some
+      information that could be used by voters or the program
+      committee to identify who you are. It's very important to
+      us at {{ g.conference.informal_name }} to have a truly
+      anonymous review process, so we have edited the version
+      that will be seen by voters and reviewers to remove this
+      identifying information.
+      </p>
+      <p>
+      If you'd like, you may
+      <a href="{{ url_for("views.edit_talk", talk_id=talk.talk_id) }}">edit
+      your proposal</a> to re-word and remove the identifying
+      information. This will trigger re-review by
+      {{ g.conference.informal_name }} staff.
+      </p>
+    </div>
+  </div>
+</div>
+{% endif %}
+<div class="row">
+  <div class="col">
+    <h2>{{ talk|anonymization_diff("title") }}</h2>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <pre>{{ talk|anonymization_diff("description") }}</pre>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <h3>Outline</h3>
+    <pre>{{ talk|anonymization_diff("outline") }}</pre>
+  </div>
+</div>
+{% if mode == "admin" %}
+<div class="row">
+  <div class="col">
+    <a class="btn btn-primary" href="{{ url_for("manage.anonymize_talks") }}">Anonymize Next Talk</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

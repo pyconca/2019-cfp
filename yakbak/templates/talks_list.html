@@ -48,6 +48,17 @@
       <a href="{{ url_for(view, talk_id=talk.talk_id) }}" class="btn btn-outline-{{cls}} btn-sm">{{ label }}</a>
       {% endfor %}
     </div>
+    {% if talk.has_anonymization_changes %}
+    <div class="col-md-12 mt-2">
+      <div class="alert alert-warning my-0 pt-1 pb-2" role="alert">
+        <small>
+        This talk has anonymization changes. Please <a href="{{ url_for("views.anonymized_talk", talk_id=talk.talk_id) }}">review
+        the anonymized version</a>, and consider updating your talk for
+        anonymous review.
+        </small>
+      </div>
+    </div>
+    {% endif %}
   </div>
 {% endfor %}
 {% endmacro %}
