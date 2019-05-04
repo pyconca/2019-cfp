@@ -62,8 +62,8 @@ def test_talk_anonymization(client: Client, user: User) -> None:
         client.post(f"/manage/anonymize/{talk.talk_id}", data=postdata)
 
     talk = Talk.query.get(talk.talk_id)
-    assert talk.is_anonymized == True  # noqa: E712
-    assert talk.has_anonymization_changes == True  # noqa: E712
+    assert talk.is_anonymized is True
+    assert talk.has_anonymization_changes is True
     assert talk.anonymized_title == "(Speaker name redacted)'s Identifying Talk"
     assert talk.anonymized_description == "This talk is by (Speaker name redacted)"
     assert talk.anonymized_outline == "(Speaker name redacted)!"
@@ -109,8 +109,8 @@ def test_talk_anonymization_doesnt_set_is_anonymized_if_no_changes(client: Clien
         client.post(f"/manage/anonymize/{talk.talk_id}", data=postdata)
 
     talk = Talk.query.get(talk.talk_id)
-    assert talk.is_anonymized == True  # noqa: E712
-    assert talk.has_anonymization_changes == False  # noqa: E712
+    assert talk.is_anonymized is True
+    assert talk.has_anonymization_changes is False
     assert talk.anonymized_title == talk.title
     assert talk.anonymized_description == talk.anonymized_description
     assert talk.anonymized_outline == talk.outline
