@@ -129,6 +129,9 @@ class Category(db.Model):  # type: ignore
 
     talks = db.relationship("Talk", secondary=TalkCategory.__table__)
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class Talk(db.Model):  # type: ignore
     talk_id: int = db.Column(db.Integer, primary_key=True)

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Iterable
 
 from bunch import Bunch
 from flask import abort, Blueprint, flash, g, redirect, render_template, request, url_for
@@ -180,10 +180,6 @@ class AuthMixin:
         abort(404)
 
 
-class ModelView(AuthMixin, sqla.ModelView):
-    pass
-
-
 class AdminDashboard(AuthMixin, AdminIndexView):
     @expose()
     def index(self) -> Response:
@@ -194,11 +190,17 @@ class AdminDashboard(AuthMixin, AdminIndexView):
         )
 
 
-class DemographicSurveyView(ModelView):
-    column_exclude_list = ("user", )
-
-    def __init__(self) -> None:
-        super().__init__(DemographicSurvey, db.session)
+class ModelView(AuthMixin, sqla.ModelView):
+    def __init__(
+        self,
+        model: Any,
+        session: Any,
+        include: Iterable[str] = (),
+        exclude: Iterable[str] = (),
+    ) -> None:
+        self.column_exclude_list = exclude
+        self.column_list = include
+        super().__init__(model, session)
 
 
 flask_admin = Admin(
@@ -207,7 +209,14 @@ flask_admin = Admin(
     url="/manage/db",
 )
 flask_admin.add_view(ModelView(Conference, db.session))
-flask_admin.add_view(ModelView(Talk, db.session))
+flask_admin.add_view(ModelView(Talk, db.session, include=(
+    "state",
+    "title",
+    "categories",
+    "is_anonymized",
+    "created",
+    "updated",
+)))
 flask_admin.add_view(ModelView(Category, db.session))
 flask_admin.add_view(ModelView(User, db.session))
-flask_admin.add_view(DemographicSurveyView())
+flask_admin.add_view(ModelView(DemographicSurvey, db.session, exclude=("user", )))
