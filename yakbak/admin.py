@@ -73,7 +73,7 @@ def categorize_talks() -> Response:
         )
 
     offset = int(random.random() * count)
-    talk = Talk.active().filter(not_(Talk.categories.any())).offset(offset).limit(1).one()
+    talk = Talk.active().filter(not_(Talk.categories.any())).offset(offset).first()
     return redirect(url_for("manage.categorize_talk", talk_id=talk.talk_id))
 
 
@@ -107,7 +107,7 @@ def anonymize_talks() -> Response:
         return redirect(url_for("manage.index"))
 
     offset = int(random.random() * count)
-    talk = Talk.active().filter_by(is_anonymized=False).offset(offset).limit(1).one()
+    talk = Talk.active().filter_by(is_anonymized=False).offset(offset).first()
     return redirect(url_for("manage.anonymize_talk", talk_id=talk.talk_id))
 
 
