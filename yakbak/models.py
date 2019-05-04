@@ -142,6 +142,23 @@ class Talk(db.Model):  # type: ignore
     requirements: Optional[str] = db.Column(db.Text)
     take_aways: Optional[str] = db.Column(db.Text)
 
+    # anonymization support
+    is_anonymized: bool = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
+    )
+    has_anonymization_changes: bool = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
+    )
+    anonymized_title: Optional[str] = db.Column(db.String(512))
+    anonymized_description: Optional[str] = db.Column(db.Text)
+    anonymized_outline: Optional[str] = db.Column(db.Text)
+
     accepted_recording_release: bool = db.Column(db.Boolean)
 
     categories = db.relationship("Category", secondary=TalkCategory.__table__)
@@ -162,6 +179,17 @@ class Talk(db.Model):  # type: ignore
         ts.talk = self
         ts.user = speaker
         self.speakers.append(ts)
+
+    def reset_after_edits(self) -> None:
+        # prompt admins to re-categorize
+        del self.categories[:]
+
+        # prompt admins to re-anonymize
+        self.is_anonymized = False
+        self.anonymized_title = None
+        self.anonymized_description = None
+        self.anonymized_outline = None
+        self.has_anonymization_changes = False
 
 
 class TalkSpeaker(db.Model):  # type: ignore

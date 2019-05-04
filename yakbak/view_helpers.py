@@ -4,6 +4,10 @@ from typing import Any, Dict, Iterable, List, Tuple
 from flask import Blueprint, current_app, g, Markup, request, url_for
 from flask_login import current_user
 from markdown import markdown
+import diff_match_patch
+
+from yakbak.diff import diff_wordsToChars
+from yakbak.models import Talk
 
 
 app = Blueprint("view_helpers", __name__)
@@ -79,10 +83,36 @@ def timesince(dt: datetime, default: str = "just now") -> str:
 
 
 @app.app_template_filter("markdown")
-def markdown_filter(value: str) -> str:
+def markdown_filter(value: str) -> Markup:
     return Markup(markdown(value, output_format="html5"))
 
 
 @app.app_template_filter("remove")
 def remove_element(value: Iterable[Any], item: Any) -> List[Any]:
     return [elm for elm in value if elm != item]
+
+
+@app.app_template_filter("anonymization_diff")
+def anonymization_diff(talk: Talk, attr: str) -> Markup:
+    left = getattr(talk, attr)
+    right = getattr(talk, f"anonymized_{attr}")
+    if not right:
+        return Markup(left)
+
+    dmp = diff_match_patch.diff_match_patch()
+
+    # from https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#line-mode
+    left_words, right_words, word_array = diff_wordsToChars(left, right)
+    diff = dmp.diff_main(left_words, right_words)
+    dmp.diff_charsToLines(diff, word_array)
+
+    out = []
+    for op, text in diff:
+        if op == 1:  # addition
+            out.append(f'<span class="diff_add">{text}</span>')
+        elif op == -1:  # deletion
+            out.append(f'<span class="diff_sub">{text}</span>')
+        else:
+            out.append(text)
+
+    return Markup("".join(out))

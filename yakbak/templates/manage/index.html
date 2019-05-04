@@ -7,9 +7,10 @@
       <h1>Submissions</h1>
       <ul>
         <li>
-          Talks: {{ num_talks }} total, {{ num_without_category }} need categorization.
+          Talks: {{ num_talks }} total
           <ul>
-            <li><a href="{{ url_for("manage.categorize_talks") }}">Categorize</a></li>
+            <li><a href="{{ url_for("manage.categorize_talks") }}">{{ num_without_category }} need categorization</a></li>
+            <li><a href="{{ url_for("manage.anonymize_talks") }}">{{ num_without_anonymization }} need anonymization</a></li>
             <li><a href="{{ url_for("talk.index_view") }}">View All</a></li>
           </ul>
         </li>
