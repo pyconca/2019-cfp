@@ -5,10 +5,11 @@
 #
 # [1] https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#word-mode
 # [2] https://github.com/google/diff-match-patch/blob/858b3812cc02e7d48da4beebb21d4d80dc1d3062/python3/diff_match_patch.py
+from typing import Dict, Tuple
 import re
 
 
-def diff_wordsToChars(text1, text2):
+def diff_wordsToChars(text1: str, text2: str) -> Tuple[str, str, object]:
   """Split two texts into an array of strings.  Reduce the texts to a string
   of hashes where each Unicode character represents one line.
 
@@ -22,13 +23,13 @@ def diff_wordsToChars(text1, text2):
     strings is intentionally blank.
   """
   lineArray = []  # e.g. lineArray[4] == "Hello\n"
-  lineHash = {}   # e.g. lineHash["Hello\n"] == 4
+  lineHash: Dict[str, int] = {}   # e.g. lineHash["Hello\n"] == 4
 
   # "\x00" is a valid character, but various debuggers don't like it.
   # So we'll insert a junk entry to avoid generating a null character.
   lineArray.append('')
 
-  def next_word_end(text, start):
+  def next_word_end(text: str, start: int) -> int:
     """Find the next word end (any whitespace) after `start`.
     """
     pattern = re.compile(r"([^ \t\n]+)[ \t\n]")
@@ -37,7 +38,7 @@ def diff_wordsToChars(text1, text2):
       return -1
     return start + len(match.group(1))
 
-  def diff_linesToCharsMunge(text):
+  def diff_linesToCharsMunge(text: str) -> str:
     """Split a text into an array of strings.  Reduce the texts to a string
     of hashes where each Unicode character represents one line.
     Modifies linearray and linehash through being a closure.
@@ -79,3 +80,5 @@ def diff_wordsToChars(text1, text2):
   maxLines = 1114111
   chars2 = diff_linesToCharsMunge(text2)
   return (chars1, chars2, lineArray)
+
+# flake8: noqa

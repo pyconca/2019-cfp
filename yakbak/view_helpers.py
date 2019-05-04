@@ -7,6 +7,7 @@ from markdown import markdown
 import diff_match_patch
 
 from yakbak.diff import diff_wordsToChars
+from yakbak.models import Talk
 
 
 app = Blueprint("view_helpers", __name__)
@@ -82,7 +83,7 @@ def timesince(dt: datetime, default: str = "just now") -> str:
 
 
 @app.app_template_filter("markdown")
-def markdown_filter(value: str) -> str:
+def markdown_filter(value: str) -> Markup:
     return Markup(markdown(value, output_format="html5"))
 
 
@@ -92,7 +93,7 @@ def remove_element(value: Iterable[Any], item: Any) -> List[Any]:
 
 
 @app.app_template_filter("anonymization_diff")
-def anonymization_diff(talk, attr):
+def anonymization_diff(talk: Talk, attr: str) -> Markup:
     left = getattr(talk, attr)
     right = getattr(talk, f"anonymized_{attr}")
     if not right:
@@ -100,7 +101,7 @@ def anonymization_diff(talk, attr):
 
     dmp = diff_match_patch.diff_match_patch()
 
-    # based on https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#line-mode
+    # from https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#line-mode
     left_words, right_words, word_array = diff_wordsToChars(left, right)
     diff = dmp.diff_main(left_words, right_words)
     dmp.diff_charsToLines(diff, word_array)
