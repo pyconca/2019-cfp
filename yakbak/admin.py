@@ -5,7 +5,7 @@ from bunch import Bunch
 from flask import abort, Blueprint, flash, g, redirect, render_template, request, url_for
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib import sqla
-from sqlalchemy import not_
+from sqlalchemy import func, not_
 from sqlalchemy.orm import joinedload
 from werkzeug import Response
 
@@ -63,8 +63,8 @@ def index() -> Response:
 
 @app.route("/categorize")
 def categorize_talks() -> Response:
-    count = Talk.active().filter(not_(Talk.categories.any())).count()
-    if count == 0:
+    not_categorized = Talk.active().filter(not_(Talk.categories.any()))
+    if not db.session.query(not_categorized.exists()).scalar():
         flash("All talks categorized")
         talks = Talk.active().options(joinedload(Talk.categories)).all()
         return render_template(
@@ -72,8 +72,7 @@ def categorize_talks() -> Response:
             talks=talks,
         )
 
-    offset = int(random.random() * count)
-    talk = Talk.active().filter(not_(Talk.categories.any())).offset(offset).first()
+    talk = not_categorized.order_by(func.random()).first()
     return redirect(url_for("manage.categorize_talk", talk_id=talk.talk_id))
 
 
@@ -101,13 +100,12 @@ def categorize_talk(talk_id: int) -> Response:
 
 @app.route("/anonymize")
 def anonymize_talks() -> Response:
-    count = Talk.active().filter_by(is_anonymized=False).count()
-    if count == 0:
+    not_anonymized = Talk.active().filter_by(is_anonymized=False)
+    if not db.session.query(not_anonymized.exists()).scalar():
         flash("All talks anonymized")
         return redirect(url_for("manage.index"))
 
-    offset = int(random.random() * count)
-    talk = Talk.active().filter_by(is_anonymized=False).offset(offset).first()
+    talk = not_anonymized.order_by(func.random()).first()
     return redirect(url_for("manage.anonymize_talk", talk_id=talk.talk_id))
 
 
