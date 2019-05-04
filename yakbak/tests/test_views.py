@@ -5,7 +5,7 @@ from werkzeug.test import Client
 import bs4
 import mock
 
-from yakbak import mail, views
+from yakbak import views
 from yakbak.models import (
     AgeGroup,
     Category,
@@ -50,14 +50,13 @@ def test_login_shows_auth_methods(client: Client) -> None:
     assert_html_response_contains(resp, "Magic Link")
 
 
-def test_email_magic_link_form(client: Client) -> None:
+def test_email_magic_link_form(client: Client, send_mail: mock.Mock) -> None:
     resp = client.get("/login/email")
     assert_html_response_contains(resp, re.compile('<input.*name="email"'))
     csrf_token = extract_csrf_from(resp)
 
     postdata = {"email": "jane@example.com", "csrf_token": csrf_token}
-    with mock.patch.object(mail, "send_mail") as send_mail:
-        resp = client.post("/login/email", data=postdata, follow_redirects=True)
+    resp = client.post("/login/email", data=postdata, follow_redirects=True)
 
     assert_html_response_contains(resp, "We have sent a link to you")
     send_mail.assert_called_once_with(
@@ -92,16 +91,17 @@ def test_invalid_email_magic_link_login(client: Client) -> None:
     assert_html_response(resp, status=404)
 
 
-def test_email_magic_link_tokens_only_work_once(client: Client) -> None:
+def test_email_magic_link_tokens_only_work_once(
+        client: Client, send_mail: mock.Mock,
+) -> None:
     resp = client.get("/login/email")
     csrf_token = extract_csrf_from(resp)
 
-    with mock.patch.object(mail, "send_mail") as send_mail:
-        postdata = {
-            "email": "jane@example.com",
-            "csrf_token": csrf_token,
-        }
-        client.post("/login/email", data=postdata, follow_redirects=True)
+    postdata = {
+        "email": "jane@example.com",
+        "csrf_token": csrf_token,
+    }
+    client.post("/login/email", data=postdata, follow_redirects=True)
 
     _, kwargs = send_mail.call_args
     magic_link_url = kwargs["magic_link"]
