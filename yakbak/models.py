@@ -24,7 +24,7 @@ from typing import List, Optional
 import enum
 import logging
 
-from attr import attrs, attrib
+from attr import attrib, attrs
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Query, synonym
 from sqlalchemy.types import Enum, JSON
@@ -49,6 +49,19 @@ class TalkStatus(enum.Enum):
     # ACCEPTED = "deleted"
     # CONFIRMED = "confirmed"
     # WAITLISTED = "waitlisted"
+
+
+@attrs
+class TimeWindow:
+    start: Optional[datetime] = attrib()
+    end: Optional[datetime] = attrib()
+
+    def includes_now(self) -> bool:
+        now = datetime.utcnow()
+        return self.start <= now <= self.end
+
+    def __bool__(self) -> bool:
+        return bool(self.start and self.end)
 
 
 class Conference(db.Model):  # type: ignore
@@ -77,25 +90,13 @@ class Conference(db.Model):  # type: ignore
     updated = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    @attrs
-    class Window:
-        start: Optional[datetime] = attrib()
-        end: Optional[datetime] = attrib()
-
-        def includes_now(self) -> bool:
-            now = datetime.utcnow()
-            return self.start <= now <= self.end
-
-        def __bool__(self) -> bool:
-            return bool(self.start and self.end)
+    @property
+    def proposal_window(self) -> TimeWindow:
+        return TimeWindow(self.proposals_begin, self.proposals_end)
 
     @property
-    def proposal_window(self) -> Window:
-        return Conference.Window(self.proposals_begin, self.proposals_end)
-
-    @property
-    def voting_window(self) -> Window:
-        return Conference.Window(self.voting_begin, self.voting_end)
+    def voting_window(self) -> TimeWindow:
+        return TimeWindow(self.voting_begin, self.voting_end)
 
 
 class User(db.Model):  # type: ignore

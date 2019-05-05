@@ -67,7 +67,8 @@ def if_creating_proposals_allowed(func: Callable) -> Callable:
     def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
         window = g.conference.proposal_window
         if window and not window.includes_now():
-            return render_template("action_not_allowed.html", action="create_proposal"), 400
+            resp = render_template("action_not_allowed.html", action="create_proposal")
+            return resp, 400
         return func(*args, **kwargs)
     return wrapper
 
@@ -79,13 +80,14 @@ def if_editing_proposals_allowed(func: Callable) -> Callable:
         voting_window = g.conference.voting_window
         disallowed = (
             request.method == "POST" and (
-                (proposal_window and not proposal_window.includes_now())
-                or (voting_window and voting_window.includes_now())
+                (proposal_window and not proposal_window.includes_now()) or
+                (voting_window and voting_window.includes_now())
             )
         )
         # TODO: allow edits to accepted talks after proposal and voting windows
         if disallowed:
-            return render_template("action_not_allowed.html", action="edit_proposal"), 400
+            resp = render_template("action_not_allowed.html", action="edit_proposal")
+            return resp, 400
         return func(*args, **kwargs)
     return wrapper
 
