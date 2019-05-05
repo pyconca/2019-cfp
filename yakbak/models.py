@@ -57,6 +57,8 @@ class TimeWindow:
     end: Optional[datetime] = attrib()
 
     def includes_now(self) -> bool:
+        if not self.start or not self.end:
+            return False
         now = datetime.utcnow()
         return self.start <= now <= self.end
 
