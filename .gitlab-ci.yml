@@ -21,4 +21,5 @@ docker:
   services:
     - docker:dind
   script:
-    - docker build .
+    - timeout 5m -sKILL docker build .
+  retry: 1
