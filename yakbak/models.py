@@ -26,6 +26,7 @@ import logging
 
 from attr import attrib, attrs
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import CheckConstraint
 from sqlalchemy.orm import Query, synonym
 from sqlalchemy.types import Enum, JSON
 from sqlalchemy_postgresql_json import JSONMutableList
@@ -53,17 +54,12 @@ class TalkStatus(enum.Enum):
 
 @attrs
 class TimeWindow:
-    start: Optional[datetime] = attrib()
-    end: Optional[datetime] = attrib()
+    start: datetime = attrib()
+    end: datetime = attrib()
 
     def includes_now(self) -> bool:
-        if not self.start or not self.end:
-            return False
         now = datetime.utcnow()
         return self.start <= now <= self.end
-
-    def __bool__(self) -> bool:
-        return bool(self.start and self.end)
 
 
 class Conference(db.Model):  # type: ignore
@@ -92,13 +88,30 @@ class Conference(db.Model):  # type: ignore
     updated = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    @property
-    def proposal_window(self) -> TimeWindow:
-        return TimeWindow(self.proposals_begin, self.proposals_end)
+    __table_args__ = (
+        CheckConstraint(
+            "(proposals_begin IS NOT NULL and proposals_end IS NOT NULL) "
+            "OR (proposals_begin IS NULL AND proposals_end IS NULL)",
+            name="ck_proposals_window"
+        ),
+        CheckConstraint(
+            "(voting_begin IS NOT NULL and voting_end IS NOT NULL) "
+            "OR (voting_begin IS NULL AND voting_end IS NULL)",
+            name="ck_voting_window"
+        ),
+    )
 
     @property
-    def voting_window(self) -> TimeWindow:
-        return TimeWindow(self.voting_begin, self.voting_end)
+    def proposal_window(self) -> Optional[TimeWindow]:
+        if self.proposals_begin and self.proposals_end:
+            return TimeWindow(self.proposals_begin, self.proposals_end)
+        return None
+
+    @property
+    def voting_window(self) -> Optional[TimeWindow]:
+        if self.voting_begin and self.voting_end:
+            return TimeWindow(self.voting_begin, self.voting_end)
+        return None
 
 
 class User(db.Model):  # type: ignore
