@@ -1,7 +1,16 @@
 from typing import Any, Iterable
 
 from bunch import Bunch
-from flask import abort, Blueprint, flash, g, redirect, render_template, request, url_for
+from flask import (
+    abort,
+    Blueprint,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib import sqla
 from sqlalchemy import func, not_
@@ -21,7 +30,6 @@ from yakbak.models import (
     Talk,
     User,
 )
-
 
 app = Blueprint("manage", __name__)
 
@@ -66,10 +74,7 @@ def categorize_talks() -> Response:
     if not db.session.query(not_categorized.exists()).scalar():
         flash("All talks categorized")
         talks = Talk.active().options(joinedload(Talk.categories)).all()
-        return render_template(
-            "manage/category_list.html",
-            talks=talks,
-        )
+        return render_template("manage/category_list.html", talks=talks)
 
     talk = not_categorized.order_by(func.random()).first()
     return redirect(url_for("manage.categorize_talk", talk_id=talk.talk_id))
@@ -82,7 +87,7 @@ def categorize_talk(talk_id: int) -> Response:
     form = CategorizeForm(obj=Bunch(category_ids=category_ids))
     if form.validate_on_submit():
         categories = Category.query.filter(
-            Category.category_id.in_(form.category_ids.data),  # type: ignore
+            Category.category_id.in_(form.category_ids.data)  # type: ignore
         ).all()
         del talk.categories[:]
         talk.categories.extend(categories)
@@ -90,11 +95,7 @@ def categorize_talk(talk_id: int) -> Response:
         db.session.commit()
         return redirect(url_for("manage.categorize_talks"))
 
-    return render_template(
-        "manage/categorize.html",
-        form=form,
-        talk=talk,
-    )
+    return render_template("manage/categorize.html", form=form, talk=talk)
 
 
 @app.route("/anonymize")
@@ -126,16 +127,17 @@ def anonymize_talk(talk_id: int) -> Response:
         talk.anonymized_outline = form.outline.data
         talk.is_anonymized = True
         talk.has_anonymization_changes = (
-            talk.anonymized_title != talk.title or
-            talk.anonymized_description != talk.description or
-            talk.anonymized_outline != talk.outline
+            talk.anonymized_title != talk.title
+            or talk.anonymized_description != talk.description
+            or talk.anonymized_outline != talk.outline
         )
         db.session.add(talk)
         db.session.commit()
 
         db.session.refresh(talk)
         speakers = [
-            talk_speaker.user for talk_speaker in talk.speakers
+            talk_speaker.user
+            for talk_speaker in talk.speakers
             if talk_speaker.state == InvitationStatus.CONFIRMED
         ]
 
@@ -150,26 +152,17 @@ def anonymize_talk(talk_id: int) -> Response:
         if request.form.get("save-and-next"):
             return redirect(url_for("manage.anonymize_talks"))
         else:
-            return redirect(url_for(
-                "manage.preview_anonymized_talk",
-                talk_id=talk.talk_id,
-            ))
+            return redirect(
+                url_for("manage.preview_anonymized_talk", talk_id=talk.talk_id)
+            )
 
-    return render_template(
-        "manage/anonymize_talk.html",
-        form=form,
-        talk=talk,
-    )
+    return render_template("manage/anonymize_talk.html", form=form, talk=talk)
 
 
 @app.route("/anonymize/<int:talk_id>/preview")
 def preview_anonymized_talk(talk_id: int) -> Response:
     talk = Talk.query.get_or_404(talk_id)
-    return render_template(
-        "anonymized_talk_preview.html",
-        talk=talk,
-        mode="admin",
-    )
+    return render_template("anonymized_talk_preview.html", talk=talk, mode="admin")
 
 
 class AuthMixin:
@@ -184,10 +177,7 @@ class AdminDashboard(AuthMixin, AdminIndexView):
     @expose()
     def index(self) -> Response:
         views = [v for v in flask_admin._views if isinstance(v, ModelView)]
-        return self.render(
-            "admin/index.html",
-            views=views,
-        )
+        return self.render("admin/index.html", views=views)
 
 
 class ModelView(AuthMixin, sqla.ModelView):
@@ -209,14 +199,13 @@ flask_admin = Admin(
     url="/manage/db",
 )
 flask_admin.add_view(ModelView(Conference, db.session))
-flask_admin.add_view(ModelView(Talk, db.session, include=(
-    "state",
-    "title",
-    "categories",
-    "is_anonymized",
-    "created",
-    "updated",
-)))
+flask_admin.add_view(
+    ModelView(
+        Talk,
+        db.session,
+        include=("state", "title", "categories", "is_anonymized", "created", "updated"),
+    )
+)
 flask_admin.add_view(ModelView(Category, db.session))
 flask_admin.add_view(ModelView(User, db.session))
-flask_admin.add_view(ModelView(DemographicSurvey, db.session, exclude=("user", )))
+flask_admin.add_view(ModelView(DemographicSurvey, db.session, exclude=("user",)))

@@ -38,7 +38,6 @@ from yakbak.view_helpers import (
     requires_proposal_editing_window_open,
 )
 
-
 app = Blueprint("views", __name__)
 logger = logging.getLogger("views")
 
@@ -75,9 +74,7 @@ def email_magic_link() -> Response:
     if form.validate_on_submit():
         token, expiry = get_magic_link_token_and_expiry(form.email.data)
         url = url_for(
-            "views.email_magic_link_login",
-            magic_link_token=token,
-            _external=True,
+            "views.email_magic_link_login", magic_link_token=token, _external=True
         )
         mail.send_mail(
             to=[form.email.data],
@@ -104,8 +101,7 @@ def email_magic_link_login(magic_link_token: str) -> Response:
         # race condition, UsedMagicLink row exists
         db.session.rollback()
         return current_app.response_class(
-            render_template("email_magic_link_used.html"),
-            status=401,
+            render_template("email_magic_link_used.html"), status=401
         )
 
     verified_email = parse_magic_link_token(magic_link_token)
@@ -142,10 +138,7 @@ def user_profile() -> Response:
 @app.route("/talks")
 @login_required
 def talks_list() -> Response:
-    talks = [
-        ts.talk for ts in g.user.talks
-        if ts.state == InvitationStatus.CONFIRMED
-    ]
+    talks = [ts.talk for ts in g.user.talks if ts.state == InvitationStatus.CONFIRMED]
     proposed_talks = [t for t in talks if t.state == TalkStatus.PROPOSED]
     withdrawn_talks = [t for t in talks if t.state == TalkStatus.WITHDRAWN]
 
@@ -159,17 +152,11 @@ def talks_list() -> Response:
             ("Reject", "danger", "views.reject_invite"),
             ("Accept", "primary", "views.accept_invite"),
         ],
-        InvitationStatus.REJECTED: [
-            ("Accept", "primary", "views.accept_invite"),
-        ],
+        InvitationStatus.REJECTED: [("Accept", "primary", "views.accept_invite")],
     }
     talk_actions = {
-        TalkStatus.PROPOSED: [
-            ("Withdraw", "danger", "views.withdraw_proposal"),
-        ],
-        TalkStatus.WITHDRAWN: [
-            ("Re-Submit", "primary", "views.resubmit_proposal"),
-        ],
+        TalkStatus.PROPOSED: [("Withdraw", "danger", "views.withdraw_proposal")],
+        TalkStatus.WITHDRAWN: [("Re-Submit", "primary", "views.resubmit_proposal")],
     }
     prompt_for_survey = proposed_talks and not g.user.demographic_survey
     prompt_for_bio = proposed_talks and not g.user.speaker_bio
@@ -265,20 +252,11 @@ def edit_speakers(talk_id: int) -> Response:
         except IntegrityError:
             db.session.rollback()
 
-        mail.send_mail(
-            to=[email],
-            template="email/speaker-invite",
-            talk=talk,
-        )
+        mail.send_mail(to=[email], template="email/speaker-invite", talk=talk)
 
         return redirect(url_for("views.edit_speakers", talk_id=talk.talk_id))
 
-    return render_template(
-        "edit_speakers.html",
-        talk=talk,
-        actions=actions,
-        form=form,
-    )
+    return render_template("edit_speakers.html", talk=talk, actions=actions, form=form)
 
 
 @app.route("/talks/<int:talk_id>/speakers/uninvite/<int:user_id>")
@@ -288,8 +266,7 @@ def uninvite_speaker(talk_id: int, user_id: int) -> Response:
     user = User.query.get_or_404(user_id)
 
     ts = TalkSpeaker.query.filter_by(
-        talk_id=talk.talk_id,
-        user_id=user.user_id,
+        talk_id=talk.talk_id, user_id=user.user_id
     ).one_or_none()
     if not ts:
         abort(404)
@@ -308,8 +285,7 @@ def reinvite_speaker(talk_id: int, user_id: int) -> Response:
     user = User.query.get_or_404(user_id)
 
     ts = TalkSpeaker.query.filter_by(
-        talk_id=talk.talk_id,
-        user_id=user.user_id,
+        talk_id=talk.talk_id, user_id=user.user_id
     ).one_or_none()
     if not ts:
         abort(404)
@@ -325,8 +301,7 @@ def reinvite_speaker(talk_id: int, user_id: int) -> Response:
 @login_required
 def accept_invite(talk_id: int) -> Response:
     ts = TalkSpeaker.query.filter(
-        TalkSpeaker.talk_id == talk_id,
-        TalkSpeaker.user == g.user,
+        TalkSpeaker.talk_id == talk_id, TalkSpeaker.user == g.user
     ).one_or_none()
     if not ts:
         abort(401)
@@ -341,8 +316,7 @@ def accept_invite(talk_id: int) -> Response:
 @login_required
 def reject_invite(talk_id: int) -> Response:
     ts = TalkSpeaker.query.filter(
-        TalkSpeaker.talk_id == talk_id,
-        TalkSpeaker.user == g.user,
+        TalkSpeaker.talk_id == talk_id, TalkSpeaker.user == g.user
     ).one_or_none()
     if not ts:
         abort(401)

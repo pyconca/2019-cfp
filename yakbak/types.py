@@ -10,9 +10,6 @@ class Application(Flask):
 
     """
 
-    def __init__(
-        self,
-        settings: Settings,
-    ) -> None:
+    def __init__(self, settings: Settings) -> None:
         super(Application, self).__init__("yakbak")
         self.settings = settings

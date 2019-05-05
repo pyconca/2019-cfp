@@ -1,10 +1,10 @@
 from typing import Any, Dict, List, Optional, Tuple
 
 from attr import attrib, attrs
-from flask import current_app, render_template as flask_render_template
+from flask import current_app
+from flask import render_template as flask_render_template
 from flask_mail import Mail
 import frontmatter
-
 
 mail = Mail()
 
@@ -36,9 +36,4 @@ def send_mail(to: List[str], template: str, **kwargs: Any) -> None:
     meta, body = render_template(template, **kwargs)
     sender = meta.sender or current_app.settings.smtp.sender
     with mail.connect() as conn:
-        conn.send_message(
-            subject=meta.subject,
-            sender=sender,
-            recipients=to,
-            body=body,
-        )
+        conn.send_message(subject=meta.subject, sender=sender, recipients=to, body=body)

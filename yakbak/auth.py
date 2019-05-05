@@ -7,7 +7,6 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from yakbak.models import User
 
-
 login_manager = LoginManager()
 login_manager.login_view = "views.login"
 
@@ -62,11 +61,12 @@ def get_magic_link_token_and_expiry(email: str) -> Tuple[str, str]:
 
 def parse_magic_link_token(token: str) -> Optional[str]:
     """
-    Try to validate the signature and return the email from a email magic link ``token``.
+    Try to validate the signature and return the email from a email
+    magic link ``token``.
 
-    Returns the email address contained in the token if the signature is valid, the
-    message hasn't been tampered with, and the signature hasn't expired. Returns ``None``
-    in all other cases.
+    Returns the email address contained in the token if the signature is
+    valid, the message hasn't been tampered with, and the signature
+    hasn't expired. Returns ``None`` in all other cases.
 
     """
     serializer = get_magic_link_serializer()

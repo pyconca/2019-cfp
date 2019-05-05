@@ -31,7 +31,6 @@ from sqlalchemy.orm import Query, synonym
 from sqlalchemy.types import Enum, JSON
 from sqlalchemy_postgresql_json import JSONMutableList
 
-
 db = SQLAlchemy()
 logger = logging.getLogger("models")
 
@@ -69,8 +68,7 @@ class Conference(db.Model):  # type: ignore
     informal_name: str = db.Column(db.String(256), nullable=False)
 
     talk_lengths: List[int] = db.Column(
-        JSONMutableList.as_mutable(JSON),
-        nullable=False,
+        JSONMutableList.as_mutable(JSON), nullable=False
     )
 
     recording_release_url: str = db.Column(db.String(1024), nullable=False)
@@ -86,7 +84,8 @@ class Conference(db.Model):  # type: ignore
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
-        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     __table_args__ = (
         CheckConstraint(
@@ -124,15 +123,13 @@ class User(db.Model):  # type: ignore
     speaker_bio: str = db.Column(db.Text, nullable=True)
 
     site_admin: bool = db.Column(
-        db.Boolean,
-        default=False,
-        server_default="false",
-        nullable=False,
+        db.Boolean, default=False, server_default="false", nullable=False
     )
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
-        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     # Flask-Social-Auth compatibility
     id: int = synonym("user_id")
@@ -165,7 +162,8 @@ class User(db.Model):  # type: ignore
 class TalkCategory(db.Model):  # type: ignore
     talk_id = db.Column(db.Integer, db.ForeignKey("talk.talk_id"), primary_key=True)
     category_id = db.Column(
-        db.Integer, db.ForeignKey("category.category_id"), primary_key=True)
+        db.Integer, db.ForeignKey("category.category_id"), primary_key=True
+    )
 
 
 class Category(db.Model):  # type: ignore
@@ -181,7 +179,8 @@ class Category(db.Model):  # type: ignore
 class Talk(db.Model):  # type: ignore
     talk_id: int = db.Column(db.Integer, primary_key=True)
     state: TalkStatus = db.Column(
-        Enum(TalkStatus), server_default=TalkStatus.PROPOSED.name)
+        Enum(TalkStatus), server_default=TalkStatus.PROPOSED.name
+    )
 
     title: str = db.Column(db.String(512), nullable=False)
     length: int = db.Column(db.Integer, nullable=False)
@@ -192,16 +191,10 @@ class Talk(db.Model):  # type: ignore
 
     # anonymization support
     is_anonymized: bool = db.Column(
-        db.Boolean,
-        nullable=False,
-        default=False,
-        server_default="false",
+        db.Boolean, nullable=False, default=False, server_default="false"
     )
     has_anonymization_changes: bool = db.Column(
-        db.Boolean,
-        nullable=False,
-        default=False,
-        server_default="false",
+        db.Boolean, nullable=False, default=False, server_default="false"
     )
     anonymized_title: Optional[str] = db.Column(db.String(512))
     anonymized_description: Optional[str] = db.Column(db.Text)
@@ -213,7 +206,8 @@ class Talk(db.Model):  # type: ignore
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
-        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     def __str__(self) -> str:
         return self.title
@@ -250,7 +244,8 @@ class TalkSpeaker(db.Model):  # type: ignore
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
-        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
 
 class Gender(enum.Enum):
@@ -292,8 +287,7 @@ class ProgrammingExperience(enum.Enum):
 class DemographicSurvey(db.Model):  # type: ignore
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), primary_key=True)
     user = db.relationship(
-        "User",
-        backref=db.backref("demographic_survey", uselist=False),
+        "User", backref=db.backref("demographic_survey", uselist=False)
     )
 
     # These fields are multi-select fields, some with "other" options;
@@ -304,11 +298,14 @@ class DemographicSurvey(db.Model):  # type: ignore
 
     # These fields are single-select and have choices defined above
     age_group: Optional[AgeGroup] = db.Column(Enum(AgeGroup))
-    programming_experience: Optional[ProgrammingExperience] = db.Column(Enum(ProgrammingExperience))  # noqa: E501
+    programming_experience: Optional[ProgrammingExperience] = db.Column(
+        Enum(ProgrammingExperience)
+    )
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
-        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     def clear(self) -> None:
         self.gender = None
@@ -332,4 +329,5 @@ class UsedMagicLink(db.Model):  # type: ignore
     token: str = db.Column(db.String(512), primary_key=True)
 
     used_on: datetime = db.Column(
-        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )

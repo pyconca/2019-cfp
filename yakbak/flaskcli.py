@@ -11,8 +11,11 @@ from yakbak.settings import find_settings_file, load_settings_file
 
 # TODO: remove once https://github.com/python/typeshed/pull/2958 is merged
 if TYPE_CHECKING:
+
     class DateTime:
         pass
+
+
 else:
     from click.types import DateTime
 
@@ -28,12 +31,14 @@ def sync_db() -> None:
 
     from alembic.config import Config
     from alembic import command
+
     alembic_cfg = Config(alembic_ini)
     command.upgrade(alembic_cfg, "head")
 
     # Social-Auth needs to have the User model already in existence,
     # so do this second to creating the yakbak-specific models
     from social_flask_sqlalchemy import models
+
     models.PSABase.metadata.create_all(db.engine)
 
 
@@ -84,7 +89,5 @@ def add_conference(
 def clean_magic_links(older_than_days: str) -> None:
     now = datetime.utcnow()
     threshold = now - timedelta(days=int(older_than_days))
-    UsedMagicLink.query.filter(
-        UsedMagicLink.used_on <= threshold,
-    ).delete()
+    UsedMagicLink.query.filter(UsedMagicLink.used_on <= threshold).delete()
     db.session.commit()

@@ -14,13 +14,9 @@ from wtforms.fields import (
     SelectMultipleField,
     StringField,
 )
-from wtforms.validators import (
-    DataRequired,
-    Email,
-    NoneOf,
-    Optional as OptionalValidator,
-    ValidationError,
-)
+from wtforms.validators import DataRequired, Email, NoneOf
+from wtforms.validators import Optional as OptionalValidator
+from wtforms.validators import ValidationError
 from wtforms.widgets import html_params
 from wtforms_alchemy import model_form_factory
 
@@ -35,7 +31,6 @@ from yakbak.models import (
     User,
 )
 
-
 ModelForm = model_form_factory(FlaskForm)  # type: FlaskForm
 
 
@@ -47,11 +42,11 @@ class TalkLengthChoices:
     pre-define the choices in the way WTF usually wants for a select field,
     so we use this trickery instead.
     """
+
     def __iter__(self) -> Iterable[Tuple[int, str]]:
-        return iter([
-            (length, f"{length} Minutes")
-            for length in g.conference.talk_lengths
-        ])
+        return iter(
+            [(length, f"{length} Minutes") for length in g.conference.talk_lengths]
+        )
 
 
 class TalkForm(ModelForm):
@@ -59,12 +54,11 @@ class TalkForm(ModelForm):
         model = Talk
 
     length = SelectField(
-        coerce=int,
-        choices=TalkLengthChoices(),
-        validators=[DataRequired()],
+        coerce=int, choices=TalkLengthChoices(), validators=[DataRequired()]
     )
 
-    outline_placeholder = textwrap.dedent("""
+    outline_placeholder = textwrap.dedent(
+        """
         It's nice to:
 
         * Format bullet points, using Markdown
@@ -73,7 +67,8 @@ class TalkForm(ModelForm):
             * It is nicely formatted for reviewers
 
         Note that you must indent each level of bullet points by exactly 4 spaces.
-    """.strip("\n"))
+    """
+    ).lstrip("\n")
 
     def validate_outline(self, field: Field) -> None:
         clean_data = field.data.replace("\r", "").strip()
@@ -92,16 +87,12 @@ class EmailAddressForm(FlaskForm):
 
 
 class SpeakerEmailForm(EmailAddressForm):
-
     def __init__(self, excluded_emails: Iterable[str]) -> None:
         self.excluded_emails = excluded_emails
         super().__init__()
 
     def validate_email(self, field: Field) -> None:
-        validator = NoneOf(
-            self.excluded_emails,
-            message="Already a speaker",
-        )
+        validator = NoneOf(self.excluded_emails, message="Already a speaker")
         validator(self, field)
 
 
@@ -109,7 +100,9 @@ class PastSpeaking(enum.Enum):
     NEVER = "I have never spoken at a conference before"
     PYGOTHAM = "I have spoken at PyGotham in the past"
     OTHER_PYTHON = "I have spoken at another Python-related conference in the past"
-    OTHER_NONPYTHON = "I have spoken at another non-Python-related conference in the past"
+    OTHER_NONPYTHON = (
+        "I have spoken at another non-Python-related conference in the past"
+    )
 
 
 FormChoices = Iterable[Tuple[str, str]]
@@ -128,7 +121,9 @@ def select_multi_checkbox(field: Field, **kwargs: Any) -> str:
             continue
 
         field_id = f"{field.id}-{value}"
-        options = dict(kwargs, type="checkbox", name=field.name, value=value, id=field_id)
+        options = dict(
+            kwargs, type="checkbox", name=field.name, value=value, id=field_id
+        )
         if value in (field.data or ()):
             options["checked"] = "checked"
         html.append("<li><input %s /> " % html_params(**options))
@@ -141,11 +136,7 @@ def select_multi_checkbox(field: Field, **kwargs: Any) -> str:
         other_value = other_value[0] if other_value else ""
         other_id = f"{field_id}-{value}"
         options = dict(
-            kwargs,
-            type="text",
-            name=field.name,
-            value=other_value,
-            id=other_id,
+            kwargs, type="text", name=field.name, value=other_value, id=other_id
         )
         html.append(f'<li class="other"><label for="{field_id}">{label}:</label> ')
         html.append("<input %s /></li>" % html_params(**options))
@@ -156,11 +147,7 @@ def select_multi_checkbox(field: Field, **kwargs: Any) -> str:
 
 class SelectMultipleOrOtherField(SelectMultipleField):
     def __init__(self, choices: FormChoices, **kwargs: Any):
-        super().__init__(
-            choices=choices,
-            widget=select_multi_checkbox,
-            **kwargs,
-        )
+        super().__init__(choices=choices, widget=select_multi_checkbox, **kwargs)
 
     def process_formdata(self, valuelist: List[Any]) -> None:
         # no validation, the value will go in "other"
@@ -177,9 +164,7 @@ class DemographicSurveyForm(FlaskForm):
     past_speaking = SelectMultipleOrOtherField(choices=enum_choices(PastSpeaking))
 
     age_group = RadioField(
-        "age_group",
-        choices=enum_choices(AgeGroup),
-        validators=[OptionalValidator()],
+        "age_group", choices=enum_choices(AgeGroup), validators=[OptionalValidator()]
     )
     programming_experience = RadioField(
         "programming_experience",
@@ -191,8 +176,7 @@ class DemographicSurveyForm(FlaskForm):
         # make a fake obj to pass in that adapts the enum values to their
         # names which the select fields are more happy to work with
         data = dict(
-            (col.name, getattr(obj, col.name, None))
-            for col in obj.__table__.columns
+            (col.name, getattr(obj, col.name, None)) for col in obj.__table__.columns
         )
         if data["age_group"]:
             data["age_group"] = data["age_group"].name
@@ -225,7 +209,9 @@ class DemographicSurveyForm(FlaskForm):
             if self.programming_experience.data == "None":
                 obj.programming_experience = None
             else:
-                obj.programming_experience = ProgrammingExperience[self.programming_experience.data]  # noqa: E501
+                obj.programming_experience = ProgrammingExperience[
+                    self.programming_experience.data
+                ]
 
 
 class CategoryChoices:
@@ -236,18 +222,19 @@ class CategoryChoices:
     pre-define the choices in the way WTF usually wants for a select field,
     so we use this trickery instead.
     """
+
     def __iter__(self) -> Iterable[Tuple[int, str]]:
-        return iter([
-            (category.category_id, category.name)
-            for category in Category.query.order_by(Category.name).all()
-        ])
+        return iter(
+            [
+                (category.category_id, category.name)
+                for category in Category.query.order_by(Category.name).all()
+            ]
+        )
 
 
 class CategorizeForm(FlaskForm):
     category_ids = SelectMultipleField(
-        coerce=int,
-        choices=CategoryChoices(),
-        widget=select_multi_checkbox,
+        coerce=int, choices=CategoryChoices(), widget=select_multi_checkbox
     )
 
     def validate_category_ids(self, field: Field) -> None:
