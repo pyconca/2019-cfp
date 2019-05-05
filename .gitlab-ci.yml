@@ -23,7 +23,7 @@ docker:
   script:
     - docker build .
   retry:
-    - max: 1
-    - when:
-        - runner_system_failure
-        - stuck_or_timeout_failure
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
