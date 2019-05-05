@@ -178,4 +178,4 @@ def set_up_handlers(app: Application) -> None:
     @app.before_request
     def load_conference() -> None:
         # TODO: load by URL or something
-        g.conference = Conference.query.one()
+        g.conference = Conference.query.order_by(Conference.created).first()
