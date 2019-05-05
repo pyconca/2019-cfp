@@ -115,7 +115,7 @@
       {% if field.data %}
       {{ macros.render_field(field) }}
       {% else %}
-      {{ macros.render_field(field, "It's nice to:\n\n* Format bullet points, using Markdown\n* So that\n  * You can write it easily, and\n  * It is nicely formatted for reviewers") }}
+      {{ macros.render_field(field, "It's nice to:\n\n* Format bullet points, using Markdown\n* So that\n    * You can write it easily, and\n    * It is nicely formatted for reviewers\n\nNote that you must indent each level of bullet points by exactly 4 spaces.") }}
       {% endif %}
       {{ macros.render_error(field) }}
     </div>
