@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 import os.path
 
 import click
@@ -34,12 +35,20 @@ def sync_db() -> None:
 @click.argument("talk_lengths")
 @click.argument("recording_release_url")
 @click.argument("cfp_email")
+@click.option("--proposals-begin", type=click.DateTime(), help="interpreted as UTC")
+@click.option("--proposals-end", type=click.DateTime(), help="interpreted as UTC")
+@click.option("--voting-begin", type=click.DateTime(), help="interpreted as UTC")
+@click.option("--voting-end", type=click.DateTime(), help="interpreted as UTC")
 def add_conference(
     full_name: str,
     informal_name: str,
     talk_lengths: str,
     recording_release_url: str,
     cfp_email: str,
+    proposals_begin: Optional[datetime],
+    proposals_end: Optional[datetime],
+    voting_begin: Optional[datetime],
+    voting_end: Optional[datetime],
 ) -> None:
     lengths = [int(l) for l in talk_lengths.split(",")]
     conf = Conference(
@@ -48,6 +57,10 @@ def add_conference(
         talk_lengths=lengths,
         recording_release_url=recording_release_url,
         cfp_email=cfp_email,
+        proposals_begin=proposals_begin,
+        proposals_end=proposals_end,
+        voting_begin=voting_begin,
+        voting_end=voting_end,
     )
     db.session.add(conf)
     db.session.commit()
