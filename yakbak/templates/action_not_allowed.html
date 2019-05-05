@@ -3,21 +3,21 @@
 {% block container %}
 <div class="row">
   <div class="col">
-    {% if phase == "allow_new_talks" or phase == "allow_talk_edits" %}
+    {% if action == "create_proposal" or action == "edit_proposal" %}
     <h2>{{ g.conference.informal_name }} CFP is Over</h2>
     <p>
     Unfortunately, the {{ g.conference.informal_name }} call for proposals
     is over. We appreciate your interest, but we cannot accept new proposals
     at this time.
     </p>
-    {% if phase == "allow_talk_edits" %}
+    {% if action == "edit_proposal" %}
     <p>
     Additionally, talk editing is disabled at this time while we review
     talks for selection in {{ g.conference.informal_name }}.
     </p>
     {% endif %}
     {% endif %}
-    {% if phase == "allow_voting" %}
+    {% if action == "vote" %}
     <h2>{{ g.conference.informal_name }} Voting has Ended</h2>
     <p>
     Unfortunately, voting on proposals for {{ g.conference.informal_name }} has

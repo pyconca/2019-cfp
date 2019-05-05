@@ -24,6 +24,7 @@ from typing import List, Optional
 import enum
 import logging
 
+from attr import attrs, attrib
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Query, synonym
 from sqlalchemy.types import Enum, JSON
@@ -64,28 +65,37 @@ class Conference(db.Model):  # type: ignore
     recording_release_url: str = db.Column(db.String(1024), nullable=False)
     cfp_email: str = db.Column(db.String(256), nullable=False)
 
-    allow_new_talks: bool = db.Column(
-        db.Boolean,
-        default=True,
-        server_default="true",
-        nullable=True,
-    )
-    allow_talk_edits: bool = db.Column(
-        db.Boolean,
-        default=True,
-        server_default="true",
-        nullable=True,
-    )
-    allow_voting: bool = db.Column(
-        db.Boolean,
-        default=False,
-        server_default="false",
-        nullable=False,
-    )
+    # Proposals window -- populate with naive datetimes in UTC
+    proposals_begin: datetime = db.Column(db.DateTime)
+    proposals_end: datetime = db.Column(db.DateTime)
+
+    # Voting window -- populate with naive datetimes in UTC
+    voting_begin: datetime = db.Column(db.DateTime)
+    voting_end: datetime = db.Column(db.DateTime)
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    @attrs
+    class Window:
+        start: Optional[datetime] = attrib()
+        end: Optional[datetime] = attrib()
+
+        def includes_now(self) -> bool:
+            now = datetime.utcnow()
+            return self.start <= now <= self.end
+
+        def __bool__(self) -> bool:
+            return bool(self.start and self.end)
+
+    @property
+    def proposal_window(self) -> Window:
+        return Conference.Window(self.proposals_begin, self.proposals_end)
+
+    @property
+    def voting_window(self) -> Window:
+        return Conference.Window(self.voting_begin, self.voting_end)
 
 
 class User(db.Model):  # type: ignore

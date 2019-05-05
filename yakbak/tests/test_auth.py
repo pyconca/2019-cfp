@@ -1,10 +1,12 @@
+from datetime import datetime, timedelta
+
 from werkzeug.test import Client
 import mock
 import pytest
 
 from yakbak import auth
-from yakbak.models import Conference, db, User
-from yakbak.tests.util import assert_html_response
+from yakbak.models import Conference, db, InvitationStatus, Talk, User
+from yakbak.tests.util import assert_html_response, extract_csrf_from
 
 
 @pytest.mark.parametrize("length, expected", [
@@ -64,12 +66,78 @@ def test_parse_magic_link_token_is_none_for_expired_tokens() -> None:
         assert email is None
 
 
-def test_require_cfp_phase(user: User, client: Client) -> None:
+def test_talk_creation_allowed_when_no_window(user: User, client: Client) -> None:
+    # this behavior is needed for backwards compatibility as we add
+    # the fields for the first time to the Conference object
     conf = Conference.query.get(1)
-    conf.allow_new_talks = False
+    conf.proposals_begin = None
+    conf.proposals_end = None
     db.session.add(conf)
     db.session.commit()
 
     client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
     resp = client.get("/talks/new")
+    assert_html_response(resp, status=200)
+
+
+def test_talk_creation_only_allowed_in_window(user: User, client: Client) -> None:
+    conf = Conference.query.get(1)
+    conf.proposals_begin = datetime.utcnow() - timedelta(days=1)
+    conf.proposals_end = datetime.utcnow() + timedelta(days=1)
+    db.session.add(conf)
+    db.session.commit()
+
+    client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
+    resp = client.get("/talks/new")
+    assert_html_response(resp, status=200)
+
+    conf = Conference.query.get(1)
+    conf.proposals_begin = datetime.utcnow() - timedelta(days=3)
+    conf.proposals_end = datetime.utcnow() - timedelta(days=1)
+    db.session.add(conf)
+    db.session.commit()
+
+    resp = client.get("/talks/new")
+    assert_html_response(resp, status=400)
+
+
+def test_talk_editing_not_allowed_while_voting(user: User, client: Client) -> None:
+    conf = Conference.query.get(1)
+    conf.voting_begin = datetime.utcnow() - timedelta(days=1)
+    conf.voting_end = datetime.utcnow() + timedelta(days=1)
+    db.session.add(conf)
+
+    talk = Talk(title="My Talk", length=25)
+    talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    db.session.add(talk)
+    db.session.commit()
+
+    db.session.refresh(talk)
+    client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
+    resp = client.get(f"/talks/{talk.talk_id}")
+    assert_html_response(resp, status=200)
+
+    postdata = {"csrf_token": extract_csrf_from(resp)}
+    resp = client.post(f"/talks/{talk.talk_id}", data=postdata)
+    assert_html_response(resp, status=400)
+
+
+def test_talk_editing_not_allowed_outside_proposal_window(user: User, client: Client) -> None:  # noqa: E501
+    conf = Conference.query.get(1)
+    conf.proposals_begin = datetime.utcnow() - timedelta(days=3)
+    conf.proposals_end = datetime.utcnow() - timedelta(days=1)
+    db.session.add(conf)
+
+    talk = Talk(title="My Talk", length=25)
+    talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    db.session.add(talk)
+    db.session.commit()
+
+    db.session.refresh(talk)
+    client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
+    resp = client.get(f"/talks/{talk.talk_id}")
+    assert_html_response(resp, status=200)
+
+    postdata = {"csrf_token": extract_csrf_from(resp)}
+    resp = client.post(f"/talks/{talk.talk_id}", data=postdata)
     assert_html_response(resp, status=400)

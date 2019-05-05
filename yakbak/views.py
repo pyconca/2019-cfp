@@ -33,7 +33,10 @@ from yakbak.models import (
     UsedMagicLink,
     User,
 )
-from yakbak.view_helpers import require_cfp_phase
+from yakbak.view_helpers import (
+    if_creating_proposals_allowed,
+    if_editing_proposals_allowed,
+)
 
 
 app = Blueprint("views", __name__)
@@ -185,7 +188,7 @@ def talks_list() -> Response:
 
 
 @app.route("/talks/<int:talk_id>", methods=["GET", "POST"])
-@require_cfp_phase("allow_talk_edits")
+@if_editing_proposals_allowed
 @login_required
 def edit_talk(talk_id: int) -> Response:
     talk = load_talk(talk_id)
@@ -233,7 +236,7 @@ def resubmit_proposal(talk_id: int) -> Response:
 
 
 @app.route("/talks/<int:talk_id>/speakers", methods=["GET", "POST"])
-@require_cfp_phase("allow_talk_edits")
+@if_editing_proposals_allowed
 @login_required
 def edit_speakers(talk_id: int) -> Response:
     talk = load_talk(talk_id)
@@ -358,7 +361,7 @@ def preview_talk(talk_id: int) -> Response:
 
 
 @app.route("/talks/new", methods=["GET", "POST"])
-@require_cfp_phase("allow_new_talks", methods=["GET", "POST"])
+@if_creating_proposals_allowed
 @login_required
 def create_talk() -> Response:
     talk = Talk()
