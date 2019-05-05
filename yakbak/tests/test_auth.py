@@ -1,7 +1,10 @@
+from werkzeug.test import Client
 import mock
 import pytest
 
 from yakbak import auth
+from yakbak.models import Conference, db, User
+from yakbak.tests.util import assert_html_response
 
 
 @pytest.mark.parametrize("length, expected", [
@@ -59,3 +62,14 @@ def test_parse_magic_link_token_is_none_for_expired_tokens() -> None:
         email = auth.parse_magic_link_token(token)
 
         assert email is None
+
+
+def test_require_cfp_phase(user: User, client: Client) -> None:
+    conf = Conference.query.get(1)
+    conf.allow_new_talks = False
+    db.session.add(conf)
+    db.session.commit()
+
+    client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
+    resp = client.get("/talks/new")
+    assert_html_response(resp, status=400)

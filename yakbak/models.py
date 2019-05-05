@@ -64,6 +64,25 @@ class Conference(db.Model):  # type: ignore
     recording_release_url: str = db.Column(db.String(1024), nullable=False)
     cfp_email: str = db.Column(db.String(256), nullable=False)
 
+    allow_new_talks: bool = db.Column(
+        db.Boolean,
+        default=True,
+        server_default="true",
+        nullable=True,
+    )
+    allow_talk_edits: bool = db.Column(
+        db.Boolean,
+        default=True,
+        server_default="true",
+        nullable=True,
+    )
+    allow_voting: bool = db.Column(
+        db.Boolean,
+        default=False,
+        server_default="false",
+        nullable=False,
+    )
+
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)

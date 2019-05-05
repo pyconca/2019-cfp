@@ -1,9 +1,11 @@
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Tuple
+from functools import wraps
+from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
 
-from flask import Blueprint, current_app, g, Markup, request, url_for
+from flask import Blueprint, current_app, g, Markup, render_template, request, url_for
 from flask_login import current_user
 from markdown import markdown
+from werkzeug.wrappers import Response
 import diff_match_patch
 
 from yakbak.diff import diff_wordsToChars
@@ -11,6 +13,7 @@ from yakbak.models import Talk
 
 
 app = Blueprint("view_helpers", __name__)
+ViewResponse = Union[Response, Tuple[Response, int]]
 
 
 @app.app_context_processor
@@ -57,6 +60,17 @@ def set_user_in_templates() -> Dict[str, Any]:
 @app.before_app_request
 def set_current_user_on_g() -> None:
     g.user = current_user
+
+
+def require_cfp_phase(phase: str, methods: Iterable[str] = ("POST",)) -> Callable:
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
+            if not getattr(g.conference, phase) and request.method in methods:
+                return render_template("phase_not_allowed.html", phase=phase), 400
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 @app.app_template_filter("timesince")
