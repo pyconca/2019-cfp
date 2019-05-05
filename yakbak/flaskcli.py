@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import os.path
+import sys
 
 import click
 
@@ -41,6 +42,11 @@ def add_conference(
     recording_release_url: str,
     cfp_email: str,
 ) -> None:
+    # TODO: Remove this check once multiple conferences are supported.
+    if db.session.query(Conference.exists()).scalar():
+        print("WARNING: Adding a second conference is not supported at this time.")
+        sys.exit(1)
+
     lengths = [int(l) for l in talk_lengths.split(",")]
     conf = Conference(
         full_name=full_name,
