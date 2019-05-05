@@ -1,4 +1,5 @@
 from typing import Any, Iterable, List, Optional, Tuple
+import textwrap
 import enum
 
 from bunch import Bunch
@@ -62,6 +63,22 @@ class TalkForm(ModelForm):
         choices=TalkLengthChoices(),
         validators=[DataRequired()],
     )
+
+    outline_placeholder = textwrap.dedent("""
+        It's nice to:
+
+        * Format bullet points, using Markdown
+        * So that
+            * You can write it easily, and
+            * It is nicely formatted for reviewers
+
+        Note that you must indent each level of bullet points by exactly 4 spaces.
+    """.strip("\n"))
+
+    def validate_outline(self, field: Field) -> None:
+        clean_data = field.data.replace("\r", "").strip()
+        if clean_data == self.outline_placeholder:
+            field.data = ""
 
 
 class UserForm(ModelForm):
