@@ -357,7 +357,7 @@ def preview_talk(talk_id: int) -> Response:
 @app.route("/talks/new", methods=["GET", "POST"])
 @login_required
 def create_talk() -> Response:
-    talk = Talk()
+    talk = Talk(accepted_recording_release=True)
     talk.add_speaker(g.user, InvitationStatus.CONFIRMED)
     form = TalkForm(conference=g.conference, obj=talk)
     if form.validate_on_submit():
