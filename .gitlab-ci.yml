@@ -34,6 +34,11 @@ docker:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_REGISTRY_IMAGE:ci || true
     - docker build --cache-from $CI_REGISTRY_IMAGE:ci .
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
 
 docker_ci:
   stage: build
@@ -47,3 +52,8 @@ docker_ci:
     - docker pull $CI_REGISTRY_IMAGE:ci || true
     - docker build --cache-from $CI_REGISTRY_IMAGE:ci --tag $CI_REGISTRY_IMAGE:ci .
     - docker push $CI_REGISTRY_IMAGE:ci
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
