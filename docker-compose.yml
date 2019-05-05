@@ -10,6 +10,7 @@ services:
     - smtp
     volumes:
     - ./yakbak.toml-compose:/code/yakbak.toml
+    - ./yakbak:/code/yakbak
   db:
     image: "postgres:10-alpine"
     volumes:

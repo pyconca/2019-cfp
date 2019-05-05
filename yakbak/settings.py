@@ -105,6 +105,7 @@ class SMTPSettings:
     host: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
     port: Optional[int] = attrib(validator=optional(instance_of(int)), default=None)
     username: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
+    use_tls: bool = attrib(default=True)
     password: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
     sender: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
 
