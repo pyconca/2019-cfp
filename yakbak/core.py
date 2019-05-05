@@ -163,7 +163,7 @@ def set_up_mail(app: Application) -> None:
     app.config["MAIL_USERNAME"] = app.settings.smtp.username
     app.config["MAIL_PASSWORD"] = app.settings.smtp.password
     app.config["MAIL_DEFAULT_SENDER"] = app.settings.smtp.sender
-    app.config["MAIL_USE_TLS"] = True
+    app.config["MAIL_USE_TLS"] = app.settings.smtp.use_tls
     app.config["MAIL_MAX_EMAILS"] = 10  # guess
 
     mail.init_app(app)
@@ -178,4 +178,4 @@ def set_up_handlers(app: Application) -> None:
     @app.before_request
     def load_conference() -> None:
         # TODO: load by URL or something
-        g.conference = Conference.query.one()
+        g.conference = Conference.query.order_by(Conference.created).first()

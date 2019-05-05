@@ -1,27 +1,57 @@
+stages:
+  - test
+  - build
+
 py37:
+  stage: test
   image: python:3.7-slim
   script:
     - python3.7 -m pip install tox
     - tox -r -e py37
 
 style:
+  stage: test
   image: python:3.7-slim
   script:
     - python3.7 -m pip install tox
     - tox -r -e style
 
 mypy:
+  stage: test
   image: python:3.7-slim
   script:
     - python3.7 -m pip install tox
     - tox -r -e mypy
 
 docker:
+  stage: build
+  except:
+    - master
   image: docker:git
   services:
     - docker:dind
   script:
-    - docker build .
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_REGISTRY_IMAGE:ci || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:ci .
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+
+docker_ci:
+  stage: build
+  image: docker:git
+  only:
+    - master@bigapplepy/yak-bak
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_REGISTRY_IMAGE:ci || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:ci --tag $CI_REGISTRY_IMAGE:ci .
+    - docker push $CI_REGISTRY_IMAGE:ci
   retry:
     max: 1
     when:

@@ -8,6 +8,7 @@ level="INFO"
 host="smtp"
 port=1025
 username=""
+use_tls=false
 password=""
 sender="Yak-Bak <yakbak@example.com>"
 
