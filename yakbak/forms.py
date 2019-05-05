@@ -1,6 +1,6 @@
 from typing import Any, Iterable, List, Optional, Tuple
-import textwrap
 import enum
+import textwrap
 
 from bunch import Bunch
 from flask import g
