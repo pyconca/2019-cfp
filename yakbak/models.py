@@ -92,12 +92,12 @@ class Conference(db.Model):  # type: ignore
         CheckConstraint(
             "(proposals_begin IS NOT NULL and proposals_end IS NOT NULL) "
             "OR (proposals_begin IS NULL AND proposals_end IS NULL)",
-            name="ck_proposals_window"
+            name="ck_proposals_window",
         ),
         CheckConstraint(
             "(voting_begin IS NOT NULL and voting_end IS NOT NULL) "
             "OR (voting_begin IS NULL AND voting_end IS NULL)",
-            name="ck_voting_window"
+            name="ck_voting_window",
         ),
     )
 
