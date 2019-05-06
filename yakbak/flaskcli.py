@@ -1,7 +1,12 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 import os.path
 
+# TODO: remove once https://github.com/python/typeshed/pull/2958 is merged
+if TYPE_CHECKING:
+    class DateTime: pass
+else:
+    from click.types import DateTime
 import click
 
 from yakbak.core import create_app
@@ -35,10 +40,10 @@ def sync_db() -> None:
 @click.argument("talk_lengths")
 @click.argument("recording_release_url")
 @click.argument("cfp_email")
-@click.option("--proposals-begin", type=click.DateTime(), help="interpreted as UTC")
-@click.option("--proposals-end", type=click.DateTime(), help="interpreted as UTC")
-@click.option("--voting-begin", type=click.DateTime(), help="interpreted as UTC")
-@click.option("--voting-end", type=click.DateTime(), help="interpreted as UTC")
+@click.option("--proposals-begin", type=DateTime(), help="interpreted as UTC")
+@click.option("--proposals-end", type=DateTime(), help="interpreted as UTC")
+@click.option("--voting-begin", type=DateTime(), help="interpreted as UTC")
+@click.option("--voting-end", type=DateTime(), help="interpreted as UTC")
 def add_conference(
     full_name: str,
     informal_name: str,
