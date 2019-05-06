@@ -3,6 +3,7 @@ from typing import Generator, Iterable
 import json
 import os.path
 
+from _pytest.fixtures import FixtureRequest
 from flask import abort, redirect
 from flask_login import login_user
 from werkzeug.test import Client
@@ -20,7 +21,7 @@ from yakbak.types import Application
 
 
 @pytest.fixture
-def app() -> Iterable[Application]:
+def app(request: FixtureRequest) -> Iterable[Application]:
     APP_CACHE.clear()
 
     here = os.path.dirname(__file__)
@@ -31,6 +32,10 @@ def app() -> Iterable[Application]:
     app = create_app(settings, flask_config)
 
     db.create_all()
+
+    @request.addfinalizer
+    def tear_down_database() -> None:
+        db.drop_all()
 
     # views will expect that there's a conference object in the DB
     conference_json = os.path.join(here, "conference.json-test")

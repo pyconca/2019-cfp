@@ -5,6 +5,12 @@ stages:
 py37:
   stage: test
   image: python:3.7-slim
+  services:
+    - postgres:10
+  variables:
+    POSTGRES_DB: yakbak
+    POSTGRES_USER: yakbak
+    POSTGRES_PASSWORD: ""
   script:
     - python3.7 -m pip install tox
     - tox -r -e py37

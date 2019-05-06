@@ -1,5 +1,5 @@
 [db]
-url="sqlite://"  # in-memory DB
+url="postgresql://yakbak@postgres:5432/yakbak"
 
 [logging]
 level="INFO"

@@ -41,10 +41,9 @@ Yak-Bak requires Python 3.6 or newer.
     You may find the `--debugger` and `--reload` flags helpful during
     development.
 
-6. Run tests with `py.test yakbak`, check style compliance with `tox -e
-   style`, check types with `tox -e mypy`, or run the full CI suite (tests,
-   style check, and type check) simply with `tox`. You can also format the code
-   with `tox -e format`, although this is not included when you run `tox`.
+6. Run tests with `py.test yakbak` (NOTE: the current settings are based on CI),
+   check style compliance with `tox -e style`, or check types with `tox -e
+   mypy`. You can also format the code with `tox -e format`.
 
 ## Development Notes
 
