@@ -34,8 +34,8 @@ from yakbak.models import (
     User,
 )
 from yakbak.view_helpers import (
-    if_creating_proposals_allowed,
-    if_editing_proposals_allowed,
+    requires_new_proposal_window_open,
+    requires_proposal_editing_window_open,
 )
 
 
@@ -188,7 +188,7 @@ def talks_list() -> Response:
 
 
 @app.route("/talks/<int:talk_id>", methods=["GET", "POST"])
-@if_editing_proposals_allowed
+@requires_proposal_editing_window_open
 @login_required
 def edit_talk(talk_id: int) -> Response:
     talk = load_talk(talk_id)
@@ -236,7 +236,7 @@ def resubmit_proposal(talk_id: int) -> Response:
 
 
 @app.route("/talks/<int:talk_id>/speakers", methods=["GET", "POST"])
-@if_editing_proposals_allowed
+@requires_proposal_editing_window_open
 @login_required
 def edit_speakers(talk_id: int) -> Response:
     talk = load_talk(talk_id)
@@ -361,7 +361,7 @@ def preview_talk(talk_id: int) -> Response:
 
 
 @app.route("/talks/new", methods=["GET", "POST"])
-@if_creating_proposals_allowed
+@requires_new_proposal_window_open
 @login_required
 def create_talk() -> Response:
     talk = Talk()

@@ -62,7 +62,7 @@ def set_current_user_on_g() -> None:
     g.user = current_user
 
 
-def if_creating_proposals_allowed(func: Callable) -> Callable:
+def requires_new_proposal_window_open(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
         window = g.conference.proposal_window
@@ -73,7 +73,7 @@ def if_creating_proposals_allowed(func: Callable) -> Callable:
     return wrapper
 
 
-def if_editing_proposals_allowed(func: Callable) -> Callable:
+def requires_proposal_editing_window_open(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
         proposal_window = g.conference.proposal_window
