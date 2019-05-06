@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block container %}
+<div class="row">
+  <div class="col">
+    {% if action == "create_proposal" or action == "edit_proposal" %}
+    <h2>{{ g.conference.informal_name }} CFP is Over</h2>
+    <p>
+    Unfortunately, the {{ g.conference.informal_name }} call for proposals
+    is over. We appreciate your interest, but we cannot accept new proposals
+    at this time.
+    </p>
+    {% if action == "edit_proposal" %}
+    <p>
+    Additionally, talk editing is disabled at this time while we review
+    talks for selection in {{ g.conference.informal_name }}.
+    </p>
+    {% endif %}
+    {% endif %}
+    {% if action == "vote" %}
+    <h2>{{ g.conference.informal_name }} Voting has Ended</h2>
+    <p>
+    Unfortunately, voting on proposals for {{ g.conference.informal_name }} has
+    ended. We appreciate the time that you have taken to vote so far. Your input
+    helps us make {{ g.conference.informal_name }} as good as it can be!
+    </p>
+    {% endif %}
+    <p>
+    <a class="btn btn-primary" href="{{ url_for("views.talks_list") }}">Back to talks list</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

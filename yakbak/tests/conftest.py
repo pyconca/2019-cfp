@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Generator, Iterable
 import json
 import os.path
@@ -40,6 +41,8 @@ def app() -> Iterable[Application]:
         conference_fields = json.load(fp)
 
     conference = Conference(**conference_fields)
+    conference.proposals_begin = datetime.utcnow() - timedelta(days=1)
+    conference.proposals_end = datetime.utcnow() + timedelta(days=1)
     db.session.add(conference)
     db.session.commit()
 

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional, TYPE_CHECKING
 import os.path
 import sys
 
@@ -7,6 +8,13 @@ import click
 from yakbak.core import create_app
 from yakbak.models import Conference, db, UsedMagicLink
 from yakbak.settings import find_settings_file, load_settings_file
+
+# TODO: remove once https://github.com/python/typeshed/pull/2958 is merged
+if TYPE_CHECKING:
+    class DateTime:
+        pass
+else:
+    from click.types import DateTime
 
 
 app = create_app(load_settings_file(find_settings_file()))
@@ -35,12 +43,20 @@ def sync_db() -> None:
 @click.argument("talk_lengths")
 @click.argument("recording_release_url")
 @click.argument("cfp_email")
+@click.option("--proposals-begin", type=DateTime(), help="interpreted as UTC")
+@click.option("--proposals-end", type=DateTime(), help="interpreted as UTC")
+@click.option("--voting-begin", type=DateTime(), help="interpreted as UTC")
+@click.option("--voting-end", type=DateTime(), help="interpreted as UTC")
 def add_conference(
     full_name: str,
     informal_name: str,
     talk_lengths: str,
     recording_release_url: str,
     cfp_email: str,
+    proposals_begin: Optional[datetime],
+    proposals_end: Optional[datetime],
+    voting_begin: Optional[datetime],
+    voting_end: Optional[datetime],
 ) -> None:
     # TODO: Remove this check once multiple conferences are supported.
     if db.session.query(Conference.exists()).scalar():
@@ -54,6 +70,10 @@ def add_conference(
         talk_lengths=lengths,
         recording_release_url=recording_release_url,
         cfp_email=cfp_email,
+        proposals_begin=proposals_begin,
+        proposals_end=proposals_end,
+        voting_begin=voting_begin,
+        voting_end=voting_end,
     )
     db.session.add(conf)
     db.session.commit()

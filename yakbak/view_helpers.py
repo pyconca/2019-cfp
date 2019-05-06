@@ -1,9 +1,11 @@
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Tuple
+from functools import wraps
+from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
 
-from flask import Blueprint, current_app, g, Markup, request, url_for
+from flask import Blueprint, current_app, g, Markup, render_template, request, url_for
 from flask_login import current_user
 from markdown import markdown
+from werkzeug.wrappers import Response
 import diff_match_patch
 
 from yakbak.diff import diff_wordsToChars
@@ -11,6 +13,7 @@ from yakbak.models import Talk
 
 
 app = Blueprint("view_helpers", __name__)
+ViewResponse = Union[Response, Tuple[Response, int]]
 
 
 @app.app_context_processor
@@ -57,6 +60,36 @@ def set_user_in_templates() -> Dict[str, Any]:
 @app.before_app_request
 def set_current_user_on_g() -> None:
     g.user = current_user
+
+
+def requires_new_proposal_window_open(func: Callable) -> Callable:
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
+        window = g.conference.proposal_window
+        if window and not window.includes_now():
+            resp = render_template("action_not_allowed.html", action="create_proposal")
+            return resp, 400
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def requires_proposal_editing_window_open(func: Callable) -> Callable:
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
+        proposal_window = g.conference.proposal_window
+        voting_window = g.conference.voting_window
+        disallowed = (
+            request.method == "POST" and (
+                (proposal_window and not proposal_window.includes_now()) or
+                (voting_window and voting_window.includes_now())
+            )
+        )
+        # TODO: allow edits to accepted talks after proposal and voting windows
+        if disallowed:
+            resp = render_template("action_not_allowed.html", action="edit_proposal")
+            return resp, 400
+        return func(*args, **kwargs)
+    return wrapper
 
 
 @app.app_template_filter("timesince")
