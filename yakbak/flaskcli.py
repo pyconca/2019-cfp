@@ -2,16 +2,18 @@ from datetime import datetime, timedelta
 from typing import Optional, TYPE_CHECKING
 import os.path
 
-# TODO: remove once https://github.com/python/typeshed/pull/2958 is merged
-if TYPE_CHECKING:
-    class DateTime: pass
-else:
-    from click.types import DateTime
 import click
 
 from yakbak.core import create_app
 from yakbak.models import Conference, db, UsedMagicLink
 from yakbak.settings import find_settings_file, load_settings_file
+
+# TODO: remove once https://github.com/python/typeshed/pull/2958 is merged
+if TYPE_CHECKING:
+    class DateTime:
+        pass
+else:
+    from click.types import DateTime
 
 
 app = create_app(load_settings_file(find_settings_file()))
