@@ -22,7 +22,9 @@ def assert_html_response(resp: Response, status: int = 200) -> str:
     return data.decode(resp.charset or "utf8")
 
 
-def assert_html_response_contains(resp: Response, *snippets: Union[str, Pattern], status: int = 200) -> None:  # noqa: E501
+def assert_html_response_contains(
+    resp: Response, *snippets: Union[str, Pattern], status: int = 200
+) -> None:
     """
     Ensure that each of the ``snippets`` is in the body of ``resp``.
 
@@ -30,12 +32,16 @@ def assert_html_response_contains(resp: Response, *snippets: Union[str, Pattern]
     content = assert_html_response(resp, status)
     for snippet in snippets:
         if isinstance(snippet, Pattern):
-            assert re.search(snippet, content), f"{snippet!r} does not match {content!r}"
+            assert re.search(
+                snippet, content
+            ), f"{snippet!r} does not match {content!r}"
         else:
             assert snippet in content
 
 
-def assert_html_response_doesnt_contain(resp: Response, *snippets: Union[str, Pattern], status: int = 200) -> None:  # noqa: E501
+def assert_html_response_doesnt_contain(
+    resp: Response, *snippets: Union[str, Pattern], status: int = 200
+) -> None:
     """
     Ensure that none of the ``snippets`` is in the body of ``resp``.
 
@@ -43,7 +49,9 @@ def assert_html_response_doesnt_contain(resp: Response, *snippets: Union[str, Pa
     content = assert_html_response(resp, status)
     for snippet in snippets:
         if isinstance(snippet, Pattern):
-            assert not re.search(snippet, content), f"{snippet!r} should not match {content!r}"  # noqa: E501
+            assert not re.search(
+                snippet, content
+            ), f"{snippet!r} should not match {content!r}"
         else:
             assert snippet not in content
 

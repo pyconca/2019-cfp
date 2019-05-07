@@ -39,18 +39,19 @@ def test_speakers_button_shows_up_on_existing_talks(client: Client, user: User) 
         resp,
         re.compile(
             '<a href="/talks/{}/speakers".*class=".*btn.*">'
-            "Manage Speakers</a>".format(talk.talk_id),
+            "Manage Speakers</a>".format(talk.talk_id)
         ),
     )
 
 
-def test_speakers_button_doesnt_show_up_on_new_talks(client: Client, user: User) -> None:
+def test_speakers_button_doesnt_show_up_on_new_talks(
+    client: Client, user: User
+) -> None:
     client.get("/test-login/{}".format(user.user_id))
     resp = client.get("/talks/new")
 
     assert_html_response_doesnt_contain(
-        resp,
-        re.compile("<a href=[^>]*>Manage Speakers</a>"),
+        resp, re.compile("<a href=[^>]*>Manage Speakers</a>")
     )
 
 
@@ -105,16 +106,18 @@ def test_manage_speakers_page_shows_other_speakers(client: Client, user: User) -
     assert len(speakers) == 4
 
     row_texts = [re.sub(r"\s+", " ", row.get_text()).strip() for row in speakers]
-    assert sorted(row_texts) == sorted([
-        "{} ({}) Confirmed".format(user.fullname, user.email),
-        "Alice Example (alice@example.com) Pending Uninvite",
-        "Bob Example (bob@example.com) Rejected",
-        "Charlie Example (charlie@example.com) Deleted Reinvite",
-    ])
+    assert sorted(row_texts) == sorted(
+        [
+            "{} ({}) Confirmed".format(user.fullname, user.email),
+            "Alice Example (alice@example.com) Pending Uninvite",
+            "Bob Example (bob@example.com) Rejected",
+            "Charlie Example (charlie@example.com) Deleted Reinvite",
+        ]
+    )
 
 
 def test_inviting_a_speaker_adds_the_speaker(
-        client: Client, user: User, send_mail: mock.Mock,
+    client: Client, user: User, send_mail: mock.Mock
 ) -> None:
     talk = Talk(title="My Talk", length=25)
     talk.add_speaker(user, InvitationStatus.CONFIRMED)
@@ -134,17 +137,13 @@ def test_inviting_a_speaker_adds_the_speaker(
 
     postdata = {"email": "alice@example.com", "csrf_token": csrf_token}
     resp = client.post(
-        "/talks/{}/speakers".format(talk.talk_id),
-        data=postdata,
-        follow_redirects=True,
+        "/talks/{}/speakers".format(talk.talk_id), data=postdata, follow_redirects=True
     )
 
     assert_html_response_contains(resp, "Alice Example")
 
     send_mail.assert_called_once_with(
-        to=["alice@example.com"],
-        template="email/speaker-invite",
-        talk=mock.ANY,
+        to=["alice@example.com"], template="email/speaker-invite", talk=mock.ANY
     )
 
     _, kwargs = send_mail.call_args
@@ -154,7 +153,7 @@ def test_inviting_a_speaker_adds_the_speaker(
 
 
 def test_inviting_a_speaker_emails_the_speaker(
-        client: Client, user: User, send_mail: mock.Mock,
+    client: Client, user: User, send_mail: mock.Mock
 ) -> None:
     talk = Talk(title="My Talk", length=25)
     talk.add_speaker(user, InvitationStatus.CONFIRMED)
@@ -174,17 +173,13 @@ def test_inviting_a_speaker_emails_the_speaker(
     # this speaker doesn't exist, but we should still send the email
     postdata = {"email": "alice@example.com", "csrf_token": csrf_token}
     resp = client.post(
-        "/talks/{}/speakers".format(talk.talk_id),
-        data=postdata,
-        follow_redirects=True,
+        "/talks/{}/speakers".format(talk.talk_id), data=postdata, follow_redirects=True
     )
 
     assert_html_response_contains(resp, "alice@example.com")
 
     send_mail.assert_called_once_with(
-        to=["alice@example.com"],
-        template="email/speaker-invite",
-        talk=mock.ANY,
+        to=["alice@example.com"], template="email/speaker-invite", talk=mock.ANY
     )
 
     _, kwargs = send_mail.call_args
@@ -212,8 +207,8 @@ def test_talks_list_shows_invitations(client: Client, user: User) -> None:
         "Speaker Invitations:",
         "My Talk",
         "(25 Minutes, Alice Example and You)",
-        '<a href="/talks/1/speakers/reject" class="btn btn-outline-danger btn-sm">Reject</a>',   # noqa: E501
-        '<a href="/talks/1/speakers/accept" class="btn btn-outline-primary btn-sm">Accept</a>',  # noqa: E501
+        '<a href="/talks/1/speakers/reject" class="btn btn-outline-danger btn-sm">Reject</a>',  # NOQA: B950
+        '<a href="/talks/1/speakers/accept" class="btn btn-outline-primary btn-sm">Accept</a>',  # NOQA: B950
     )
 
 
@@ -232,15 +227,10 @@ def test_accept_button_accepts_the_talk(client: Client, user: User) -> None:
     resp = client.get("/talks")
 
     assert_html_response_contains(
-        resp,
-        "My Talk",
-        "(25 Minutes, Alice Example and You)",
+        resp, "My Talk", "(25 Minutes, Alice Example and You)"
     )
     assert_html_response_doesnt_contain(
-        resp,
-        "Speaker Invitations:",
-        "Reject",
-        "Accept",
+        resp, "Speaker Invitations:", "Reject", "Accept"
     )
 
 
@@ -265,7 +255,4 @@ def test_accept_button_rejects_the_talk(client: Client, user: User) -> None:
         "Speaker Invitations:",
         "Accept",
     )
-    assert_html_response_doesnt_contain(
-        resp,
-        "Reject",
-    )
+    assert_html_response_doesnt_contain(resp, "Reject")

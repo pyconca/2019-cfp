@@ -77,7 +77,9 @@ def test_talk_anonymization(client: Client, user: User, send_mail: mock.Mock) ->
     )
 
 
-def test_talk_anonymization_doesnt_set_is_anonymized_if_no_changes(client: Client, user: User, send_mail: mock.Mock) -> None:  # noqa: E501
+def test_talk_anonymization_doesnt_set_is_anonymized_if_no_changes(
+    client: Client, user: User, send_mail: mock.Mock
+) -> None:
     user.site_admin = True
     db.session.add(user)
 

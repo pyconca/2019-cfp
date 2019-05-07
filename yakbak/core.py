@@ -18,7 +18,6 @@ from yakbak.models import Conference, db
 from yakbak.settings import Settings
 from yakbak.types import Application
 
-
 logger = logging.getLogger("core")
 
 # When run with `flask run ...`, Flask loads the application
@@ -28,7 +27,7 @@ logger = logging.getLogger("core")
 APP_CACHE: Dict[int, Application] = {}
 
 
-def create_app(settings: Settings, flask_config: Dict[str, Any] = {}) -> Application:
+def create_app(settings: Settings, flask_config: Dict[str, Any] = None) -> Application:
     """
     Bootstrap the application.
 
@@ -46,6 +45,8 @@ def create_app(settings: Settings, flask_config: Dict[str, Any] = {}) -> Applica
         APP_CACHE.clear()
         APP_CACHE[os.getpid()] = app
 
+    if flask_config is None:
+        flask_config = {}
     set_up_flask(app, flask_config)
     set_up_database(app)
     set_up_auth(app)
@@ -67,7 +68,7 @@ def set_up_logging(settings: Settings) -> None:
     log_level = getattr(logging, log_level_name)
     stream_handler = logging.StreamHandler(stream=sys.stdout)
     stream_handler.setFormatter(
-        logging.Formatter("%(asctime)s [%(name)s:%(levelname)s] %(message)s"),
+        logging.Formatter("%(asctime)s [%(name)s:%(levelname)s] %(message)s")
     )
     stream_handler.setLevel(log_level)
 
@@ -132,7 +133,7 @@ def set_up_auth(app: Application) -> None:
         "social_core.pipeline.social_auth.social_uid",
         "social_core.pipeline.social_auth.auth_allowed",
         "social_core.pipeline.social_auth.social_user",
-        "social_core.pipeline.social_auth.associate_by_email",  # <= inserted vs. default
+        "social_core.pipeline.social_auth.associate_by_email",  # <= inserted vs default
         "social_core.pipeline.user.get_username",
         "social_core.pipeline.user.create_user",
         "social_core.pipeline.social_auth.associate_user",

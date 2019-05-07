@@ -92,15 +92,12 @@ def test_invalid_email_magic_link_login(client: Client) -> None:
 
 
 def test_email_magic_link_tokens_only_work_once(
-        client: Client, send_mail: mock.Mock,
+    client: Client, send_mail: mock.Mock
 ) -> None:
     resp = client.get("/login/email")
     csrf_token = extract_csrf_from(resp)
 
-    postdata = {
-        "email": "jane@example.com",
-        "csrf_token": csrf_token,
-    }
+    postdata = {"email": "jane@example.com", "csrf_token": csrf_token}
     client.post("/login/email", data=postdata, follow_redirects=True)
 
     _, kwargs = send_mail.call_args
@@ -204,14 +201,18 @@ def test_talks_list_page_lists_talks(client: Client, user: User) -> None:
     assert len(talks) == 3
 
     talk_row_texts = [re.sub(r"\s+", " ", talk.get_text()).strip() for talk in talks]
-    assert sorted(talk_row_texts) == sorted([
-        "My Talk (25 Minutes)",
-        "Our Talk (40 Minutes, Alice Example and You)",
-        "All Our Talk (25 Minutes, Alice Example, Bob Example, and You)",
-    ])
+    assert sorted(talk_row_texts) == sorted(
+        [
+            "My Talk (25 Minutes)",
+            "Our Talk (40 Minutes, Alice Example and You)",
+            "All Our Talk (25 Minutes, Alice Example, Bob Example, and You)",
+        ]
+    )
 
 
-def test_talks_list_page_shows_proposed_and_withdrawn_talks(client: Client, user: User) -> None:  # noqa: E501
+def test_talks_list_page_shows_proposed_and_withdrawn_talks(
+    client: Client, user: User
+) -> None:
     in_talk = Talk(title="In Talk", length=25)
     in_talk.add_speaker(user, InvitationStatus.CONFIRMED)
 
@@ -230,7 +231,9 @@ def test_talks_list_page_shows_proposed_and_withdrawn_talks(client: Client, user
     talks = soup.find_all("div", class_="talk")
     assert len(talks) == 2
 
-    talk_row_texts = [re.sub(r"\s+", " ", talk.parent.get_text()).strip() for talk in talks]  # noqa: E501
+    talk_row_texts = [
+        re.sub(r"\s+", " ", talk.parent.get_text()).strip() for talk in talks
+    ]
     talk_row_texts.sort()
 
     assert re.match("In Talk.*Withdraw", talk_row_texts[0])
@@ -247,7 +250,9 @@ def test_talks_list_page_shows_proposed_and_withdrawn_talks(client: Client, user
     talks = soup.find_all("div", class_="talk")
     assert len(talks) == 2
 
-    talk_row_texts = [re.sub(r"\s+", " ", talk.parent.get_text()).strip() for talk in talks]  # noqa: E501
+    talk_row_texts = [
+        re.sub(r"\s+", " ", talk.parent.get_text()).strip() for talk in talks
+    ]
     talk_row_texts.sort()
 
     assert re.match("In Talk.*Re-Submit", talk_row_texts[0])
@@ -259,11 +264,7 @@ def test_create_talk_goes_to_preview(client: Client, user: User) -> None:
     resp = client.get("/talks/new")
     csrf_token = extract_csrf_from(resp)
 
-    postdata = {
-        "title": "My Awesome Talk",
-        "length": "25",
-        "csrf_token": csrf_token,
-    }
+    postdata = {"title": "My Awesome Talk", "length": "25", "csrf_token": csrf_token}
 
     resp = client.post("/talks/new", data=postdata, follow_redirects=True)
     assert_html_response_contains(
@@ -287,7 +288,7 @@ def test_talk_form_uses_select_field_for_length(client: Client, user: User) -> N
     assert_html_response_contains(
         resp,
         re.compile(
-            '<select[^>]*(?:name="length"[^>]*required|required[^>]*name="length")',
+            '<select[^>]*(?:name="length"[^>]*required|required[^>]*name="length")'
         ),
     )
 
@@ -305,15 +306,8 @@ def test_saving_a_talk_clears_categories(client: Client, user: User) -> None:
     resp = client.get("/talks/1")
 
     csrf_token = extract_csrf_from(resp)
-    postdata = {
-        "title": "New Title",
-        "csrf_token": csrf_token,
-    }
-    resp = client.post(
-        "/talks/1",
-        data=postdata,
-        follow_redirects=True,
-    )
+    postdata = {"title": "New Title", "csrf_token": csrf_token}
+    resp = client.post("/talks/1", data=postdata, follow_redirects=True)
     assert_html_response(resp, status=200)
 
     talk = Talk.query.first()
@@ -343,12 +337,7 @@ def test_demographic_survey_saves_data(client: Client, user: User) -> None:
 
     csrf_token = extract_csrf_from(resp)
     postdata = {
-        "gender": [
-            "MAN",
-            "WOMAN",
-            "NONBINARY",
-            "free form text for 'other' gender",
-        ],
+        "gender": ["MAN", "WOMAN", "NONBINARY", "free form text for 'other' gender"],
         "ethnicity": [
             "ASIAN",
             "BLACK_AFRICAN_AMERICAN",
@@ -358,20 +347,13 @@ def test_demographic_survey_saves_data(client: Client, user: User) -> None:
             "WHITE_CAUCASIAN",
             "free form text for 'other' ethnicity",
         ],
-        "past_speaking": [
-            "NEVER",
-            "PYGOTHAM",
-            "OTHER_PYTHON",
-            "OTHER_NONPYTHON",
-        ],
+        "past_speaking": ["NEVER", "PYGOTHAM", "OTHER_PYTHON", "OTHER_NONPYTHON"],
         "age_group": "UNDER_45",
         "programming_experience": "UNDER_10YR",
         "csrf_token": csrf_token,
     }
     resp = client.post(
-        "/profile/demographic_survey",
-        data=postdata,
-        follow_redirects=True,
+        "/profile/demographic_survey", data=postdata, follow_redirects=True
     )
     assert_html_response_contains(resp, "Thanks For Completing")
 
@@ -384,7 +366,9 @@ def test_demographic_survey_saves_data(client: Client, user: User) -> None:
     assert survey.programming_experience == ProgrammingExperience.UNDER_10YR
 
 
-def test_demographic_survey_skips_blank_other_values(client: Client, user: User) -> None:
+def test_demographic_survey_skips_blank_other_values(
+    client: Client, user: User
+) -> None:
     assert user.demographic_survey is None
 
     client.get("/test-login/{}".format(user.user_id))
@@ -400,14 +384,9 @@ def test_demographic_survey_skips_blank_other_values(client: Client, user: User)
     )
 
     csrf_token = extract_csrf_from(resp)
-    postdata = {
-        "gender": ["MAN", ""],
-        "csrf_token": csrf_token,
-    }
+    postdata = {"gender": ["MAN", ""], "csrf_token": csrf_token}
     resp = client.post(
-        "/profile/demographic_survey",
-        data=postdata,
-        follow_redirects=True,
+        "/profile/demographic_survey", data=postdata, follow_redirects=True
     )
     assert_html_response_contains(resp, "Thanks For Completing")
 
@@ -464,9 +443,7 @@ def test_demographic_survey_bug_with_age_field(client: Client, user: User) -> No
         "csrf_token": csrf_token,
     }
     resp = client.post(
-        "/profile/demographic_survey",
-        data=postdata,
-        follow_redirects=True,
+        "/profile/demographic_survey", data=postdata, follow_redirects=True
     )
     assert_html_response_contains(resp, "Thanks For Completing")
 

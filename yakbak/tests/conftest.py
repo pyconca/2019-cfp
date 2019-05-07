@@ -27,10 +27,7 @@ def app() -> Iterable[Application]:
     test_toml = os.path.join(here, "yakbak.toml-test")
 
     settings = load_settings_file(test_toml)
-    flask_config = {
-        "TESTING": True,
-        "MAIL_SUPPRESS_SEND": True,
-    }
+    flask_config = {"TESTING": True, "MAIL_SUPPRESS_SEND": True}
     app = create_app(settings, flask_config)
 
     db.create_all()
@@ -47,11 +44,11 @@ def app() -> Iterable[Application]:
     db.session.commit()
 
     test_templates_dir = os.path.join(here, "templates")
-    my_loader = jinja2.ChoiceLoader([
-        app.jinja_loader,
-        jinja2.FileSystemLoader(test_templates_dir),
-    ])
-    setattr(app, "jinja_loader", my_loader)
+    my_loader = jinja2.ChoiceLoader(
+        [app.jinja_loader, jinja2.FileSystemLoader(test_templates_dir)]
+    )
+    # Bugbear doesn't like this, but mypy doesn't like the alternative.
+    setattr(app, "jinja_loader", my_loader)  # NOQA: B010
 
     # cheeky: add a /test-login endpoint to the app,
     # logging in with social auth in tests is tough

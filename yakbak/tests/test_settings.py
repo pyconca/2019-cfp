@@ -8,15 +8,9 @@ from yakbak.settings import InvalidSettings, load_settings
 def valid_settings_dict() -> Dict[str, Any]:
     return {
         "auth": {},
-        "db": {
-            "url": "sqlite://",
-        },
-        "flask": {
-            "secret_key": "abcd",
-        },
-        "logging": {
-            "level": "ERROR",
-        },
+        "db": {"url": "sqlite://"},
+        "flask": {"secret_key": "abcd"},
+        "logging": {"level": "ERROR"},
         "smtp": {},
         "sentry": {},
     }
@@ -49,10 +43,7 @@ def test_it_fails_with_missing_fields() -> None:
 
 def test_it_sets_auth_summary_fields() -> None:
     settings_dict = valid_settings_dict()
-    settings_dict["auth"].update(
-        github_key_id="the-key-id",
-        github_secret="the-secret",
-    )
+    settings_dict["auth"].update(github_key_id="the-key-id", github_secret="the-secret")
     settings_dict["auth"].pop("google_key_id", None)
     settings_dict["auth"].pop("google_secret", None)
 
@@ -66,9 +57,7 @@ def test_it_sets_auth_summary_fields() -> None:
 def test_social_auth_methods() -> None:
     settings_dict = valid_settings_dict()
     settings_dict["auth"].update(
-        github_key_id="the-key-id",
-        github_secret="the-secret",
-        email_magic_link=True,
+        github_key_id="the-key-id", github_secret="the-secret", email_magic_link=True
     )
     settings_dict["auth"].pop("google_key_id", None)
     settings_dict["auth"].pop("google_secret", None)

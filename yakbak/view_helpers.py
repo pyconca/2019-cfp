@@ -11,7 +11,6 @@ import diff_match_patch
 from yakbak.diff import diff_wordsToChars
 from yakbak.models import Talk
 
-
 app = Blueprint("view_helpers", __name__)
 ViewResponse = Union[Response, Tuple[Response, int]]
 
@@ -38,10 +37,7 @@ def top_nav() -> Dict[str, List[Tuple[str, str, bool]]]:
     else:
         right_nav.append(navtuple("Log In", "views.login"))
 
-    return {
-        "left_nav": left_nav,
-        "right_nav": right_nav,
-    }
+    return {"left_nav": left_nav, "right_nav": right_nav}
 
 
 @app.app_context_processor
@@ -70,6 +66,7 @@ def requires_new_proposal_window_open(func: Callable) -> Callable:
             resp = render_template("action_not_allowed.html", action="create_proposal")
             return resp, 400
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -78,17 +75,16 @@ def requires_proposal_editing_window_open(func: Callable) -> Callable:
     def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
         proposal_window = g.conference.proposal_window
         voting_window = g.conference.voting_window
-        disallowed = (
-            request.method == "POST" and (
-                (proposal_window and not proposal_window.includes_now()) or
-                (voting_window and voting_window.includes_now())
-            )
+        disallowed = request.method == "POST" and (
+            (proposal_window and not proposal_window.includes_now())
+            or (voting_window and voting_window.includes_now())
         )
         # TODO: allow edits to accepted talks after proposal and voting windows
         if disallowed:
             resp = render_template("action_not_allowed.html", action="edit_proposal")
             return resp, 400
         return func(*args, **kwargs)
+
     return wrapper
 
 

@@ -9,19 +9,21 @@ from yakbak.models import Conference, db, InvitationStatus, Talk, User
 from yakbak.tests.util import assert_html_response, extract_csrf_from
 
 
-@pytest.mark.parametrize("length, expected", [
-    (60, "1 minute"),
-    (120, "2 minutes"),
-    (3600, "1 hour"),
-    (7200, "2 hours"),
-    (86400, "1 day"),
-    (172800, "2 days"),
-    (31536000, "1 year"),
-    (63072000, "2 years"),
-
-    # test that it doesn't do "2 days, 4 hours, 10 minutes..."
-    (187800, "2 days"),
-])
+@pytest.mark.parametrize(
+    "length, expected",
+    [
+        (60, "1 minute"),
+        (120, "2 minutes"),
+        (3600, "1 hour"),
+        (7200, "2 hours"),
+        (86400, "1 day"),
+        (172800, "2 days"),
+        (31536000, "1 year"),
+        (63072000, "2 years"),
+        # test that it doesn't do "2 days, 4 hours, 10 minutes..."
+        (187800, "2 days"),
+    ],
+)
 def test_get_magic_link_token_expiry(length: int, expected: str) -> None:
     with mock.patch.object(auth, "current_app") as app:
         app.settings.auth.email_magic_link_expiry = length
@@ -122,7 +124,9 @@ def test_talk_editing_not_allowed_while_voting(user: User, client: Client) -> No
     assert_html_response(resp, status=400)
 
 
-def test_talk_editing_not_allowed_outside_proposal_window(user: User, client: Client) -> None:  # noqa: E501
+def test_talk_editing_not_allowed_outside_proposal_window(
+    user: User, client: Client
+) -> None:
     conf = Conference.query.get(1)
     conf.proposals_begin = datetime.utcnow() - timedelta(days=3)
     conf.proposals_end = datetime.utcnow() - timedelta(days=1)

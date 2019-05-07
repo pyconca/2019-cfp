@@ -2,6 +2,8 @@
 
 Future home of a tech conference call for proposals and program selection app.
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+
 ## Running it Locally
 
 Yak-Bak requires Python 3.6 or newer.
@@ -41,7 +43,8 @@ Yak-Bak requires Python 3.6 or newer.
 
 6. Run tests with `py.test yakbak`, check style compliance with `tox -e
    style`, check types with `tox -e mypy`, or run the full CI suite (tests,
-   style check, and type check) simply with `tox`.
+   style check, and type check) simply with `tox`. You can also format the code
+   with `tox -e format`, although this is not included when you run `tox`.
 
 ## Development Notes
 

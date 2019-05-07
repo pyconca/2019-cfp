@@ -7,7 +7,6 @@ from attr.validators import instance_of, optional
 from flask import url_for
 import toml
 
-
 ValidationFunc = Callable[[Any, Any, Any], None]
 
 
@@ -55,12 +54,16 @@ class AuthSettings:
     google_key_id: Optional[str] = attrib(validator=optional(instance_of(str)))
     google_secret: Optional[str] = attrib(validator=optional(instance_of(str)))
 
-    email_magic_link: Optional[bool] = attrib(validator=instance_of(bool), default=False)
+    email_magic_link: Optional[bool] = attrib(
+        validator=instance_of(bool), default=False
+    )
     email_magic_link_expiry: Optional[int] = attrib(
-        validator=optional(instance_of(int)), default=None)
+        validator=optional(instance_of(int)), default=None
+    )
 
     signing_key: Optional[str] = attrib(
-        validator=optional(instance_of(str)), default=None)
+        validator=optional(instance_of(str)), default=None
+    )
 
     def auth_methods(self) -> List[AuthMethod]:
         """
@@ -68,16 +71,12 @@ class AuthSettings:
 
         """
         # any which are not name.title()
-        display_names = {
-            "github": "GitHub",
-        }
+        display_names = {"github": "GitHub"}
         # any which are not name
-        backend_names = {
-            "google": "google-oauth2",
-        }
+        backend_names = {"google": "google-oauth2"}
         # any which are not social-auth
         view_and_kwargs: Dict[str, Tuple[str, Dict[str, Any]]] = {
-            "email": ("views.magic_link_begin", {}),
+            "email": ("views.magic_link_begin", {})
         }
 
         methods = []
@@ -95,7 +94,9 @@ class AuthSettings:
 
         methods.sort(key=attrgetter("name"))
         if self.email_magic_link:
-            email = AuthMethod("email", "Email Magic Link", "views.email_magic_link", {})
+            email = AuthMethod(
+                "email", "Email Magic Link", "views.email_magic_link", {}
+            )
             methods.insert(0, email)
         return methods
 
@@ -152,11 +153,13 @@ def load_settings(settings_dict: Dict[str, Any]) -> Settings:
         # if that method is configured; if none are configured, set
         # a field "no_social_auth" to True
         if section == "auth":
-            social_methods = set([
-                f.name[:-7]
-                for f in fields(AuthSettings)
-                if f.name.endswith("_key_id")
-            ])
+            social_methods = set(
+                [
+                    f.name[:-7]
+                    for f in fields(AuthSettings)
+                    if f.name.endswith("_key_id")
+                ]
+            )
 
             data["no_social_auth"] = True
             for social_method in social_methods:
@@ -174,6 +177,7 @@ def load_settings(settings_dict: Dict[str, Any]) -> Settings:
 
     if settings_dict:
         raise InvalidSettings(
-            f"settings has unexpected sections: {settings_dict.keys()}")
+            f"settings has unexpected sections: {settings_dict.keys()}"
+        )
 
     return Settings(**top_level)  # type: ignore
