@@ -1,0 +1,13 @@
+---
+subject: "{{ g.user.fullname }} has asked you to co-present a talked proposed to {{ g.conference.full_name }}"
+---
+Hello,
+
+You have been invited to become a co-presenter for "{{ talk.title }}" if it's presented at {{ g.conference.full_name }}.
+
+You can accept or reject this invitation from your dashboard at {{ url_for("views.talks_list", _external=True) }}.
+
+
+Thanks!
+
+Your friends at {{ g.conference.full_name }}

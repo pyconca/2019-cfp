@@ -252,7 +252,7 @@ def edit_speakers(talk_id: int) -> Response:
         except IntegrityError:
             db.session.rollback()
 
-        mail.send_mail(to=[email], template="email/speaker-invite", talk=talk)
+        mail.send_mail(to=[email], template="email/co-presenter-invite", talk=talk)
 
         return redirect(url_for("views.edit_speakers", talk_id=talk.talk_id))
 

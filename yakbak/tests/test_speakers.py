@@ -143,7 +143,7 @@ def test_inviting_a_speaker_adds_the_speaker(
     assert_html_response_contains(resp, "Alice Example")
 
     send_mail.assert_called_once_with(
-        to=["alice@example.com"], template="email/speaker-invite", talk=mock.ANY
+        to=["alice@example.com"], template="email/co-presenter-invite", talk=mock.ANY
     )
 
     _, kwargs = send_mail.call_args
@@ -179,7 +179,7 @@ def test_inviting_a_speaker_emails_the_speaker(
     assert_html_response_contains(resp, "alice@example.com")
 
     send_mail.assert_called_once_with(
-        to=["alice@example.com"], template="email/speaker-invite", talk=mock.ANY
+        to=["alice@example.com"], template="email/co-presenter-invite", talk=mock.ANY
     )
 
     _, kwargs = send_mail.call_args
