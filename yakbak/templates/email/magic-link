@@ -1,5 +1,5 @@
 ---
-subject: Log In Link for {{ g.conference.full_name }}
+subject: "Log In Link for {{ g.conference.full_name }}"
 ---
 Hello,
 

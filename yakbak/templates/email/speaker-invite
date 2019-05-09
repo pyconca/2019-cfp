@@ -1,5 +1,5 @@
 ---
-subject: You Were Invited to Present {{ talk.title }} at {{ g.conference.full_name }}
+subject: "You Were Invited to Present {{ talk.title }} at {{ g.conference.full_name }}"
 ---
 Hello,
 

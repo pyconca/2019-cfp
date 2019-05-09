@@ -1,5 +1,5 @@
 ---
-subject: Your {{ g.conference.informal_name }} talk was anonymized
+subject: "Your {{ g.conference.informal_name }} talk was anonymized"
 ---
 Hello,
 
