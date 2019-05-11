@@ -60,12 +60,17 @@ class TimeWindow:
         now = datetime.utcnow()
         return self.start <= now <= self.end
 
+    def after_now(self) -> bool:
+        now = datetime.utcnow()
+        return now < self.start
+
 
 class Conference(db.Model):  # type: ignore
     conference_id: int = db.Column(db.Integer, primary_key=True)
 
     full_name: str = db.Column(db.String(256), nullable=False)
     informal_name: str = db.Column(db.String(256), nullable=False)
+    website: str = db.Column(db.String(512), nullable=False)
 
     talk_lengths: List[int] = db.Column(
         JSONMutableList.as_mutable(JSON), nullable=False
@@ -111,6 +116,27 @@ class Conference(db.Model):  # type: ignore
         if self.voting_begin and self.voting_end:
             return TimeWindow(self.voting_begin, self.voting_end)
         return None
+
+    @property
+    def creating_proposals_allowed(self) -> bool:
+        return self.proposal_window and self.proposal_window.includes_now()
+
+    @property
+    def editing_proposals_allowed(self) -> bool:
+        disallowed = request.method == "POST" and (
+            (self.proposal_window and not self.proposal_window.includes_now())
+            or (self.voting_window and self.voting_window.includes_now())
+        )
+        # TODO: allow edits to accepted talks after proposal and voting windows
+        return not disallowed
+
+    @property
+    def voting_allowed(self) -> bool:
+        return self.voting_window and self.voting_window.includes_now()
+
+    @property
+    def voting_coming_soon(self) -> bool:
+        return self.voting_window and self.voting_window.after_now()
 
 
 class User(db.Model):  # type: ignore
