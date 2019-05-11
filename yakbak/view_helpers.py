@@ -61,7 +61,7 @@ def set_current_user_on_g() -> None:
 def requires_new_proposal_window_open(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
-        if g.conference.creating_proposals_allowed:
+        if not g.conference.creating_proposals_allowed:
             resp = render_template("action_not_allowed.html", action="create_proposal")
             return resp, 400
         return func(*args, **kwargs)
@@ -72,7 +72,7 @@ def requires_new_proposal_window_open(func: Callable) -> Callable:
 def requires_proposal_editing_window_open(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
-        if not g.conference.editing_proposals_allowed:
+        if request.method == "POST" and not g.conference.editing_proposals_allowed:
             resp = render_template("action_not_allowed.html", action="edit_proposal")
             return resp, 400
         return func(*args, **kwargs)

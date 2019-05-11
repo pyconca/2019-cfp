@@ -119,11 +119,14 @@ class Conference(db.Model):  # type: ignore
 
     @property
     def creating_proposals_allowed(self) -> bool:
-        return self.proposal_window and self.proposal_window.includes_now()
+        # TODO: stop considering proposals open if there is no window,
+        # but want to be cautious about installs that might not have
+        # updated their windows yet
+        return self.proposal_window is None or self.proposal_window.includes_now()
 
     @property
     def editing_proposals_allowed(self) -> bool:
-        disallowed = request.method == "POST" and (
+        disallowed = (
             (self.proposal_window and not self.proposal_window.includes_now())
             or (self.voting_window and self.voting_window.includes_now())
         )
