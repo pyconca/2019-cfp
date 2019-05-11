@@ -15,14 +15,7 @@
   ul#speakers li {
     list-style-type: none;
   }
-  textarea.multiline-placeholder.active {
-    color: #6c757d !important;
-  }
 </style>
-{% endblock %}
-
-{% block morescripts %}
-<script src="{{ url_for("static", filename="multiline-placeholder.js") }}" crossorigin="anonymous"></script>
 {% endblock %}
 
 {% block container %}
@@ -115,7 +108,7 @@
       {% if field.data %}
       {{ macros.render_field(field) }}
       {% else %}
-      {{ macros.render_field(field, form.outline_placeholder) }}
+      {{ macros.render_field(field, "It's nice to:\n\n* Format bullet points, using Markdown\n* So that\n    * You can write it easily, and\n    * It is nicely formatted for reviewers\n\nNote that you must indent each level of bullet points by exactly 4 spaces.") }}
       {% endif %}
       {{ macros.render_error(field) }}
     </div>
