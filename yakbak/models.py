@@ -134,7 +134,7 @@ class Conference(db.Model):  # type: ignore
         return self.voting_window is not None and self.voting_window.includes_now()
 
     @property
-    def voting_coming_soon(self) -> bool:
+    def voting_window_after_now(self) -> bool:
         return self.voting_window is not None and self.voting_window.after_now()
 
 

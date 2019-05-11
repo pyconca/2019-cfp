@@ -62,9 +62,9 @@
   {% else %}
   <p>
     Unfortunately, our Call for Proposals is over.
-    {% if g.conference.voting_coming_soon %}
-    We're anonymizing all the proposals, and getting ready to start voting soon &mdash;
-    check back often to see when voting has started.
+    {% if g.conference.voting_window_after_now %}
+    We're anonymizing all the proposals, and getting ready to start voting
+    on {{ g.conference.voting_window.start.strftime("%A, %B %d") }}.
     {% else %}
     For the latest information about {{ g.conference.informal_name }}, head to
     <a href="{{ g.conference.website }}">the main {{ g.conference.informal_name }} site</a>.
