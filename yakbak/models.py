@@ -126,20 +126,16 @@ class Conference(db.Model):  # type: ignore
 
     @property
     def editing_proposals_allowed(self) -> bool:
-        disallowed = (
-            (self.proposal_window and not self.proposal_window.includes_now())
-            or (self.voting_window and self.voting_window.includes_now())
-        )
         # TODO: allow edits to accepted talks after proposal and voting windows
-        return not disallowed
+        return self.creating_proposals_allowed and not self.voting_allowed
 
     @property
     def voting_allowed(self) -> bool:
-        return self.voting_window and self.voting_window.includes_now()
+        return self.voting_window is not None and self.voting_window.includes_now()
 
     @property
     def voting_coming_soon(self) -> bool:
-        return self.voting_window and self.voting_window.after_now()
+        return self.voting_window is not None and self.voting_window.after_now()
 
 
 class User(db.Model):  # type: ignore
