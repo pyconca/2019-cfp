@@ -1,4 +1,6 @@
+from contextlib import suppress
 import logging
+import uuid
 
 from flask import (
     abort,
@@ -8,34 +10,45 @@ from flask import (
     g,
     redirect,
     render_template,
+    request,
+    session,
     url_for,
 )
 from flask_login import login_required, login_user, logout_user
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.wrappers import Response
 
 from yakbak import mail
 from yakbak.auth import get_magic_link_token_and_expiry, parse_magic_link_token
 from yakbak.forms import (
+    ConductReportForm,
     DemographicSurveyForm,
     EmailAddressForm,
     SpeakerEmailForm,
     TalkForm,
     UserForm,
+    VoteForm,
 )
 from yakbak.models import (
+    Category,
+    ConductReport,
     db,
     DemographicSurvey,
     InvitationStatus,
     Talk,
+    TalkCategory,
     TalkSpeaker,
     TalkStatus,
     UsedMagicLink,
     User,
+    Vote,
 )
 from yakbak.view_helpers import (
     requires_new_proposal_window_open,
     requires_proposal_editing_window_open,
+    requires_voting_allowed,
 )
 
 app = Blueprint("views", __name__)
@@ -226,6 +239,193 @@ def resubmit_proposal(talk_id: int) -> Response:
     db.session.commit()
     flash(f"{talk.title!r} re-submitted")
     return redirect(url_for("views.talks_list"))
+
+
+@app.route("/vote")
+@requires_voting_allowed
+@login_required
+def vote_home() -> Response:
+    """Render the voting homepage with talk categories."""
+    # TODO: When this is multitenant, categories and votes should be filtered
+    # by event.
+    categories = Category.query.order_by(Category.name.asc())
+    # TODO: This is an inefficient way to do this. Write it as one query
+    # instead.
+    categories_counts = {
+        category: Talk.query.join(TalkCategory)
+        .filter(
+            Talk.state == TalkStatus.PROPOSED,
+            Talk.talk_id.notin_(
+                db.session.query(Vote.talk_id).filter(
+                    Vote.user == g.user, Vote.value != None  # noqa: E711
+                )
+            ),
+            TalkCategory.category_id == category.category_id,
+        )
+        .count()
+        for category in categories
+    }
+
+    votes = Vote.query.filter_by(user=g.user).order_by(Vote.created.asc())
+    return render_template(
+        "vote/home.html",
+        categories_counts=categories_counts,
+        votes=votes,
+        vote_label_map=VoteForm.VOTE_VALUE_CHOICES,
+    )
+
+
+@app.route("/vote/category/<int:category_id>")
+@requires_voting_allowed
+@login_required
+def vote_choose_talk_from_category(category_id: int) -> Response:
+    """Display a talk in need of a vote.
+
+    If a talk has already been displayed for voting and is included in
+    the selected category, but has not been voted on or explicitly
+    skipped, it should be used. This is independent of the chosen
+    category.  Otherwise choose fairly from a list of possible talks.
+
+    The talk list:
+
+    1. is filtered down to the requested category
+    2. excludes talks that a user has previously voted on or skipped
+    3. is sorted to attempt to evenly distribute votes across talks
+
+    .. note::
+        Because talks can belong to more than one category, ensuring
+        that votes are evenly distributed is not quite possible.
+        Breaking the list up by category is a tradeoff to allow voters
+        to weigh in on topics they have interest or expertise in. This
+        implementation should still ensure that all proposals have
+        enough votes to derive meaningful signal.
+
+    """
+    category = Category.query.get_or_404(category_id)
+
+    vote = (
+        db.session.query(Vote)
+        .join(Talk)
+        .join(TalkCategory)
+        .filter(
+            TalkCategory.category_id == category.category_id,
+            Vote.skipped == None,
+            Vote.user == g.user,
+            Vote.value == None,  # noqa: E711
+        )
+        .first()
+    )
+
+    if vote is None:
+        talk = (
+            db.session.query(Talk)
+            .join(TalkCategory)
+            .filter(
+                Talk.is_anonymized == True,  # noqa: E712
+                Talk.state == TalkStatus.PROPOSED,
+                Talk.talk_id.notin_(
+                    db.session.query(Vote.talk_id).filter(Vote.user == g.user)
+                ),
+                TalkCategory.category_id == category_id,
+            )
+            .order_by(Talk.vote_count.asc(), func.random())
+        ).first()
+        if talk is None:
+            flash(
+                f"There are no more {category.name} talks left to vote on. Great job!"
+            )
+            # There are no talks to vote on here, so remove the stored
+            # category preference.
+            with suppress(KeyError):
+                del session["voting_category"]
+            return redirect(url_for("views.vote_home"))
+
+        vote = Vote(user=g.user, talk=talk)
+        db.session.add(vote)
+        db.session.commit()
+        # Set the chosen category for redirection purposes later.
+        session["voting_category"] = category.category_id
+    return redirect(url_for("views.vote", public_id=vote.public_id))
+
+
+@app.route("/vote/cast/<uuid:public_id>", methods=["GET", "POST"])
+@requires_voting_allowed
+@login_required
+def vote(public_id: uuid.UUID) -> Response:
+    """Vote on the talk identified by talk_id."""
+    vote = Vote.query.filter_by(public_id=public_id).first_or_404()
+    form = VoteForm(obj=vote)
+    if form.validate_on_submit():
+        if form.action.data == "vote":
+            vote.value = form.value.data
+            vote.skipped = False
+        elif form.action.data == "skip":
+            vote.skipped = True
+        db.session.commit()
+        flash("Voted!")
+
+        if "voting_category" in session:
+            return redirect(
+                url_for(
+                    "views.vote_choose_talk_from_category",
+                    category_id=session["voting_category"],
+                )
+            )
+        return redirect(url_for("views.vote_home"))
+    return render_template(
+        "vote/detail.html",
+        talk=vote.talk,
+        form=form,
+        conduct_form=ConductReportForm(talk_id=vote.talk.talk_id),
+    )
+
+
+# TODO: consider the privacy implications of using talk_id here,
+# potentially switch to loading the talk by the vote's public id. If
+# that approach is taken, this route will also be
+# requires_voting_allowed.
+@app.route("/conduct-report", methods=["POST"])
+@login_required
+def conduct_report() -> Response:
+    """Add a new code of conduct report for the given talk.
+
+    When a report is generated, store it in the database and email the
+    conduct team.
+    """
+
+    form = ConductReportForm()
+    if not form.validate_on_submit():
+        flash(
+            " ".join(
+                (
+                    "Unable to report a code of conduct issue.",
+                    "If you continue to receive this message, please contact",
+                    f"{g.conference.conduct_email}.",
+                )
+            )
+        )
+        return redirect(request.referrer)
+
+    # If we can't find the talk, something's gone very wrong. This
+    # codepath should not be executed in normal use, as the form should
+    # always contain a valid talk id.
+    try:
+        talk = Talk.query.get(form.talk_id.data)
+    except NoResultFound:
+        abort(400)
+
+    report = ConductReport(talk=talk, text=form.text.data)
+    # A bit of a silly guard, but on the off chance a bug is introduced
+    # here or in the form code, I'd rather the explicit comparison to
+    # `True` than the looser comparison to anything truthy.
+    if form.anonymous.data is not True:
+        report.user = g.user
+
+    db.session.add(report)
+    db.session.commit()
+    mail.send_mail(to=[g.conference.conduct_email], template="email/conduct-report")
+    flash("Thank you for your report. Our team will review it shortly.")
+    return redirect(request.referrer)
 
 
 @app.route("/talks/<int:talk_id>/speakers", methods=["GET", "POST"])

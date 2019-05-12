@@ -21,6 +21,7 @@ from yakbak import mail
 from yakbak.forms import CategorizeForm, TalkForm
 from yakbak.models import (
     Category,
+    ConductReport,
     Conference,
     db,
     DemographicSurvey,
@@ -29,6 +30,7 @@ from yakbak.models import (
     InvitationStatus,
     Talk,
     User,
+    Vote,
 )
 
 app = Blueprint("manage", __name__)
@@ -206,9 +208,20 @@ flask_admin.add_view(
     ModelView(
         Talk,
         db.session,
-        include=("state", "title", "categories", "is_anonymized", "created", "updated"),
+        include=(
+            "state",
+            "title",
+            "categories",
+            "is_anonymized",
+            "vote_count",
+            "vote_score",
+            "created",
+            "updated",
+        ),
     )
 )
 flask_admin.add_view(ModelView(Category, db.session))
+flask_admin.add_view(ModelView(ConductReport, db.session))
 flask_admin.add_view(ModelView(User, db.session))
 flask_admin.add_view(ModelView(DemographicSurvey, db.session, exclude=("user",)))
+flask_admin.add_view(ModelView(Vote, db.session))

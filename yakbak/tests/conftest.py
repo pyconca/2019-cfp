@@ -92,3 +92,12 @@ def user(app: Application) -> User:
     db.session.commit()
 
     return user
+
+
+@pytest.fixture
+def authenticated_client(*, app: Application, user: User) -> Client:
+    """Return a client authenticated with a user and without CSRF protection."""
+    app.config["WTF_CSRF_ENABLED"] = False
+    client = app.test_client()
+    client.get(f"/test-login/{user.user_id}", follow_redirects=True)
+    return client

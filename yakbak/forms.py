@@ -8,15 +8,17 @@ from jinja2.utils import Markup
 from wtforms import Form
 from wtforms.fields import (
     Field,
+    IntegerField,
     RadioField,
     SelectField,
     SelectMultipleField,
     StringField,
+    TextAreaField,
 )
-from wtforms.validators import DataRequired, Email, NoneOf
+from wtforms.validators import DataRequired, Email, InputRequired, NoneOf
 from wtforms.validators import Optional as OptionalValidator
 from wtforms.validators import ValidationError
-from wtforms.widgets import html_params
+from wtforms.widgets import HiddenInput, html_params
 from wtforms_alchemy import model_form_factory
 
 from yakbak.models import (
@@ -54,6 +56,47 @@ class TalkForm(ModelForm):
 
     length = SelectField(
         coerce=int, choices=TalkLengthChoices(), validators=[DataRequired()]
+    )
+
+
+class VoteForm(FlaskForm):
+    VOTE_VALUE_CHOICES = {
+        1: "Definitely yes!",
+        0: "I'm impartial.",
+        -1: "Definitely not.",
+    }
+
+    action = StringField()
+    value = RadioField(
+        choices=list(VOTE_VALUE_CHOICES.items()),
+        coerce=int,
+        validators=[OptionalValidator()],
+    )
+
+
+class ConductReportForm(FlaskForm):
+    """Information required for a code of conduct report."""
+
+    ANONYMOUS_CHOICES = (
+        (1, "I wish to remain anonymous."),
+        (
+            0,
+            " ".join(
+                (
+                    "Share my identity with the code of conduct team.",
+                    "It will not be shared with anyone else.",
+                )
+            ),
+        ),
+    )
+
+    talk_id = IntegerField(widget=HiddenInput())
+    text = TextAreaField(
+        "Please describe why this talk may violate the code of conduct.",
+        validators=[InputRequired()],
+    )
+    anonymous = RadioField(
+        choices=ANONYMOUS_CHOICES, coerce=lambda data: bool(int(data))
     )
 
 

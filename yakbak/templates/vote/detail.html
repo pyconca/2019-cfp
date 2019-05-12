@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}Vote on "{{ talk.anonymized_title }}" - {{ super() }}{% endblock %}
+
+{% block morestyles %}
+<style>
+  form li {
+    list-style-type: none;
+  }
+  form li input, form li label {
+    display: inline;
+  }
+</style>
+{% endblock %}
+
+{% block container %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="row">
+      <div class="col"><h1>{{ talk.anonymized_title }}</h1></div>
+      <div class="w-100"></div>
+      <div class="col"><h4>{{ talk.length }} Minutes</h2></div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-8">
+    <div class="row">
+      <div class="col">
+        {{ talk.anonymized_description|markdown }}
+      </div>
+    </div>
+    <div class="row border bg-light my-2 py-2">
+      <div class="col"><h2>Outline:</h2></div>
+      <div class="w-100"></div>
+      <div class="col">
+        {{ talk.anonymized_outline|markdown }}
+      </div>
+    </div>
+    <div class="row border bg-light my-2 py-2">
+      <div class="col"><h2>Audience Take-Aways:</h2></div>
+      <div class="w-100"></div>
+      <div class="col">
+        {{ talk.take_aways|markdown }}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <p>Should this talk be presented at {{ g.conference.informal_name }}?</p>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      {{ macros.render_field(form.value) }}
+      <button type="submit" class="btn btn-primary" name="action" value="vote">Vote</button>
+      <button type="submit" class="btn btn-light border" name="action" value="skip">Skip</button>
+    </form>
+
+    <hr>
+
+    <p>If this proposal presents a code of conduct issue, please let the conduct team know.</p>
+    <form method="POST" action="{{ url_for("views.conduct_report") }}">
+      {{ conduct_form.hidden_tag() }}
+      {{ macros.render_field(conduct_form.text, placeholder="The talk proposal presents a code of conduct issue because...") }}
+      {{ macros.render_field(conduct_form.anonymous) }}
+      <button type="submit" class="btn btn-primary btn-warning">Report</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

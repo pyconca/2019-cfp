@@ -22,7 +22,7 @@ services:
     - POSTGRES_PASSWORD=y4kb4k
     ports:
     - "5432:5432"
-  
+
   smtp:
     image: mailhog/mailhog
     ports:

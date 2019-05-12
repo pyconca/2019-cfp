@@ -2,6 +2,7 @@
 yakbak.toml
 
 # Leftovers from tools & support libs
+__pycache__
 .coverage
 dist/
 .eggs/

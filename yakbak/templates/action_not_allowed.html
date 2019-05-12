@@ -18,7 +18,15 @@
     {% endif %}
     {% endif %}
     {% if action == "vote" %}
-    <h2>{{ g.conference.informal_name }} Voting has Ended</h2>
+    <h2>
+      {{ g.conference.informal_name }} Voting has
+      {% if g.conference.voting_window_after_now %}
+        not started yet
+      {% else %}
+        ended
+      {% endif %}
+    </h2>
+
     <p>
     Unfortunately, voting on proposals for {{ g.conference.informal_name }} has
     ended. We appreciate the time that you have taken to vote so far. Your input
