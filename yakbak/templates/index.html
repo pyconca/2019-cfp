@@ -40,6 +40,7 @@
   be, {{ g.conference.full_name }} wants to hear your story. Won't you share
   it with us?
   </p>
+  {% if g.conference.creating_proposals_allowed %}
   <p>
     <strong>There's still time!</strong>
     Our Call for Proposals is open through May 12, <a href="https://time.is/Anywhere_on_Earth">Anywhere on Earth</a>.
@@ -49,6 +50,28 @@
     {% if g.user.is_anonymous %}Log In and{%endif %}
     Submit a Talk Now
   </a>
+  {% elif g.conference.voting_allowed %}
+  <p>
+    <strong>Help us pick the talks that make the conference!</strong>
+    Cast your votes to tell us whic talks you'd like to see at {{ g.conference.informal_name }}.
+  </p>
+  <a class="btn btn-lg btn-light border" href="#">
+    {% if g.user.is_anonymous %}Log In and{%endif %}
+    Vote Now
+  </a>
+  {% else %}
+  <p>
+    Unfortunately, our Call for Proposals is over.
+    {% if g.conference.voting_window_after_now %}
+    We're anonymizing all the proposals, and getting ready to start voting
+    on {{ g.conference.voting_window.start.strftime("%A, %B %d") }}.
+    {% else %}
+    For the latest information about {{ g.conference.informal_name }}, head to
+    <a href="{{ g.conference.website }}">the main {{ g.conference.informal_name }} site</a>.
+    {% endif %}
+  </p>
+  {% endif %}
+  <br style="clear:both">
 </div>
 <div class="row py-3">
   <div class="col">

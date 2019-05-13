@@ -60,12 +60,17 @@ class TimeWindow:
         now = datetime.utcnow()
         return self.start <= now <= self.end
 
+    def after_now(self) -> bool:
+        now = datetime.utcnow()
+        return now < self.start
+
 
 class Conference(db.Model):  # type: ignore
     conference_id: int = db.Column(db.Integer, primary_key=True)
 
     full_name: str = db.Column(db.String(256), nullable=False)
     informal_name: str = db.Column(db.String(256), nullable=False)
+    website: str = db.Column(db.String(512), nullable=False)
 
     talk_lengths: List[int] = db.Column(
         JSONMutableList.as_mutable(JSON), nullable=False
@@ -111,6 +116,26 @@ class Conference(db.Model):  # type: ignore
         if self.voting_begin and self.voting_end:
             return TimeWindow(self.voting_begin, self.voting_end)
         return None
+
+    @property
+    def creating_proposals_allowed(self) -> bool:
+        # TODO: stop considering proposals open if there is no window,
+        # but want to be cautious about installs that might not have
+        # updated their windows yet
+        return self.proposal_window is None or self.proposal_window.includes_now()
+
+    @property
+    def editing_proposals_allowed(self) -> bool:
+        # TODO: allow edits to accepted talks after proposal and voting windows
+        return self.creating_proposals_allowed and not self.voting_allowed
+
+    @property
+    def voting_allowed(self) -> bool:
+        return self.voting_window is not None and self.voting_window.includes_now()
+
+    @property
+    def voting_window_after_now(self) -> bool:
+        return self.voting_window is not None and self.voting_window.after_now()
 
 
 class User(db.Model):  # type: ignore
