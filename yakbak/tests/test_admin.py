@@ -39,6 +39,7 @@ def test_talk_anonymization(client: Client, user: User, send_mail: mock.Mock) ->
         title="Alice's Identifying Talk",
         description="This talk is by Alice",
         outline="Alice!",
+        take_aways="Alice's point.",
         length=25,
     )
     talk.add_speaker(user, InvitationStatus.CONFIRMED)
@@ -55,6 +56,7 @@ def test_talk_anonymization(client: Client, user: User, send_mail: mock.Mock) ->
         "title": "(Speaker name redacted)'s Identifying Talk",
         "description": "This talk is by (Speaker name redacted)",
         "outline": "(Speaker name redacted)!",
+        "take_aways": "(The speaker's) point.",
         "csrf_token": extract_csrf_from(resp),
     }
     client.post(f"/manage/anonymize/{talk.talk_id}", data=postdata)
@@ -65,9 +67,11 @@ def test_talk_anonymization(client: Client, user: User, send_mail: mock.Mock) ->
     assert talk.anonymized_title == "(Speaker name redacted)'s Identifying Talk"
     assert talk.anonymized_description == "This talk is by (Speaker name redacted)"
     assert talk.anonymized_outline == "(Speaker name redacted)!"
+    assert talk.anonymized_take_aways == "(The speaker's) point."
     assert talk.title == "Alice's Identifying Talk"
     assert talk.description == "This talk is by Alice"
     assert talk.outline == "Alice!"
+    assert talk.take_aways == "Alice's point."
 
     send_mail.assert_called_once_with(
         to=[user.email],
@@ -87,6 +91,7 @@ def test_talk_anonymization_doesnt_set_is_anonymized_if_no_changes(
         title="Alice's Identifying Talk",
         description="This talk is by Alice",
         outline="Alice!",
+        take_aways="Alice's point.",
         length=25,
     )
     talk.add_speaker(user, InvitationStatus.CONFIRMED)
@@ -103,6 +108,7 @@ def test_talk_anonymization_doesnt_set_is_anonymized_if_no_changes(
         "title": talk.title,
         "description": talk.description,
         "outline": talk.outline,
+        "take_aways": talk.take_aways,
         "csrf_token": extract_csrf_from(resp),
     }
     client.post(f"/manage/anonymize/{talk.talk_id}", data=postdata)
@@ -113,5 +119,6 @@ def test_talk_anonymization_doesnt_set_is_anonymized_if_no_changes(
     assert talk.anonymized_title == talk.title
     assert talk.anonymized_description == talk.anonymized_description
     assert talk.anonymized_outline == talk.outline
+    assert talk.anonymized_take_aways == talk.take_aways
 
     assert not send_mail.called

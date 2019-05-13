@@ -224,6 +224,7 @@ class Talk(db.Model):  # type: ignore
     anonymized_title: Optional[str] = db.Column(db.String(512))
     anonymized_description: Optional[str] = db.Column(db.Text)
     anonymized_outline: Optional[str] = db.Column(db.Text)
+    anonymized_take_aways: Optional[str] = db.Column(db.Text)
 
     accepted_recording_release: bool = db.Column(db.Boolean)
 
@@ -256,6 +257,7 @@ class Talk(db.Model):  # type: ignore
         self.anonymized_title = None
         self.anonymized_description = None
         self.anonymized_outline = None
+        self.anonymized_take_aways = None
         self.has_anonymization_changes = False
 
 
