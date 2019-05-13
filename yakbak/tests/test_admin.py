@@ -67,7 +67,7 @@ def test_talk_anonymization(client: Client, user: User, send_mail: mock.Mock) ->
     assert talk.anonymized_title == "(Speaker name redacted)'s Identifying Talk"
     assert talk.anonymized_description == "This talk is by (Speaker name redacted)"
     assert talk.anonymized_outline == "(Speaker name redacted)!"
-    assert talk.anonymized_take_aways = "(The speaker's) point."
+    assert talk.anonymized_take_aways == "(The speaker's) point."
     assert talk.title == "Alice's Identifying Talk"
     assert talk.description == "This talk is by Alice"
     assert talk.outline == "Alice!"
