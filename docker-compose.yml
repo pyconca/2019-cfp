@@ -11,6 +11,7 @@ services:
     volumes:
     - ./yakbak.toml-compose:/code/yakbak.toml
     - ./yakbak:/code/yakbak
+    - ./alembic:/code/alembic
   db:
     image: "postgres:10-alpine"
     volumes:

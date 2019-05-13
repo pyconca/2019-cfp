@@ -119,17 +119,20 @@ def anonymize_talk(talk_id: int) -> Response:
         talk.title = talk.anonymized_title
         talk.description = talk.anonymized_description
         talk.outline = talk.anonymized_outline
+        talk.take_aways = talk.anonymized_take_aways
 
     form = TalkForm(obj=talk)
     if form.validate_on_submit():
         talk.anonymized_title = form.title.data
         talk.anonymized_description = form.description.data
         talk.anonymized_outline = form.outline.data
+        talk.anonymized_take_aways = form.take_aways.data
         talk.is_anonymized = True
         talk.has_anonymization_changes = (
             talk.anonymized_title != talk.title
             or talk.anonymized_description != talk.description
             or talk.anonymized_outline != talk.outline
+            or talk.anonymized_take_aways != talk.take_aways
         )
         db.session.add(talk)
         db.session.commit()
