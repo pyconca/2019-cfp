@@ -40,7 +40,7 @@ docker:
       - runner_system_failure
       - stuck_or_timeout_failure
 
-docker_ci:
+docker_tags:
   stage: build
   image: docker:git
   only:
@@ -50,8 +50,9 @@ docker_ci:
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_REGISTRY_IMAGE:ci || true
-    - docker build --cache-from $CI_REGISTRY_IMAGE:ci --tag $CI_REGISTRY_IMAGE:ci .
+    - docker build --cache-from $CI_REGISTRY_IMAGE:ci --tag $CI_REGISTRY_IMAGE:ci --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
     - docker push $CI_REGISTRY_IMAGE:ci
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
   retry:
     max: 1
     when:
