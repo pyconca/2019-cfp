@@ -124,12 +124,14 @@ def test_talk_editing_not_allowed_while_voting(user: User, client: Client) -> No
     assert_html_response(resp, status=400)
 
 
-def test_talk_editing_not_allowed_outside_proposal_window(
+def test_talk_editing_allowed_after_proposal_window_but_before_voting_window(
     user: User, client: Client
 ) -> None:
     conf = Conference.query.get(1)
     conf.proposals_begin = datetime.utcnow() - timedelta(days=3)
     conf.proposals_end = datetime.utcnow() - timedelta(days=1)
+    conf.voting_begin = datetime.utcnow() + timedelta(days=1)
+    conf.voting_end = datetime.utcnow() + timedelta(days=3)
     db.session.add(conf)
 
     talk = Talk(title="My Talk", length=25)
@@ -144,4 +146,4 @@ def test_talk_editing_not_allowed_outside_proposal_window(
 
     postdata = {"csrf_token": extract_csrf_from(resp)}
     resp = client.post(f"/talks/{talk.talk_id}", data=postdata)
-    assert_html_response(resp, status=400)
+    assert_html_response(resp, status=200)
