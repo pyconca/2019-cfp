@@ -127,7 +127,11 @@ class Conference(db.Model):  # type: ignore
     @property
     def editing_proposals_allowed(self) -> bool:
         # TODO: allow edits to accepted talks after proposal and voting windows
-        return self.creating_proposals_allowed and not self.voting_allowed
+        if self.voting_window and self.voting_allowed:
+            return False
+        elif self.creating_proposals_allowed or self.voting_window_after_now:
+            return True
+        return False
 
     @property
     def voting_allowed(self) -> bool:
