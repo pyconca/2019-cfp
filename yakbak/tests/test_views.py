@@ -267,7 +267,6 @@ def test_talks_list_page_doesnt_show_resubmit_after_proposal_window(
     conf = Conference.query.get(1)
     conf.proposals_begin = datetime.utcnow() - timedelta(days=3)
     conf.proposals_end = datetime.utcnow() - timedelta(days=1)
-    db.session.add(conf)
 
     withdrawn_talk = Talk(title="Withdrawn Talk", length=40, state=TalkStatus.WITHDRAWN)
     withdrawn_talk.add_speaker(user, InvitationStatus.CONFIRMED)
