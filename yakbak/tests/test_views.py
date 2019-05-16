@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 import re
 
@@ -9,6 +10,7 @@ from yakbak import views
 from yakbak.models import (
     AgeGroup,
     Category,
+    Conference,
     db,
     DemographicSurvey,
     InvitationStatus,
@@ -257,6 +259,28 @@ def test_talks_list_page_shows_proposed_and_withdrawn_talks(
 
     assert re.match("In Talk.*Re-Submit", talk_row_texts[0])
     assert re.match("Out Talk.*Withdraw", talk_row_texts[1])
+
+
+def test_talks_list_page_doesnt_show_resubmit_after_proposal_window(
+    client: Client, user: User
+) -> None:
+    conf = Conference.query.get(1)
+    conf.proposals_begin = datetime.utcnow() - timedelta(days=3)
+    conf.proposals_end = datetime.utcnow() - timedelta(days=1)
+    db.session.add(conf)
+
+    withdrawn_talk = Talk(title="Withdrawn Talk", length=40, state=TalkStatus.WITHDRAWN)
+    withdrawn_talk.add_speaker(user, InvitationStatus.CONFIRMED)
+    db.session.add(withdrawn_talk)
+    db.session.commit()
+
+    client.get("/test-login/{}".format(user.user_id))
+    resp = client.get("/talks")
+    assert_html_response_doesnt_contain(resp, "Re-Submit")
+
+    # also make sure to prevent it server-side
+    resp = client.get(f"/talks/1/resubmit")
+    assert_html_response(resp, status=400)
 
 
 def test_create_talk_goes_to_preview(client: Client, user: User) -> None:
