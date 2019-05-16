@@ -74,17 +74,24 @@
     {% else %}
     <div class="row py-2 border-top border-right border-left border-bottom">
       <div class="col-md-12">
-        <em>No talks yet. Why not <a href="{{ url_for("views.create_talk") }}">add one now?</a></em>
+        <em>
+          No talks yet.
+          {% if g.conference.creating_proposals_allowed %}
+            Why not <a href="{{ url_for("views.create_talk") }}">add one now?</a>
+          {% endif %}
+        </em>
       </div>
     </div>
     {% endif %}
   </div>
 </div>
+{% if g.conference.creating_proposals_allowed %}
 <div class="row py-2">
   <div class="col text-right">
     <a class="btn btn-primary" href="{{ url_for("views.create_talk") }}">Add Talk</a>
   </div>
 </div>
+{% endif %}
 {% if has_withdrawn_talks %}
 <div class="row py-3">
   <div class="col">
