@@ -135,6 +135,23 @@ class SpeakerEmailForm(EmailAddressForm):
         validator(self, field)
 
 
+class Gender(enum.Enum):
+    WOMAN = "Woman"
+    MAN = "Man"
+    NONBINARY = "Non-binary / third gender person"
+    OTHER = "Other"
+
+
+class Ethnicity(enum.Enum):
+    ASIAN = "Asian"
+    BLACK_AFRICAN_AMERICAN = "Black / African-American"
+    HISPANIC_LATINX = "Hispanic / Latinx"
+    ABORIGINAL = "Aboriginal"
+    PACIFIC_ISLANDER = "Pacific Islander"
+    WHITE_CAUCASIAN = "White / Caucasian"
+    OTHER = "Other"
+
+
 class PastSpeaking(enum.Enum):
     NEVER = "I have never spoken at a conference before"
     PYCONCA = "I have spoken at PyCon Canada in the past"
