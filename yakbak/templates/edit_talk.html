@@ -43,6 +43,13 @@
       {{ macros.render_label(field, "Length") }}
       {{ macros.render_field(field, "") }}
       {{ macros.render_error(field) }}
+      <small id="{{ field.id }}-help" class="form-text text-muted">
+        <ul class="list-unstyled">
+          <li>10 Minutes - Ligiting Talk</li>
+          <li>30 Minutes - Full Talk</li>
+          <li>55 Minutes - Tutorial</li>
+        </ul>
+      </small>
     </div>
   </div>
   <div class="row">
