@@ -50,6 +50,8 @@
     <p>Should this talk be presented at {{ g.conference.informal_name }}?</p>
     <form method="POST">
       {{ form.hidden_tag() }}
+      {{ macros.render_error(form.action) }}
+      {{ macros.render_error(form.value) }}
       {{ macros.render_field(form.value) }}
       <button type="submit" class="btn btn-primary" name="action" value="vote">Vote</button>
       <button type="submit" class="btn btn-light border" name="action" value="skip">Skip</button>
