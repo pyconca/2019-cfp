@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}Categories - {{ super() }}{% endblock %}
+
+{% block container %}
+<h3>Talk Categories</h3>
+<table class="table table-bordered table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Category</th>
+      <th scope="col">Talks Remaining</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for category, count in categories_counts.items() %}
+      <tr>
+        <td>
+          <a href="{{ url_for("views.vote_choose_talk_from_category", category_id=category.category_id) }}">
+            {{ category.name }}
+          </a>
+        </td>
+        <td>
+          {{ count }}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>My Votes</h3>
+<table class="table table-bordered table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Talk</th>
+      <th scope="col">Vote</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for vote in votes %}
+      <tr>
+        <td><a href="{{ url_for("views.vote", public_id=vote.public_id) }}">{{ vote.talk.title }}</a></td>
+        <td>
+          {# Jinja2 requires `none` rather than `None` #}
+          {% if vote.value is not none %}
+            {{ vote_label_map[vote.value] }}
+          {% elif vote.skipped %}
+            Skipped
+          {% else %}
+            Pending
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

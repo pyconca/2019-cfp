@@ -26,6 +26,9 @@ def top_nav() -> Dict[str, List[Tuple[str, str, bool]]]:
     left_nav = []
     if user and not user.is_anonymous:
         left_nav.append(navtuple("My Proposals", "views.talks_list"))
+        if g.conference.voting_allowed:
+            left_nav.append(navtuple("Vote", "views.vote_home"))
+
     if user and not user.is_anonymous and user.is_site_admin:
         left_nav.append(navtuple("Admin", "manage.index"))
         left_nav.append(navtuple("DB Entries", "admin.index"))
@@ -74,6 +77,19 @@ def requires_proposal_editing_window_open(func: Callable) -> Callable:
     def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
         if request.method == "POST" and not g.conference.editing_proposals_allowed:
             resp = render_template("action_not_allowed.html", action="edit_proposal")
+            return resp, 400
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def requires_voting_allowed(func: Callable) -> Callable:
+    """Prevent access to views outside of the voting window."""
+
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
+        if not g.conference.voting_allowed:
+            resp = render_template("action_not_allowed.html", action="vote")
             return resp, 400
         return func(*args, **kwargs)
 

@@ -23,11 +23,13 @@ from datetime import datetime
 from typing import List, Optional
 import enum
 import logging
+import uuid
 
 from attr import attrib, attrs
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import CheckConstraint
-from sqlalchemy.orm import Query, synonym
+from sqlalchemy import and_, CheckConstraint, func, select
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import column_property, Query, synonym
 from sqlalchemy.types import Enum, JSON
 from sqlalchemy_postgresql_json import JSONMutableList
 
@@ -49,6 +51,12 @@ class TalkStatus(enum.Enum):
     # ACCEPTED = "deleted"
     # CONFIRMED = "confirmed"
     # WAITLISTED = "waitlisted"
+
+
+class ConductReportStatus(enum.Enum):
+    REPORTED = "reported"
+    AWAITING_RESPONSE = "awaiting_response"
+    RESOLVED = "resolved"
 
 
 @attrs
@@ -78,6 +86,7 @@ class Conference(db.Model):  # type: ignore
 
     recording_release_url: str = db.Column(db.String(1024), nullable=False)
     cfp_email: str = db.Column(db.String(256), nullable=False)
+    conduct_email: str = db.Column(db.String(256), nullable=False)
 
     # Proposals window -- populate with naive datetimes in UTC
     proposals_begin: datetime = db.Column(db.DateTime)
@@ -197,7 +206,7 @@ class TalkCategory(db.Model):  # type: ignore
 
 class Category(db.Model):  # type: ignore
     category_id: int = db.Column(db.Integer, primary_key=True)
-    name: str = db.Column(db.String(64), nullable=False, unique=True)
+    name = db.Column(db.String(64), nullable=False, unique=True)
 
     talks = db.relationship("Talk", secondary=TalkCategory.__table__)
 
@@ -205,8 +214,75 @@ class Category(db.Model):  # type: ignore
         return self.name
 
 
+class Vote(db.Model):  # type: ignore
+    """Public voting support for talks."""
+
+    created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
+    updated = db.Column(
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+    talk_id = db.Column(db.Integer, db.ForeignKey("talk.talk_id"), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), primary_key=True)
+    # A public id is used to expose a reference to a vote without
+    # leaking information about the talk. This helps prevent brigading
+    # and ballot stuffing.
+    public_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True)
+    value = db.Column(db.Integer)
+    # A talk can be skipped without a vote value.
+    # This allows a voter to come back to talks at a later time.
+    skipped = db.Column(db.Boolean)
+
+    talk = db.relationship("Talk", backref=db.backref("votes", lazy="dynamic"))
+    user = db.relationship("User", backref=db.backref("votes", lazy="dynamic"))
+
+    __table_args__ = (
+        # TODO: Is this the correct approach here? Should conferences be
+        # able to set their own voting scales?
+        CheckConstraint("value is NULL OR value IN (-1, 0, 1)", name="ck_vote_values"),
+    )
+
+
+class ConductReport(db.Model):  # type: ignore
+    """Store reports of possible code of conduct issues for talks.
+
+    During public voting and review, users can report talks as possible
+    code of conduct issues. These reports must be reviewed by the
+    conduct team and responded to appropriately. Users can choose to
+    report anonymously; in these cases, organizers will be unable to
+    follow up to request more details.
+
+    .. note::
+        Anonymity is a difficult problem. Many places can leak
+        identifying information (e.g. logs), but as a first effort, we
+        don't permanently store a reference to the reporter.
+
+    """
+
+    id = db.Column(db.BigInteger, primary_key=True)
+    created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
+    updated = db.Column(
+        db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+    talk_id = db.Column(db.Integer, db.ForeignKey("talk.talk_id"), nullable=False)
+    # If the user reports anonymously, no reference will be stored.
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=True)
+    # The content provided by the reporter. This should serve as the
+    # formal report and direct conference staff in their review.
+    text = db.Column(db.Text, nullable=False)
+    status = db.Column(
+        Enum(ConductReportStatus), default=ConductReportStatus.REPORTED.name
+    )
+
+    talk = db.relationship(
+        "Talk", backref=db.backref("conduct_reports", lazy="dynamic")
+    )
+    user = db.relationship(
+        "User", backref=db.backref("conduct_reports_made", lazy="dynamic")
+    )
+
+
 class Talk(db.Model):  # type: ignore
-    talk_id: int = db.Column(db.Integer, primary_key=True)
+    talk_id = db.Column(db.Integer, primary_key=True)
     state: TalkStatus = db.Column(
         Enum(TalkStatus), server_default=TalkStatus.PROPOSED.name
     )
@@ -237,6 +313,18 @@ class Talk(db.Model):  # type: ignore
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    vote_count = column_property(
+        select([func.count(Vote.talk_id)])
+        .where(and_(Vote.talk_id == talk_id, Vote.skipped == False))  # noqa: E712
+        .correlate_except(Vote)
+    )
+
+    vote_score = column_property(
+        select([func.sum(Vote.value)])
+        .where(Vote.talk_id == talk_id)
+        .correlate_except(Vote)
     )
 
     def __str__(self) -> str:
