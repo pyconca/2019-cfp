@@ -73,6 +73,21 @@ class VoteForm(FlaskForm):
         validators=[OptionalValidator()],
     )
 
+    def validate(self) -> bool:
+        """Validate that a value is provided if the actions is vote."""
+        if not super().validate():
+            return False
+
+        if self.action.data not in ("skip", "vote"):
+            self.action.errors.append("Action must be vote or skip.")
+            return False
+
+        if self.action.data == "vote" and self.value.data is None:
+            self.value.errors.append("Please cast a vote.")
+            return False
+
+        return True
+
 
 class ConductReportForm(FlaskForm):
     """Information required for a code of conduct report."""
