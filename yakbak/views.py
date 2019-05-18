@@ -343,8 +343,9 @@ def vote_choose_talk_from_category(category_id: int) -> Response:
         vote = Vote(user=g.user, talk=talk)
         db.session.add(vote)
         db.session.commit()
-        # Set the chosen category for redirection purposes later.
-        session["voting_category"] = category.category_id
+
+    # Set the chosen category for redirection purposes later.
+    session["voting_category"] = category.category_id
     return redirect(url_for("views.vote", public_id=vote.public_id))
 
 
