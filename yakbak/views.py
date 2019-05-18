@@ -359,10 +359,11 @@ def vote(public_id: uuid.UUID) -> Response:
         if form.action.data == "vote":
             vote.value = form.value.data
             vote.skipped = False
+            flash("Voted!")
         elif form.action.data == "skip":
             vote.skipped = True
+            flash("Skipped")
         db.session.commit()
-        flash("Voted!")
 
         if "voting_category" in session:
             return redirect(

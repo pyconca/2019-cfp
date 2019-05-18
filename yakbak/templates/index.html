@@ -55,7 +55,7 @@
     <strong>Help us pick the talks that make the conference!</strong>
     Cast your votes to tell us whic talks you'd like to see at {{ g.conference.informal_name }}.
   </p>
-  <a class="btn btn-lg btn-light border" href="#">
+  <a class="btn btn-lg btn-light border" href="{{ url_for("views.vote_home") }}">
     {% if g.user.is_anonymous %}Log In and{%endif %}
     Vote Now
   </a>
