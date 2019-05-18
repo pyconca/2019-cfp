@@ -79,6 +79,7 @@ class Conference(db.Model):  # type: ignore
     full_name: str = db.Column(db.String(256), nullable=False)
     informal_name: str = db.Column(db.String(256), nullable=False)
     website: str = db.Column(db.String(512), nullable=False)
+    footer_text = db.Column(db.Text, default="", server_default="", nullable=False)
 
     talk_lengths: List[int] = db.Column(
         JSONMutableList.as_mutable(JSON), nullable=False
