@@ -155,9 +155,14 @@ def talks_list() -> Response:
         InvitationStatus.REJECTED: [("Accept", "primary", "views.accept_invite")],
     }
     talk_actions = {
-        TalkStatus.PROPOSED: [("Withdraw", "danger", "views.withdraw_proposal")],
-        TalkStatus.WITHDRAWN: [("Re-Submit", "primary", "views.resubmit_proposal")],
+        TalkStatus.PROPOSED: [("Withdraw", "danger", "views.withdraw_proposal")]
     }
+    if g.conference.creating_proposals_allowed:
+        # you can resubmit talks only until the end of the CFP window
+        talk_actions[TalkStatus.WITHDRAWN] = [
+            ("Re-Submit", "primary", "views.resubmit_proposal")
+        ]
+
     prompt_for_survey = proposed_talks and not g.user.demographic_survey
     prompt_for_bio = proposed_talks and not g.user.speaker_bio
     return render_template(
@@ -212,6 +217,7 @@ def withdraw_proposal(talk_id: int) -> Response:
 
 
 @app.route("/talks/<int:talk_id>/resubmit")
+@requires_new_proposal_window_open
 @login_required
 def resubmit_proposal(talk_id: int) -> Response:
     talk = load_talk(talk_id)
