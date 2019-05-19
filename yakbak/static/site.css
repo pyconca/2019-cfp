@@ -6,6 +6,7 @@
   width: 100%;
   padding: 20px 0;
 }
-.footer div p:last-child {
+.footer p {
+  font-size: 80%;
   margin-bottom: 0;
 }

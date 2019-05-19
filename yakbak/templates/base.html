@@ -81,20 +81,15 @@
 
     {% block footer %}
     <footer class="footer bg-light">
-      <div class="container">
+      <div class="container text-muted">
+        <p>{{ g.conference.footer_text|markdown }}</p>
+        <p>Copyright &copy; 2019 Big Apple Py, Inc.</p>
         <p>
-          <small class="text-muted">
-            {{ g.conference.footer_text|markdown }}
-          </small>
-        </p>
-          <small class="text-muted">
-            Copyright &copy; 2019 Big Apple Py, Inc.
-          </small>
-        </p>
+          Have a question about the {{ g.conference.informal_name }} call for proposals?
+          Email <a href="mailto:{{ g.conference.cfp_email }}">{{ g.conference.cfp_email }}</a>.
         <p>
-          <small class="text-muted">
-            Spot a problem? Email <a href="mailto:{{ g.conference.cfp_email }}">{{ g.conference.cfp_email }}</a>.
-          </small>
+          Spot a problem? Let the developers know at
+          <a href="https://gitlab.com/bigapplepy/yak-bak">https://gitlab.com/bigapplepy/yak-bak</a>.
         </p>
       </div>
     </footer>
