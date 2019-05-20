@@ -1,9 +1,9 @@
 from typing import List
+from unittest.mock import ANY, Mock
 import re
 
 from werkzeug.test import Client
 import bs4
-import mock
 
 from yakbak.models import db, InvitationStatus, Talk, User
 from yakbak.tests.util import (
@@ -117,7 +117,7 @@ def test_manage_speakers_page_shows_other_speakers(client: Client, user: User) -
 
 
 def test_inviting_a_speaker_adds_the_speaker(
-    client: Client, user: User, send_mail: mock.Mock
+    client: Client, user: User, send_mail: Mock
 ) -> None:
     talk = Talk(title="My Talk", length=25)
     talk.add_speaker(user, InvitationStatus.CONFIRMED)
@@ -143,7 +143,7 @@ def test_inviting_a_speaker_adds_the_speaker(
     assert_html_response_contains(resp, "Alice Example")
 
     send_mail.assert_called_once_with(
-        to=["alice@example.com"], template="email/co-presenter-invite", talk=mock.ANY
+        to=["alice@example.com"], template="email/co-presenter-invite", talk=ANY
     )
 
     _, kwargs = send_mail.call_args
@@ -153,7 +153,7 @@ def test_inviting_a_speaker_adds_the_speaker(
 
 
 def test_inviting_a_speaker_emails_the_speaker(
-    client: Client, user: User, send_mail: mock.Mock
+    client: Client, user: User, send_mail: Mock
 ) -> None:
     talk = Talk(title="My Talk", length=25)
     talk.add_speaker(user, InvitationStatus.CONFIRMED)
@@ -179,7 +179,7 @@ def test_inviting_a_speaker_emails_the_speaker(
     assert_html_response_contains(resp, "alice@example.com")
 
     send_mail.assert_called_once_with(
-        to=["alice@example.com"], template="email/co-presenter-invite", talk=mock.ANY
+        to=["alice@example.com"], template="email/co-presenter-invite", talk=ANY
     )
 
     _, kwargs = send_mail.call_args

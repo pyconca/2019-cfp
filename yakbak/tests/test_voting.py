@@ -1,8 +1,8 @@
 """Test voting functionality."""
 
 from datetime import datetime, timedelta
+from unittest.mock import Mock
 
-from mock import Mock
 from werkzeug.test import Client
 import pytest
 

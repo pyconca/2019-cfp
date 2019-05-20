@@ -1,5 +1,4 @@
 beautifulsoup4
-mock
 tox
 pip-tools
 pytest
