@@ -1,5 +1,6 @@
 [db]
-url="postgresql://yakbak@postgres:5432/yakbak"
+# the URL is overridden in the app fixture in conftest.py
+url="..."
 
 [logging]
 level="INFO"

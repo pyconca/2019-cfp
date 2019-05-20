@@ -1,5 +1,3 @@
-beautifulsoup4
 tox
-pip-tools
-pytest
+tox-docker
 -rrequirements.txt

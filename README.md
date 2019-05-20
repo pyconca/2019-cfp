@@ -6,7 +6,7 @@ Future home of a tech conference call for proposals and program selection app.
 
 ## Running it Locally
 
-Yak-Bak requires Python 3.6 or newer.
+Yak-Bak requires Python 3.7 or newer.
 
 1. Install requirements: `pip install -rtest-requirements.txt`
 
@@ -38,9 +38,9 @@ Yak-Bak requires Python 3.6 or newer.
     You may find the `--debugger` and `--reload` flags helpful during
     development.
 
-6. Run tests with `py.test yakbak` (NOTE: the current settings are based on CI),
-   check style compliance with `tox -e style`, or check types with `tox -e
-   mypy`. You can also format the code with `tox -e format`.
+6. Run tests with `tox -e py37`, check style compliance with `tox -e style`,
+   or check types with `tox -e mypy`. You can also format the code with `tox -e
+   format`.
 
 ## Development Notes
 
