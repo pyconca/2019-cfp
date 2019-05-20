@@ -28,9 +28,6 @@ Yak-Bak requires Python 3.6 or newer.
     `postgres+psycopg2://localhost/yakbak`, assuming a database name of
     `yakbak`.
 
-    For local development with SQLite, you may use `sqlite://yakbak.sqlite3`,
-    which will create a file named `yakbak.sqlite3` in the repository root.
-
     We recommend that you use PostgreSQL 10 or newer. You will also need to
     install the PostgreSQL driver for python with `pip install psycopg2`.
 
