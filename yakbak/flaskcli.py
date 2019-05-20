@@ -45,9 +45,11 @@ def sync_db() -> None:
 @app.cli.command()
 @click.argument("full_name")
 @click.argument("informal_name")
+@click.argument("website")
 @click.argument("talk_lengths")
 @click.argument("recording_release_url")
 @click.argument("cfp_email")
+@click.argument("conduct_email")
 @click.option("--proposals-begin", type=DateTime(), help="interpreted as UTC")
 @click.option("--proposals-end", type=DateTime(), help="interpreted as UTC")
 @click.option("--voting-begin", type=DateTime(), help="interpreted as UTC")
@@ -55,16 +57,18 @@ def sync_db() -> None:
 def add_conference(
     full_name: str,
     informal_name: str,
+    website: str,
     talk_lengths: str,
     recording_release_url: str,
     cfp_email: str,
+    conduct_email: str,
     proposals_begin: Optional[datetime],
     proposals_end: Optional[datetime],
     voting_begin: Optional[datetime],
     voting_end: Optional[datetime],
 ) -> None:
     # TODO: Remove this check once multiple conferences are supported.
-    if db.session.query(Conference.exists()).scalar():
+    if db.session.query(Conference.query.exists()).scalar():
         print("WARNING: Adding a second conference is not supported at this time.")
         sys.exit(1)
 
@@ -72,9 +76,11 @@ def add_conference(
     conf = Conference(
         full_name=full_name,
         informal_name=informal_name,
+        website=website,
         talk_lengths=lengths,
         recording_release_url=recording_release_url,
         cfp_email=cfp_email,
+        conduct_email=conduct_email,
         proposals_begin=proposals_begin,
         proposals_end=proposals_end,
         voting_begin=voting_begin,
