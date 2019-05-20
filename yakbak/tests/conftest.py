@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Generator, Iterable
+from unittest.mock import Mock, patch
 import json
 import os.path
 
@@ -9,7 +10,6 @@ from flask_login import login_user
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 import jinja2
-import mock
 import pytest
 
 from yakbak import mail
@@ -80,8 +80,8 @@ def client(app: Application) -> Client:
 
 
 @pytest.yield_fixture
-def send_mail() -> Generator[mock.Mock, None, None]:
-    with mock.patch.object(mail, "send_mail") as send_mail:
+def send_mail() -> Generator[Mock, None, None]:
+    with patch.object(mail, "send_mail") as send_mail:
         yield send_mail
 
 

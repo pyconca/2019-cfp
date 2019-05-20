@@ -1,5 +1,6 @@
+from unittest.mock import Mock
+
 from werkzeug.test import Client
-import mock
 
 from yakbak.models import db, InvitationStatus, Talk, User
 from yakbak.tests.util import (
@@ -31,7 +32,7 @@ def test_site_admins_can_access_admin(client: Client, user: User) -> None:
     assert_html_response(resp, status=200)
 
 
-def test_talk_anonymization(client: Client, user: User, send_mail: mock.Mock) -> None:
+def test_talk_anonymization(client: Client, user: User, send_mail: Mock) -> None:
     user.site_admin = True
     db.session.add(user)
 
@@ -82,7 +83,7 @@ def test_talk_anonymization(client: Client, user: User, send_mail: mock.Mock) ->
 
 
 def test_talk_anonymization_doesnt_set_is_anonymized_if_no_changes(
-    client: Client, user: User, send_mail: mock.Mock
+    client: Client, user: User, send_mail: Mock
 ) -> None:
     user.site_admin = True
     db.session.add(user)

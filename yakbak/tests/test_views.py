@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
+from unittest.mock import ANY, Mock, patch
 from urllib.parse import urlparse
 import re
 
 from werkzeug.test import Client
 import bs4
-import mock
 
 from yakbak import views
 from yakbak.models import (
@@ -52,7 +52,7 @@ def test_login_shows_auth_methods(client: Client) -> None:
     assert_html_response_contains(resp, "Magic Link")
 
 
-def test_email_magic_link_form(client: Client, send_mail: mock.Mock) -> None:
+def test_email_magic_link_form(client: Client, send_mail: Mock) -> None:
     resp = client.get("/login/email")
     assert_html_response_contains(resp, re.compile('<input.*name="email"'))
     csrf_token = extract_csrf_from(resp)
@@ -64,13 +64,13 @@ def test_email_magic_link_form(client: Client, send_mail: mock.Mock) -> None:
     send_mail.assert_called_once_with(
         to=["jane@example.com"],
         template="email/magic-link",
-        magic_link=mock.ANY,
+        magic_link=ANY,
         magic_link_expiration="30 minutes",
     )
 
 
 def test_email_magic_link_login_for_new_user(client: Client) -> None:
-    with mock.patch.object(views, "parse_magic_link_token") as parse:
+    with patch.object(views, "parse_magic_link_token") as parse:
         parse.return_value = "jane@example.com"
         resp = client.get("/login/token/any-token-here", follow_redirects=True)
 
@@ -78,7 +78,7 @@ def test_email_magic_link_login_for_new_user(client: Client) -> None:
 
 
 def test_email_magic_link_login_for_returning_user(client: Client, user: User) -> None:
-    with mock.patch.object(views, "parse_magic_link_token") as parse:
+    with patch.object(views, "parse_magic_link_token") as parse:
         parse.return_value = user.email
         resp = client.get("/login/token/any-token-here", follow_redirects=True)
 
@@ -86,7 +86,7 @@ def test_email_magic_link_login_for_returning_user(client: Client, user: User) -
 
 
 def test_invalid_email_magic_link_login(client: Client) -> None:
-    with mock.patch.object(views, "parse_magic_link_token") as parse:
+    with patch.object(views, "parse_magic_link_token") as parse:
         parse.return_value = None
         resp = client.get("/login/token/any-token-here", follow_redirects=True)
 
@@ -94,7 +94,7 @@ def test_invalid_email_magic_link_login(client: Client) -> None:
 
 
 def test_email_magic_link_tokens_only_work_once(
-    client: Client, send_mail: mock.Mock
+    client: Client, send_mail: Mock
 ) -> None:
     resp = client.get("/login/email")
     csrf_token = extract_csrf_from(resp)

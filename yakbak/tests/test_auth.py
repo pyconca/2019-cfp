@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
+from unittest.mock import patch
 
 from werkzeug.test import Client
-import mock
 import pytest
 
 from yakbak import auth
@@ -25,7 +25,7 @@ from yakbak.tests.util import assert_html_response, extract_csrf_from
     ],
 )
 def test_get_magic_link_token_expiry(length: int, expected: str) -> None:
-    with mock.patch.object(auth, "current_app") as app:
+    with patch.object(auth, "current_app") as app:
         app.settings.auth.email_magic_link_expiry = length
         app.settings.auth.signing_key = "abcd"
 
@@ -35,7 +35,7 @@ def test_get_magic_link_token_expiry(length: int, expected: str) -> None:
 
 
 def test_parse_magic_link_token() -> None:
-    with mock.patch.object(auth, "current_app") as app:
+    with patch.object(auth, "current_app") as app:
         app.settings.auth.signing_key = "abcd"
         app.settings.auth.email_magic_link_expiry = 10  # seconds
 
@@ -46,7 +46,7 @@ def test_parse_magic_link_token() -> None:
 
 
 def test_parse_magic_link_token_is_none_for_garbled_tokens() -> None:
-    with mock.patch.object(auth, "current_app") as app:
+    with patch.object(auth, "current_app") as app:
         app.settings.auth.signing_key = "abcd"
         app.settings.auth.email_magic_link_expiry = 10  # seconds
 
@@ -58,7 +58,7 @@ def test_parse_magic_link_token_is_none_for_garbled_tokens() -> None:
 
 
 def test_parse_magic_link_token_is_none_for_expired_tokens() -> None:
-    with mock.patch.object(auth, "current_app") as app:
+    with patch.object(auth, "current_app") as app:
         app.settings.auth.signing_key = "abcd"
         app.settings.auth.email_magic_link_expiry = -1  # surprisingly this works
 
