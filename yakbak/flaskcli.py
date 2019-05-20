@@ -64,7 +64,7 @@ def add_conference(
     voting_end: Optional[datetime],
 ) -> None:
     # TODO: Remove this check once multiple conferences are supported.
-    if db.session.query(Conference.exists()).scalar():
+    if db.session.query(Conference.query.exists()).scalar():
         print("WARNING: Adding a second conference is not supported at this time.")
         sys.exit(1)
 
