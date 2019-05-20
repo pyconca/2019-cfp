@@ -28,6 +28,19 @@ def app(request: FixtureRequest) -> Iterable[Application]:
     test_toml = os.path.join(here, "yakbak.toml-test")
 
     settings = load_settings_file(test_toml)
+
+    # do this ugliness since the attrs object is frozen
+    if "POSTGRES_HOST" not in os.environ or "POSTGRES_5432_TCP_PORT" not in os.environ:
+        raise RuntimeError(
+            "Run tests with tox (pip install -r test-requirements.txt && tox)"
+        )
+
+    postgres_uri = (
+        f"postgresql://yakbak:y4kb4k@{os.environ['POSTGRES_HOST']}:"
+        f"{os.environ['POSTGRES_5432_TCP_PORT']}/yakbak_tox_test"
+    )
+    object.__setattr__(settings.db, "url", postgres_uri)
+
     flask_config = {"TESTING": True, "MAIL_SUPPRESS_SEND": True}
     app = create_app(settings, flask_config)
 
