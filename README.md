@@ -45,14 +45,13 @@ Yak-Bak requires Python 3.7 or newer.
 ## Development Notes
 
 - Yak-Bak uses [pip-tools](https://github.com/jazzband/pip-tools) to manage
-  the `requirements.txt` from `install_requires` in setup.py. Install
-  pip-tools with `pip install pip-tools`.
+  the `requirements.txt` from `install_requires` in setup.py.
 
-    To add or update dependencies, edit `setup.py` then run `pip-compile
-    --upgrade-package name-of-package` to update `requirements.txt` with
-    just that package, plus its dependencies. You will have to re-run `pip
-    install -r requirements.txt` after doing so to install or update the
-    packages.
+  To update dependencies, run `tox -e freeze`. To add a new package, run `tox -e
+  freeze -- --upgrade-package name-of-package`; this will update
+  `requirements.txt` with just that package and its dependencies. You will have
+  to re-run `pip install -r requirements.txt` after doing so to install or
+  update the packages.
 
 ## Social Auth
 
