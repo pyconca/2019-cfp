@@ -15,6 +15,21 @@ services:
       - ./yakbak.toml-prod:/code/yakbak.toml
     restart: on-failure
 
+  grafana:
+    image: grafana/grafana
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: 'true'
+      VIRTUAL_HOST: stats.cfp.pygotham.org
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: stats.cfp.pygotham.org
+      # TODO: this should really go to a group or ailias
+      LETSENCRYPT_EMAIL: jon@pygotham.org
+    links:
+      - db
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: on-failure
+
   db:
     image: "postgres:10-alpine"
     volumes:
@@ -59,6 +74,7 @@ volumes:
   certs:
   conf:
   dhparam:
+  grafana-data:
   html:
   vhost:
 
