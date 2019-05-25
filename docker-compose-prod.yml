@@ -18,7 +18,7 @@ services:
   grafana:
     image: grafana/grafana
     environment:
-      GF_AUTH_ANONYMOUS_ENABLED: 'true'
+      GF_SERVER_ROOT_URL: https://stats.cfp.pygotham.org
       VIRTUAL_HOST: stats.cfp.pygotham.org
       VIRTUAL_PORT: 3000
       LETSENCRYPT_HOST: stats.cfp.pygotham.org
