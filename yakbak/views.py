@@ -15,6 +15,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_required, login_user, logout_user
+from flask_wtf import FlaskForm
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
@@ -272,6 +273,7 @@ def vote_home() -> Response:
     return render_template(
         "vote/home.html",
         categories_counts=categories_counts,
+        clear_skipped_form=FlaskForm(),
         votes=votes,
         vote_label_map=VoteForm.VOTE_VALUE_CHOICES,
     )
@@ -335,11 +337,39 @@ def vote_choose_talk_from_category(category_id: int) -> Response:
             .order_by(Talk.vote_count.asc(), func.random())
         ).first()
         if talk is None:
-            flash(
-                f"There are no more {category.name} talks left to vote on. Great job!"
-            )
-            # There are no talks to vote on here, so remove the stored
-            # category preference.
+            skipped_talks_exist = db.session.query(
+                db.session.query(Vote)
+                .join(Talk)
+                .join(TalkCategory, Talk.talk_id == TalkCategory.talk_id)
+                .filter(
+                    TalkCategory.category_id == category_id,
+                    Vote.skipped == True,  # noqa: E712
+                    Vote.user == g.user,
+                )
+                .exists()
+            ).scalar()
+            if skipped_talks_exist:
+                Vote.clear_skipped(category=category, commit=True, user=g.user)
+                flash(
+                    " ".join(
+                        (
+                            f"Skipped talks for category {category.name} cleared.",
+                            "Choose a category to continue voting.",
+                        )
+                    )
+                )
+            else:
+                flash(
+                    " ".join(
+                        (
+                            f"There are no more {category.name} talks left to vote on.",
+                            "Great job!",
+                        )
+                    )
+                )
+
+            # If the user has finished voting on the selected category
+            # (temporarily or permanently), clear the preference.
             with suppress(KeyError):
                 del session["voting_category"]
             return redirect(url_for("views.vote_home"))
@@ -384,6 +414,20 @@ def vote(public_id: uuid.UUID) -> Response:
         form=form,
         conduct_form=ConductReportForm(talk_id=vote.talk.talk_id),
     )
+
+
+@app.route("/vote/clear-skipped", methods=["POST"])
+@requires_voting_allowed
+@login_required
+def clear_skipped_votes() -> Response:
+    """Remove any skipped votes to restart the review queue."""
+    # There's no form data here, so use a bare FlaskForm just to handle
+    # CSRF protection.
+    form = FlaskForm()
+    if form.validate_on_submit():
+        Vote.clear_skipped(user=g.user, commit=True)
+        flash("All skipped talks cleared. Choose a category to continue voting.")
+    return redirect(url_for("views.vote_home"))
 
 
 # TODO: consider the privacy implications of using talk_id here,

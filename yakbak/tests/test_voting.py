@@ -1,6 +1,7 @@
 """Test voting functionality."""
 
 from datetime import datetime, timedelta
+from typing import Optional
 from unittest.mock import Mock
 
 from werkzeug.test import Client
@@ -137,3 +138,49 @@ def test_vote_gating(
     assert resp.headers["Location"].endswith(f"/vote/cast/{public_id}")
     assert Vote.query.count() == 1
     assert Vote.query.filter_by(talk_id=2).count() == 0
+
+
+@pytest.mark.parametrize(
+    "category_name,commit,ending_count",
+    (
+        ("Second Category", True, 1),
+        (None, True, 0),
+        ("Second Category", False, 2),
+        (None, False, 2),
+    ),
+)
+def test_clear_skipped_votes(
+    *,
+    category_name: Optional[str],
+    commit: bool,
+    conference: Conference,
+    ending_count: int,
+    user: User,
+) -> None:
+    """Test that skipped votes can be cleared for a uesr."""
+    talk1 = Talk(title="", length=1, is_anonymized=True)
+    talk2 = Talk(title="", length=1, is_anonymized=True)
+    category1 = Category(conference=conference, name="First Category")
+    category2 = Category(conference=conference, name="Second Category")
+    vote1 = Vote(talk=talk1, user=user, skipped=True)
+    vote2 = Vote(talk=talk2, user=user, skipped=True)
+    category1.talks.append(talk1)
+    category2.talks.append(talk2)
+    db.session.add_all((category1, category2, talk1, talk2, vote1, vote2))
+    db.session.commit()
+
+    # Choose the category to delete skipped votes from based on the
+    # provided category name.
+    if category_name is None:
+        target_category = None
+    else:
+        target_category = Category.query.filter_by(name=category_name).first()
+
+    # Clear the skipped votes as configured.
+    Vote.clear_skipped(category=target_category, commit=commit, user=user)
+
+    # Rollback the session to clear any uncommitted changes.
+    db.session.rollback()
+
+    # Check for the desired skipped vote count.
+    assert Vote.query.count() == ending_count

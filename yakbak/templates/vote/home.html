@@ -4,7 +4,11 @@
 {% block title %}Categories - {{ super() }}{% endblock %}
 
 {% block container %}
-<h3>Talk Categories</h3>
+<h3 class="float-left">Talk Categories</h3>
+<form class="float-md-right" method="POST" action="{{ url_for("views.clear_skipped_votes") }}">
+  {{ clear_skipped_form.hidden_tag() }}
+  <button type="submit" class="btn btn-primary">Clear Skipped Votes</button>
+</form>
 <table class="table table-bordered table-hover">
   <thead>
     <tr>

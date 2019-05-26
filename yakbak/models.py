@@ -243,6 +243,38 @@ class Vote(db.Model):  # type: ignore
         CheckConstraint("value is NULL OR value IN (-1, 0, 1)", name="ck_vote_values"),
     )
 
+    @classmethod
+    def clear_skipped(
+        cls, *, user: User, category: Category = None, commit: bool = False
+    ) -> None:
+        """Remove any skipped votes for the given user and category.
+
+        Args:
+            user: The user that owns the votes to be cleared. Required.
+            category: The category to clear skipped votes for. If
+                ``None``, clear skipped votes regardless of category.
+                Defaults to ``None``.
+            commit: If ``True``, commit the SQLAlchemy session. If no
+                other changes are being made at a call site, this should
+                be set to ``True``. If other changes are being made,
+                however, it should be left as ``False`` to defer the
+                commit until after other database operations are
+                performed. Defaults to ``False``.
+
+        """
+        query = db.session.query(cls).filter(
+            cls.skipped == True, cls.user == user  # noqa: E712
+        )
+        if category is not None:
+            query = query.filter(
+                Vote.talk_id == TalkCategory.talk_id,
+                TalkCategory.category_id == category.category_id,
+            )
+        query.delete(synchronize_session="fetch")
+        db.session.execute(query)
+        if commit:
+            db.session.commit()
+
 
 class ConductReport(db.Model):  # type: ignore
     """Store reports of possible code of conduct issues for talks.
