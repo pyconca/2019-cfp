@@ -186,6 +186,8 @@ class AdminDashboard(AuthMixin, AdminIndexView):
 
 
 class ModelView(AuthMixin, sqla.ModelView):
+    page_size = 100
+
     def __init__(
         self,
         model: Any,
