@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from bunch import Bunch
 from flask import (
@@ -16,6 +16,8 @@ from flask_admin.contrib import sqla
 from sqlalchemy import func, not_
 from sqlalchemy.orm import joinedload
 from werkzeug import Response
+from wtforms import Form, Field
+from wtforms.validators import ValidationError
 
 from yakbak import mail
 from yakbak.forms import CategorizeForm, TalkForm
@@ -200,12 +202,24 @@ class ModelView(AuthMixin, sqla.ModelView):
         super().__init__(model, session)
 
 
+def _must_not_start_with(prefix: str) -> Callable[[Form, Field], None]:
+    def validator(form: Form, field: Field) -> None:
+        if field.data.startswith(prefix):
+            raise ValidationError(f"must not start with {prefix!r}")
+
+    return validator
+
+
+class ConferenceView(ModelView):
+    form_args = dict(twitter_username=dict(validators=[_must_not_start_with("@")]))
+
+
 flask_admin = Admin(
     index_view=AdminDashboard(url="/manage/db"),
     template_mode="bootstrap3",
     url="/manage/db",
 )
-flask_admin.add_view(ModelView(Conference, db.session))
+flask_admin.add_view(ConferenceView(Conference, db.session))
 flask_admin.add_view(
     ModelView(
         Talk,
