@@ -92,6 +92,14 @@ def client(app: Application) -> Client:
     return app.test_client()
 
 
+# TODO: This is a bit backward and should probably be the thing to
+# create the conference rather than fetching it from the app.
+@pytest.fixture
+def conference(app: Application) -> Conference:
+    """Return a test conference."""
+    return Conference.query.first()
+
+
 @pytest.yield_fixture
 def send_mail() -> Generator[Mock, None, None]:
     with patch.object(mail, "send_mail") as send_mail:

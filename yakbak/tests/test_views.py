@@ -316,8 +316,10 @@ def test_talk_form_uses_select_field_for_length(client: Client, user: User) -> N
     )
 
 
-def test_saving_a_talk_clears_categories(client: Client, user: User) -> None:
-    category = Category(name="The Category")
+def test_saving_a_talk_clears_categories(
+    client: Client, conference: Conference, user: User
+) -> None:
+    category = Category(conference=conference, name="The Category")
     talk = Talk(title="Old Title", length=25)
     talk.categories.append(category)
     talk.add_speaker(user, InvitationStatus.CONFIRMED)

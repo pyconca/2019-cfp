@@ -266,7 +266,9 @@ class CategoryChoices:
         return iter(
             [
                 (category.category_id, category.name)
-                for category in Category.query.order_by(Category.name).all()
+                for category in Category.query.filter_by(conference=g.conference)
+                .order_by(Category.name)
+                .all()
             ]
         )
 

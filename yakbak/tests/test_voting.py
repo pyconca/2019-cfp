@@ -70,14 +70,16 @@ def test_vote_save(*, authenticated_client: Client, user: User) -> None:
     assert str(Vote.query.filter_by(value=1).first().public_id) == public_id
 
 
-def test_choose_vote(*, authenticated_client: Client, user: User) -> None:
+def test_choose_vote(
+    *, authenticated_client: Client, conference: Conference, user: User
+) -> None:
     """Test that votes are created correctly for a category."""
     talk1 = Talk(title="", length=1, is_anonymized=True)
-    category1 = Category(name="1")
+    category1 = Category(conference=conference, name="1")
     category1.talks.append(talk1)
 
     talk2 = Talk(title="", length=1, is_anonymized=True)
-    category2 = Category(name="2")
+    category2 = Category(conference=conference, name="2")
     category2.talks.append(talk2)
 
     db.session.add_all((talk1, talk2, category1, category2))
@@ -92,11 +94,13 @@ def test_choose_vote(*, authenticated_client: Client, user: User) -> None:
     assert Vote.query.filter_by(talk_id=2).count() == 1
 
 
-def test_vote_balance(*, authenticated_client: Client, user: User) -> None:
+def test_vote_balance(
+    *, authenticated_client: Client, conference: Conference, user: User
+) -> None:
     """Test that votes are balanced correctly for a category."""
     talk1 = Talk(title="", length=1, is_anonymized=True)
     talk2 = Talk(title="", length=1, is_anonymized=True)
-    category = Category(name="")
+    category = Category(conference=conference, name="")
     vote1 = Vote(talk=talk1, user=user, value=1, skipped=False)
     category.talks.append(talk1)
     category.talks.append(talk2)
@@ -113,11 +117,13 @@ def test_vote_balance(*, authenticated_client: Client, user: User) -> None:
     assert Vote.query.filter_by(talk_id=2).count() == 1
 
 
-def test_vote_gating(*, authenticated_client: Client, user: User) -> None:
+def test_vote_gating(
+    *, authenticated_client: Client, conference: Conference, user: User
+) -> None:
     """Test that votes are gated correctly for a category."""
     talk1 = Talk(title="", length=1, is_anonymized=True)
     talk2 = Talk(title="", length=1, is_anonymized=True)
-    category = Category(name="")
+    category = Category(conference=conference, name="")
     vote = Vote(talk=talk1, user=user)
     category.talks.append(talk1)
     category.talks.append(talk2)

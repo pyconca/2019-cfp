@@ -22,7 +22,7 @@ import uuid
 
 from attr import attrib, attrs
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_, CheckConstraint, func, select
+from sqlalchemy import and_, CheckConstraint, func, select, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import column_property, Query, synonym
 from sqlalchemy.types import Enum, JSON
@@ -198,9 +198,19 @@ class TalkCategory(db.Model):  # type: ignore
 
 class Category(db.Model):  # type: ignore
     category_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), nullable=False, unique=True)
+    conference_id = db.Column(
+        db.Integer, db.ForeignKey("conference.conference_id"), nullable=False
+    )
+    name = db.Column(db.String(64), nullable=False)
 
+    conference = db.relationship(
+        "Conference", backref=db.backref("categories", lazy="dynamic")
+    )
     talks = db.relationship("Talk", secondary=TalkCategory.__table__)
+
+    __table_args__ = (
+        UniqueConstraint("conference_id", "name", name="uix_conference_category"),
+    )
 
     def __str__(self) -> str:
         return self.name
