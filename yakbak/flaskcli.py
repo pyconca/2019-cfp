@@ -49,6 +49,7 @@ def sync_db() -> None:
 @click.argument("talk_lengths")
 @click.argument("recording_release_url")
 @click.argument("cfp_email")
+@click.argument("twitter_username")
 @click.argument("conduct_email")
 @click.option("--proposals-begin", type=DateTime(), help="interpreted as UTC")
 @click.option("--proposals-end", type=DateTime(), help="interpreted as UTC")
@@ -61,6 +62,7 @@ def add_conference(
     talk_lengths: str,
     recording_release_url: str,
     cfp_email: str,
+    twitter_username: str,
     conduct_email: str,
     proposals_begin: Optional[datetime],
     proposals_end: Optional[datetime],
@@ -71,6 +73,9 @@ def add_conference(
     if db.session.query(Conference.query.exists()).scalar():
         print("WARNING: Adding a second conference is not supported at this time.")
         sys.exit(1)
+    if twitter_username.startswith("@"):
+        print("Twitter username should not start with '@'")
+        sys.exit(1)
 
     lengths = [int(l) for l in talk_lengths.split(",")]
     conf = Conference(
@@ -80,6 +85,7 @@ def add_conference(
         talk_lengths=lengths,
         recording_release_url=recording_release_url,
         cfp_email=cfp_email,
+        twitter_username=twitter_username,
         conduct_email=conduct_email,
         proposals_begin=proposals_begin,
         proposals_end=proposals_end,

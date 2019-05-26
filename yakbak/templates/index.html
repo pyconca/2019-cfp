@@ -21,12 +21,22 @@
 {% block metas %}
 {{ super() }}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="PyGotham Call for Proposals is Open!">
-    <meta name="twitter:description" content="If you have something that Pythonistas want to hear about, propose a talk! PyGotham CFP open through May 12.">
+    {% if g.conference.creating_proposals_allowed %}
+    <meta name="twitter:title" content="{{ g.conference.informal_name }} Call for Proposals is Open!">
+    <meta name="twitter:description" content="If you have something that Pythonistas want to hear about, propose a talk! {{ g.conference.informal_name }} CFP open through {{ g.conference.proposals_end.strftime('%B %d') }}.">
+    {% elif g.conference.voting_allowed %}
+    <meta name="twitter:title" content="Vote on {{ g.conference.informal_name }} Talk Proposals!">
+    <meta name="twitter:description" content="Help us pick the talks that will end up in {{ g.conference.informal_name }}! Cast your vote through {{ g.conference.voting_end.strftime('%B %d') }}">
+    {% else %}
+    <meta name="twitter:title" content="{{ g.conference.informal_name }} Call for Proposals">
+    <meta name="twitter:description" content="The {{ g.conference.informal_name }} Call for Proposals isn't active right now{% if g.conference.twitter_username %} -- follow {{ g.conference.twitter_username }} for conference announcements{% endif %}.">
+    {% endif %}
     <meta name="twitter:image" content="{{ url_for("static", filename="pygotham-twitter-card.jpg", _external=True) }}">
-    <meta name="twitter:image:alt" content="PyGotham 2019 Logo">
-    <meta name="twitter:creator" content="@PyGotham">
-    <meta name="twitter:site" content="@PyGotham">
+    <meta name="twitter:image:alt" content="{{ g.conference.full_name }} Logo">
+    {% if g.conference.twitter_username %}
+    <meta name="twitter:creator" content="@{{ g.conference.twitter_username }}">
+    <meta name="twitter:site" content="@{{ g.conference.twitter_username }}">
+    {% endif %}
 {% endblock %}
 
 {% block container %}

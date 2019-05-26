@@ -79,6 +79,7 @@ class Conference(db.Model):  # type: ignore
     full_name: str = db.Column(db.String(256), nullable=False)
     informal_name: str = db.Column(db.String(256), nullable=False)
     website: str = db.Column(db.String(512), nullable=False)
+    twitter_username: str = db.Column(db.String(15), nullable=True)
     footer_text = db.Column(db.Text, default="", server_default="", nullable=False)
 
     talk_lengths: List[int] = db.Column(
@@ -129,10 +130,7 @@ class Conference(db.Model):  # type: ignore
 
     @property
     def creating_proposals_allowed(self) -> bool:
-        # TODO: stop considering proposals open if there is no window,
-        # but want to be cautious about installs that might not have
-        # updated their windows yet
-        return self.proposal_window is None or self.proposal_window.includes_now()
+        return self.proposal_window is not None and self.proposal_window.includes_now()
 
     @property
     def editing_proposals_allowed(self) -> bool:

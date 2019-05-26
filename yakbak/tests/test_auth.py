@@ -68,20 +68,6 @@ def test_parse_magic_link_token_is_none_for_expired_tokens() -> None:
         assert email is None
 
 
-def test_talk_creation_allowed_when_no_window(user: User, client: Client) -> None:
-    # this behavior is needed for backwards compatibility as we add
-    # the fields for the first time to the Conference object
-    conf = Conference.query.get(1)
-    conf.proposals_begin = None
-    conf.proposals_end = None
-    db.session.add(conf)
-    db.session.commit()
-
-    client.get("/test-login/{}".format(user.user_id), follow_redirects=True)
-    resp = client.get("/talks/new")
-    assert_html_response(resp, status=200)
-
-
 def test_talk_creation_only_allowed_in_window(user: User, client: Client) -> None:
     conf = Conference.query.get(1)
     conf.proposals_begin = datetime.utcnow() - timedelta(days=1)
