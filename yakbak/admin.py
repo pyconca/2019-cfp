@@ -16,7 +16,7 @@ from flask_admin.contrib import sqla
 from sqlalchemy import func, not_
 from sqlalchemy.orm import joinedload
 from werkzeug import Response
-from wtforms import Form, Field
+from wtforms import Field, Form
 from wtforms.validators import ValidationError
 
 from yakbak import mail
