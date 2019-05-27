@@ -8,19 +8,14 @@ Some style notes:
 - Always have an opaque primary key (usually an integer), even if a
   surrogate key seems like a good candidate (eg is unique, stable, etc)
 - Always name the primary key "<tablename>_id"
-- MyPy has some trouble understanding SQLAlchemy, so use `# type: ignore`
-  on each model class, but do annotate each column with a type
 - Always name foreign keys "<tablename>_id" (for whichever table they
   reference)
-- For relationships, use ``back_populates`` rather than ``backref``, and
-  explicitly configure the relationship on the other table as well. This
-  gives us the ability to type annotate both sides.
 - Include ``created`` and ``updated`` columns on all model tables. You can
   omit this on join tables.
 
 """
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 import enum
 import logging
 import uuid
@@ -74,29 +69,27 @@ class TimeWindow:
 
 
 class Conference(db.Model):  # type: ignore
-    conference_id: int = db.Column(db.Integer, primary_key=True)
+    conference_id = db.Column(db.Integer, primary_key=True)
 
-    full_name: str = db.Column(db.String(256), nullable=False)
-    informal_name: str = db.Column(db.String(256), nullable=False)
-    website: str = db.Column(db.String(512), nullable=False)
-    twitter_username: str = db.Column(db.String(15), nullable=True)
+    full_name = db.Column(db.String(256), nullable=False)
+    informal_name = db.Column(db.String(256), nullable=False)
+    website = db.Column(db.String(512), nullable=False)
+    twitter_username = db.Column(db.String(15), nullable=True)
     footer_text = db.Column(db.Text, default="", server_default="", nullable=False)
 
-    talk_lengths: List[int] = db.Column(
-        JSONMutableList.as_mutable(JSON), nullable=False
-    )
+    talk_lengths = db.Column(JSONMutableList.as_mutable(JSON), nullable=False)
 
-    recording_release_url: str = db.Column(db.String(1024), nullable=False)
-    cfp_email: str = db.Column(db.String(256), nullable=False)
-    conduct_email: str = db.Column(db.String(256), nullable=False)
+    recording_release_url = db.Column(db.String(1024), nullable=False)
+    cfp_email = db.Column(db.String(256), nullable=False)
+    conduct_email = db.Column(db.String(256), nullable=False)
 
     # Proposals window -- populate with naive datetimes in UTC
-    proposals_begin: datetime = db.Column(db.DateTime)
-    proposals_end: datetime = db.Column(db.DateTime)
+    proposals_begin = db.Column(db.DateTime)
+    proposals_end = db.Column(db.DateTime)
 
     # Voting window -- populate with naive datetimes in UTC
-    voting_begin: datetime = db.Column(db.DateTime)
-    voting_end: datetime = db.Column(db.DateTime)
+    voting_begin = db.Column(db.DateTime)
+    voting_end = db.Column(db.DateTime)
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
@@ -151,15 +144,15 @@ class Conference(db.Model):  # type: ignore
 
 
 class User(db.Model):  # type: ignore
-    user_id: int = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True)
 
-    fullname: str = db.Column(db.String(256), nullable=False)
-    email: str = db.Column(db.String(256), nullable=False, unique=True)
+    fullname = db.Column(db.String(256), nullable=False)
+    email = db.Column(db.String(256), nullable=False, unique=True)
 
-    twitter_username: str = db.Column(db.String(15), nullable=True)
-    speaker_bio: str = db.Column(db.Text, nullable=True)
+    twitter_username = db.Column(db.String(15), nullable=True)
+    speaker_bio = db.Column(db.Text, nullable=True)
 
-    site_admin: bool = db.Column(
+    site_admin = db.Column(
         db.Boolean, default=False, server_default="false", nullable=False
     )
 
@@ -169,7 +162,7 @@ class User(db.Model):  # type: ignore
     )
 
     # Flask-Social-Auth compatibility
-    id: int = synonym("user_id")
+    id = synonym("user_id")
 
     def __str__(self) -> str:
         return f"{self.fullname} ({self.email})"
@@ -204,7 +197,7 @@ class TalkCategory(db.Model):  # type: ignore
 
 
 class Category(db.Model):  # type: ignore
-    category_id: int = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False, unique=True)
 
     talks = db.relationship("Talk", secondary=TalkCategory.__table__)
@@ -282,30 +275,28 @@ class ConductReport(db.Model):  # type: ignore
 
 class Talk(db.Model):  # type: ignore
     talk_id = db.Column(db.Integer, primary_key=True)
-    state: TalkStatus = db.Column(
-        Enum(TalkStatus), server_default=TalkStatus.PROPOSED.name
-    )
+    state = db.Column(Enum(TalkStatus), server_default=TalkStatus.PROPOSED.name)
 
-    title: str = db.Column(db.String(512), nullable=False)
-    length: int = db.Column(db.Integer, nullable=False)
-    description: Optional[str] = db.Column(db.Text)
-    outline: Optional[str] = db.Column(db.Text)
-    requirements: Optional[str] = db.Column(db.Text)
-    take_aways: Optional[str] = db.Column(db.Text)
+    title = db.Column(db.String(512), nullable=False)
+    length = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.Text)
+    outline = db.Column(db.Text)
+    requirements = db.Column(db.Text)
+    take_aways = db.Column(db.Text)
 
     # anonymization support
-    is_anonymized: bool = db.Column(
+    is_anonymized = db.Column(
         db.Boolean, nullable=False, default=False, server_default="false"
     )
-    has_anonymization_changes: bool = db.Column(
+    has_anonymization_changes = db.Column(
         db.Boolean, nullable=False, default=False, server_default="false"
     )
-    anonymized_title: Optional[str] = db.Column(db.String(512))
-    anonymized_description: Optional[str] = db.Column(db.Text)
-    anonymized_outline: Optional[str] = db.Column(db.Text)
-    anonymized_take_aways: Optional[str] = db.Column(db.Text)
+    anonymized_title = db.Column(db.String(512))
+    anonymized_description = db.Column(db.Text)
+    anonymized_outline = db.Column(db.Text)
+    anonymized_take_aways = db.Column(db.Text)
 
-    accepted_recording_release: bool = db.Column(db.Boolean)
+    accepted_recording_release = db.Column(db.Boolean)
 
     categories = db.relationship("Category", secondary=TalkCategory.__table__)
 
@@ -315,15 +306,19 @@ class Talk(db.Model):  # type: ignore
     )
 
     vote_count = column_property(
-        select([func.count(Vote.talk_id)])
-        .where(and_(Vote.talk_id == talk_id, Vote.skipped == False))  # noqa: E712
-        .correlate_except(Vote)
+        select([func.count(Vote.talk_id)]).where(
+            and_(Vote.talk_id == talk_id, Vote.skipped == False)
+        )  # noqa: E712
+        # TODO: sqlalchemy-stubs doesn't seem to like a bare `Vote`
+        # here. This should be fixed upstream.
+        .correlate_except(Vote.__table__)
     )
 
     vote_score = column_property(
-        select([func.sum(Vote.value)])
-        .where(Vote.talk_id == talk_id)
-        .correlate_except(Vote)
+        select([func.sum(Vote.value)]).where(Vote.talk_id == talk_id)
+        # TODO: sqlalchemy-stubs doesn't seem to like a bare `Vote`
+        # here. This should be fixed upstream.
+        .correlate_except(Vote.__table__)
     )
 
     def __str__(self) -> str:
@@ -410,15 +405,13 @@ class DemographicSurvey(db.Model):  # type: ignore
 
     # These fields are multi-select fields, some with "other" options;
     # the choices are defined in the DemographicSurveyForm in forms.py
-    gender: Optional[List[str]] = db.Column(JSONMutableList.as_mutable(JSON))
-    ethnicity: Optional[List[str]] = db.Column(JSONMutableList.as_mutable(JSON))
-    past_speaking: Optional[List[str]] = db.Column(JSONMutableList.as_mutable(JSON))
+    gender = db.Column(JSONMutableList.as_mutable(JSON))
+    ethnicity = db.Column(JSONMutableList.as_mutable(JSON))
+    past_speaking = db.Column(JSONMutableList.as_mutable(JSON))
 
     # These fields are single-select and have choices defined above
-    age_group: Optional[AgeGroup] = db.Column(Enum(AgeGroup))
-    programming_experience: Optional[ProgrammingExperience] = db.Column(
-        Enum(ProgrammingExperience)
-    )
+    age_group = db.Column(Enum(AgeGroup))
+    programming_experience = db.Column(Enum(ProgrammingExperience))
 
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
@@ -444,8 +437,8 @@ class DemographicSurvey(db.Model):  # type: ignore
 
 
 class UsedMagicLink(db.Model):  # type: ignore
-    token: str = db.Column(db.String(512), primary_key=True)
+    token = db.Column(db.String(512), primary_key=True)
 
-    used_on: datetime = db.Column(
+    used_on = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
     )
