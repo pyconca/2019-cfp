@@ -248,7 +248,9 @@ def vote_home() -> Response:
     """Render the voting homepage with talk categories."""
     # TODO: When this is multitenant, categories and votes should be filtered
     # by event.
-    categories = Category.query.order_by(Category.name.asc())
+    categories = Category.query.filter_by(conference=g.conference).order_by(
+        Category.name.asc()
+    )
     # TODO: This is an inefficient way to do this. Write it as one query
     # instead.
     categories_counts = {
@@ -301,7 +303,9 @@ def vote_choose_talk_from_category(category_id: int) -> Response:
         enough votes to derive meaningful signal.
 
     """
-    category = Category.query.get_or_404(category_id)
+    category = Category.query.filter_by(
+        category_id=category_id, conference=g.conference
+    ).first_or_404()
 
     vote = (
         db.session.query(Vote)
