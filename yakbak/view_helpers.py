@@ -96,6 +96,19 @@ def requires_voting_allowed(func: Callable) -> Callable:
     return wrapper
 
 
+def requires_review_allowed(func: Callable) -> Callable:
+    """Prevent access to views outside of the review window."""
+
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> ViewResponse:
+        if not g.conference.review_allowed:
+            resp = render_template("action_not_allowed.html", action="review")
+            return resp, 400
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 @app.app_template_filter("timesince")
 def timesince(dt: datetime, default: str = "just now") -> str:
     # from http://flask.pocoo.org/snippets/33/

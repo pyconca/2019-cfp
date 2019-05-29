@@ -21,7 +21,7 @@ import logging
 import uuid
 
 from attr import attrib, attrs
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import BaseQuery, SQLAlchemy
 from sqlalchemy import and_, CheckConstraint, func, select, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import column_property, Query, synonym
@@ -91,6 +91,10 @@ class Conference(db.Model):  # type: ignore
     voting_begin = db.Column(db.DateTime)
     voting_end = db.Column(db.DateTime)
 
+    # Proposal review window -- populate with naive datetimes in UTC
+    review_begin = db.Column(db.DateTime)
+    review_end = db.Column(db.DateTime)
+
     created = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
@@ -122,6 +126,12 @@ class Conference(db.Model):  # type: ignore
         return None
 
     @property
+    def review_window(self) -> Optional[TimeWindow]:
+        if self.review_begin and self.review_end:
+            return TimeWindow(self.review_begin, self.review_end)
+        return None
+
+    @property
     def creating_proposals_allowed(self) -> bool:
         return self.proposal_window is not None and self.proposal_window.includes_now()
 
@@ -141,6 +151,14 @@ class Conference(db.Model):  # type: ignore
     @property
     def voting_window_after_now(self) -> bool:
         return self.voting_window is not None and self.voting_window.after_now()
+
+    @property
+    def review_allowed(self) -> bool:
+        return self.review_window is not None and self.review_window.includes_now()
+
+    @property
+    def review_window_after_now(self) -> bool:
+        return self.review_window is not None and self.review_window.after_now()
 
 
 class User(db.Model):  # type: ignore
@@ -315,7 +333,19 @@ class ConductReport(db.Model):  # type: ignore
     )
 
 
+class TalkQuery(BaseQuery):
+    def active(self) -> Query:
+        """All active (not withdrawn) talks."""
+        return self.filter(Talk.state != TalkStatus.WITHDRAWN)
+
+    def anonymized(self) -> Query:
+        """All active and anonymized talks."""
+        return self.active().filter(Talk.is_anonymized == True)  # noqa: E712
+
+
 class Talk(db.Model):  # type: ignore
+    query_class = TalkQuery
+
     talk_id = db.Column(db.Integer, primary_key=True)
     state = db.Column(Enum(TalkStatus), server_default=TalkStatus.PROPOSED.name)
 
@@ -365,10 +395,6 @@ class Talk(db.Model):  # type: ignore
 
     def __str__(self) -> str:
         return self.title
-
-    @classmethod
-    def active(cls) -> Query:
-        return cls.query.filter(cls.state != TalkStatus.WITHDRAWN)
 
     def add_speaker(self, speaker: User, state: InvitationStatus) -> None:
         ts = TalkSpeaker(state=state)

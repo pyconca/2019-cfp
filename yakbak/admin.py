@@ -46,9 +46,13 @@ def require_admin() -> None:
 
 @app.route("/")
 def index() -> Response:
-    num_talks = Talk.active().count()
-    num_without_category = Talk.active().filter(not_(Talk.categories.any())).count()
-    num_without_anonymization = Talk.active().filter_by(is_anonymized=False).count()
+    num_talks = Talk.query.active().count()
+    num_without_category = (
+        Talk.query.active().filter(not_(Talk.categories.any())).count()
+    )
+    num_without_anonymization = (
+        Talk.query.active().filter_by(is_anonymized=False).count()
+    )
 
     # TODO: figure out how to do this with "not in JSON list" queires
     num_surveys = 0
@@ -74,10 +78,10 @@ def index() -> Response:
 
 @app.route("/categorize")
 def categorize_talks() -> Response:
-    not_categorized = Talk.active().filter(not_(Talk.categories.any()))
+    not_categorized = Talk.query.active().filter(not_(Talk.categories.any()))
     if not db.session.query(not_categorized.exists()).scalar():
         flash("All talks categorized")
-        talks = Talk.active().options(joinedload(Talk.categories)).all()
+        talks = Talk.query.active().options(joinedload(Talk.categories)).all()
         return render_template("manage/category_list.html", talks=talks)
 
     talk = not_categorized.order_by(func.random()).first()
@@ -104,7 +108,7 @@ def categorize_talk(talk_id: int) -> Response:
 
 @app.route("/anonymize")
 def anonymize_talks() -> Response:
-    not_anonymized = Talk.active().filter_by(is_anonymized=False)
+    not_anonymized = Talk.query.active().filter_by(is_anonymized=False)
     if not db.session.query(not_anonymized.exists()).scalar():
         flash("All talks anonymized")
         return redirect(url_for("manage.index"))
