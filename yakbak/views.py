@@ -49,6 +49,7 @@ from yakbak.models import (
 from yakbak.view_helpers import (
     requires_new_proposal_window_open,
     requires_proposal_editing_window_open,
+    requires_review_allowed,
     requires_voting_allowed,
 )
 
@@ -413,6 +414,7 @@ def vote(public_id: uuid.UUID) -> Response:
         talk=vote.talk,
         form=form,
         conduct_form=ConductReportForm(talk_id=vote.talk.talk_id),
+        show_vote_form=True,
     )
 
 
@@ -428,6 +430,30 @@ def clear_skipped_votes() -> Response:
         Vote.clear_skipped(user=g.user, commit=True)
         flash("All skipped talks cleared. Choose a category to continue voting.")
     return redirect(url_for("views.vote_home"))
+
+
+@app.route("/review/<int:talk_id>")
+@requires_review_allowed
+@login_required
+def review_talk(talk_id: int) -> Response:
+    """
+    Show the anonymized talk, and the viewing user's vote (if any).
+
+    This view is intentionally (for now) not linked or used from within
+    the app; the intended use case is that outside-of-Yak-Bak review
+    processes can generate links to talk detail pages for reviewers to
+    consider (eg within a Google spreadsheet or similar).
+    """
+    talk = Talk.query.anonymized().filter_by(talk_id=talk_id).first_or_404()
+    vote = Vote.query.filter_by(talk_id=talk_id, user_id=g.user.user_id).first()
+    return render_template(
+        "vote/detail.html",
+        talk=talk,
+        vote=vote,
+        vote_names=VoteForm.VOTE_VALUE_CHOICES,
+        conduct_form=ConductReportForm(talk_id=talk.talk_id),
+        show_vote_form=False,
+    )
 
 
 # TODO: consider the privacy implications of using talk_id here,

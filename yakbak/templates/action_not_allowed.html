@@ -33,6 +33,21 @@
     helps us make {{ g.conference.informal_name }} as good as it can be!
     </p>
     {% endif %}
+    {% if action == "review" %}
+    {% if g.conference.review_window_after_now %}
+    <h2>{{ g.conference.informal_name }} Voting Review Has Not Started</h2>
+    <p>
+    Unfortunately, the {{ g.conference.informal_name }} vote review period
+    has not started yet.
+    </p>
+    {% else %}
+    <h2>{{ g.conference.informal_name }} Voting Review Is Over</h2>
+    <p>
+    Unfortunately, the {{ g.conference.informal_name }} vote review period
+    has finished.
+    </p>
+    {% endif %}
+    {% endif %}
     <p>
     <a class="btn btn-primary" href="{{ url_for("views.talks_list") }}">Back to talks list</a>
     </p>

@@ -48,14 +48,24 @@
   </div>
   <div class="col-lg-4">
     <p>Should this talk be presented at {{ g.conference.informal_name }}?</p>
-    <form method="POST">
-      {{ form.hidden_tag() }}
-      {{ macros.render_error(form.action) }}
-      {{ macros.render_error(form.value) }}
-      {{ macros.render_field(form.value) }}
-      <button type="submit" class="btn btn-primary" name="action" value="vote">Vote</button>
-      <button type="submit" class="btn btn-light border" name="action" value="skip">Skip</button>
-    </form>
+    {% if show_vote_form %}
+      <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ macros.render_error(form.action) }}
+        {{ macros.render_error(form.value) }}
+        {{ macros.render_field(form.value) }}
+        <button type="submit" class="btn btn-primary" name="action" value="vote">Vote</button>
+        <button type="submit" class="btn btn-light border" name="action" value="skip">Skip</button>
+      </form>
+    {% else %}
+      {% if vote is none %}
+      <p>You did not vote on this talk.</p>
+      {% elif vote.value is not none %}
+      <p>You voted: {{ vote_names[vote.value] }}</p>
+      {% else %}
+      <p>You skipped voting on this talk.</p>
+      {% endif %}
+    {% endif %}
 
     <hr>
 

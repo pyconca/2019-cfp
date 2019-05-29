@@ -1,9 +1,13 @@
-{% macro render_field(field, placeholder="", class_="form-control") -%}
-{% if placeholder %}
-{{ field(placeholder=placeholder, class_=class_, aria_describedby=field.id + "-help") }}
-{% else %}
-{{ field(class_=class_, aria_describedby=field.id + "-help") }}
+{% macro render_field(field, placeholder="", class_="form-control", disabled=False) -%}
+{% if disabled != True %}
+{% set disabled = False %}
 {% endif %}
+{{ field(
+  placeholder=placeholder,
+  class_=class_,
+  aria_describedby=field.id + "-help",
+  disabled=disabled,
+) }}
 {%- endmacro %}
 
 {% macro render_label(field, label) -%}
