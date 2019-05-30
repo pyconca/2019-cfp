@@ -1,5 +1,6 @@
 from operator import attrgetter
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar
+import os
 import os.path
 
 from attr import attrib, attrs, fields
@@ -14,8 +15,42 @@ class InvalidSettings(Exception):
     pass
 
 
+T = TypeVar("T", bound="Section")
+
+
+class Section:
+    @classmethod
+    def populate_from(
+        cls: Type[T], toml: Dict[str, Any], environment: Dict[str, str]
+    ) -> T:
+        """
+        Populate the section using settings the TOML and environment.
+
+        Settings present in the environment take precedence over settings
+        set only in the toml; and required fields must be set in at least
+        one of the locations.
+
+        """
+        section_name = cls.__name__
+        if section_name.endswith("Settings"):
+            section_name = section_name[: -len("Settings")]
+
+        kwargs = {}
+        for field in fields(cls):
+            env_var = f"YAK_BAK_{section_name}_{field.name}".upper()
+            if env_var in environment:
+                value = environment[env_var]
+                if "%(" in value and ")s" in value:
+                    value = value % environment
+                kwargs[field.name] = value
+            elif field.name in toml:
+                kwargs[field.name] = toml[field.name]
+
+        return cls(**kwargs)  # type: ignore  # too many args for type Section
+
+
 @attrs
-class AuthMethod:
+class AuthMethod(Section):
     name: str = attrib()
     display_name: str = attrib()
     view: str = attrib()
@@ -26,23 +61,23 @@ class AuthMethod:
 
 
 @attrs(frozen=True)
-class DbSettings:
+class DbSettings(Section):
     url: str = attrib(validator=instance_of(str))
 
 
 @attrs(frozen=True)
-class FlaskSettings:
+class FlaskSettings(Section):
     secret_key: str = attrib(validator=instance_of(str))
     templates_auto_reload: bool = attrib(validator=instance_of(bool), default=False)
 
 
 @attrs(frozen=True)
-class LoggingSettings:
+class LoggingSettings(Section):
     level: str = attrib(validator=instance_of(str), default="INFO")
 
 
 @attrs(frozen=True)
-class AuthSettings:
+class AuthSettings(Section):
     # these are initialized in core.py
     github: bool = attrib()
     google: bool = attrib()
@@ -102,7 +137,7 @@ class AuthSettings:
 
 
 @attrs(frozen=True)
-class SMTPSettings:
+class SMTPSettings(Section):
     host: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
     port: Optional[int] = attrib(validator=optional(instance_of(int)), default=None)
     username: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
@@ -112,7 +147,7 @@ class SMTPSettings:
 
 
 @attrs(frozen=True)
-class SentrySettings:
+class SentrySettings(Section):
     dsn: Optional[str] = attrib(validator=optional(instance_of(str)), default=None)
 
 
@@ -173,7 +208,8 @@ def load_settings(settings_dict: Dict[str, Any]) -> Settings:
 
             data.setdefault("email_magic_link", False)
 
-        top_level[section] = field.type(**data)  # type: ignore
+        assert field.type is not None
+        top_level[section] = field.type.populate_from(data, os.environ)
 
     if settings_dict:
         raise InvalidSettings(

@@ -1,5 +1,6 @@
 stages:
   - test
+  - validate
   - build
 
 py37:
@@ -32,6 +33,25 @@ mypy:
   script:
     - python3.7 -m pip install tox
     - tox -r -e mypy
+
+migrate:
+  stage: validate
+  image: python:3.7-slim
+  services:
+    - postgres:10
+  variables:
+    POSTGRES_DB: yakbak_tox_test
+    POSTGRES_USER: yakbak
+    POSTGRES_PASSWORD: ""
+    # tests expect env vars in the format tox-docker
+    # sets, so set those up as well
+    POSTGRES_5432_TCP_PORT: 5432
+    POSTGRES_HOST: postgres
+  script:
+    - python3.7 -m pip install tox
+    - echo 0.0.0-0-fakeForGitLab > version.txt
+    - cp yakbak.toml-example yakbak.toml
+    - tox -r -e migrate
 
 docker:
   stage: build
