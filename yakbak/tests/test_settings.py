@@ -1,8 +1,9 @@
 from typing import Any, Dict
+from unittest.mock import patch
 
 import pytest
 
-from yakbak.settings import InvalidSettings, load_settings
+from yakbak.settings import DbSettings, InvalidSettings, load_settings
 
 
 def valid_settings_dict() -> Dict[str, Any]:
@@ -18,7 +19,8 @@ def valid_settings_dict() -> Dict[str, Any]:
 
 def test_it_parses_settings() -> None:
     settings_dict = valid_settings_dict()
-    settings = load_settings(settings_dict)
+    with patch.dict("os.environ", clear=True):
+        settings = load_settings(settings_dict)
 
     # spot check a few things
     assert settings.db.url == "sqlite://"
@@ -70,3 +72,12 @@ def test_social_auth_methods() -> None:
     # spot check
     assert methods[0].name == "email"
     assert methods[1].name == "github"
+
+
+def test_section_override_from_environment() -> None:
+    # try with DbSettings, it's simple
+    toml = {"url": "value-from-toml"}
+    environment = {"YAK_BAK_DB_URL": "value-from-env"}
+
+    db = DbSettings.populate_from(toml, environment)
+    assert db.url == "value-from-env"
