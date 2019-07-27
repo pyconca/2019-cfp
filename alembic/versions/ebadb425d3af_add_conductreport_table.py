@@ -32,7 +32,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.add_column('conference', sa.Column('conduct_email', sa.String(length=256), nullable=True))
-    op.execute("UPDATE conference SET conduct_email='conduct@pygotham.org' WHERE informal_name='PyGotham'")
+    op.execute("UPDATE conference SET conduct_email='organizers@pycon.ca'")
     op.alter_column('conference', 'conduct_email', existing_type=sa.VARCHAR(length=256), nullable=False)
     # ### end Alembic commands ###
 
