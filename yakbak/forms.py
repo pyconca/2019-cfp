@@ -146,7 +146,7 @@ class Ethnicity(enum.Enum):
     ASIAN = "Asian"
     BLACK_AFRICAN_AMERICAN = "Black / African-American"
     HISPANIC_LATINX = "Hispanic / Latinx"
-    ABORIGINAL = "Aboriginal"
+    ABORIGINAL = "First Nations, Métis or Inuit or Indigenous"
     PACIFIC_ISLANDER = "Pacific Islander"
     WHITE_CAUCASIAN = "White / Caucasian"
     OTHER = "Other"
