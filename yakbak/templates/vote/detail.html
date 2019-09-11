@@ -54,6 +54,8 @@
         {{ macros.render_error(form.action) }}
         {{ macros.render_error(form.value) }}
         {{ macros.render_field(form.value) }}
+        {{ macros.render_error(form.comment) }}
+        {{ macros.render_field(form.comment) }}
         <button type="submit" class="btn btn-primary" name="action" value="vote">Vote</button>
         <button type="submit" class="btn btn-light border" name="action" value="skip">Skip</button>
       </form>

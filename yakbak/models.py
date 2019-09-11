@@ -251,6 +251,7 @@ class Vote(db.Model):  # type: ignore
     # A talk can be skipped without a vote value.
     # This allows a voter to come back to talks at a later time.
     skipped = db.Column(db.Boolean)
+    comment = db.Column(db.Text)
 
     talk = db.relationship("Talk", backref=db.backref("votes", lazy="dynamic"))
     user = db.relationship("User", backref=db.backref("votes", lazy="dynamic"))
