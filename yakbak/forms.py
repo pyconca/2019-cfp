@@ -72,6 +72,7 @@ class VoteForm(FlaskForm):
         coerce=int,
         validators=[OptionalValidator()],
     )
+    comment = TextAreaField(validators=[OptionalValidator()])
 
     def validate(self) -> bool:
         """Validate that a value is provided if the actions is vote."""
@@ -84,6 +85,10 @@ class VoteForm(FlaskForm):
 
         if self.action.data == "vote" and self.value.data is None:
             self.value.errors.append("Please cast a vote.")
+            return False
+
+        if self.action.data == "vote" and not self.comment.data:
+            self.comment.errors.append("Please add a comment.")
             return False
 
         return True

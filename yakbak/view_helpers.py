@@ -26,6 +26,8 @@ def top_nav() -> Dict[str, List[Tuple[str, str, bool]]]:
     left_nav = []
     if user and not user.is_anonymous:
         left_nav.append(navtuple("My Proposals", "views.talks_list"))
+
+    if user and not user.is_anonymous and (user.is_reviewer or user.is_site_admin):
         if g.conference.voting_allowed:
             left_nav.append(navtuple("Vote", "views.vote_home"))
 
