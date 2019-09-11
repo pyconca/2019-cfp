@@ -178,6 +178,9 @@ class User(db.Model):  # type: ignore
     updated = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
     )
+    reviewer = db.Column(
+        db.Boolean, default=False, server_default="false", nullable=False
+    )
 
     # Flask-Social-Auth compatibility
     id = synonym("user_id")
@@ -205,7 +208,10 @@ class User(db.Model):  # type: ignore
     @property
     def is_anonymous(self) -> bool:
         return False
-
+    # For voting and reviewing
+    @property
+    def is_reviewer(self) -> bool:
+        return self.reviewer
 
 class TalkCategory(db.Model):  # type: ignore
     talk_id = db.Column(db.Integer, db.ForeignKey("talk.talk_id"), primary_key=True)

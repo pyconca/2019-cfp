@@ -64,14 +64,12 @@
     Submit a Talk Now
   </a>
   {% elif g.conference.voting_allowed %}
-  <p>
-    <strong>Help us pick the talks that make the conference!</strong>
-    Cast your votes to tell us whic talks you'd like to see at {{ g.conference.informal_name }}.
-  </p>
-  <a class="btn btn-lg btn-light border" href="{{ url_for("views.vote_home") }}">
-    {% if g.user.is_anonymous %}Log In and{%endif %}
-    Vote Now
-  </a>
+    {% if g.user.is_anonymous %}
+    <a class="btn btn-lg btn-light border" href="{{ url_for("views.talks_list") }}">
+      Log In
+    </a>
+    {%endif %}
+
   {% else %}
   <p>
     Unfortunately, our Call for Proposals is over.

@@ -248,6 +248,10 @@ def resubmit_proposal(talk_id: int) -> Response:
 @login_required
 def vote_home() -> Response:
     """Render the voting homepage with talk categories."""
+    # Block page from view unless an admin or reviewer (for now)
+    if not g.user.is_reviewer and not g.user.is_site_admin:
+        abort(404)
+
     # TODO: When this is multitenant, categories and votes should be filtered
     # by event.
     categories = Category.query.filter_by(conference=g.conference).order_by(
@@ -306,6 +310,10 @@ def vote_choose_talk_from_category(category_id: int) -> Response:
         enough votes to derive meaningful signal.
 
     """
+    # Block page from view unless an admin or reviewer (for now)
+    if not g.user.is_reviewer and not g.user.is_site_admin:
+        abort(404)
+
     category = Category.query.filter_by(
         category_id=category_id, conference=g.conference
     ).first_or_404()
@@ -389,6 +397,9 @@ def vote_choose_talk_from_category(category_id: int) -> Response:
 @login_required
 def vote(public_id: uuid.UUID) -> Response:
     """Vote on the talk identified by talk_id."""
+    # Block page from view unless an admin or reviewer (for now)
+    if not g.user.is_reviewer and not g.user.is_site_admin:
+        abort(404)
     vote = Vote.query.filter_by(public_id=public_id).first_or_404()
     form = VoteForm(obj=vote)
     if form.validate_on_submit():
@@ -424,6 +435,9 @@ def vote(public_id: uuid.UUID) -> Response:
 @login_required
 def clear_skipped_votes() -> Response:
     """Remove any skipped votes to restart the review queue."""
+    # Block page from view unless an admin or reviewer (for now)
+    if not g.user.is_reviewer and not g.user.is_site_admin:
+        abort(404)
     # There's no form data here, so use a bare FlaskForm just to handle
     # CSRF protection.
     form = FlaskForm()
@@ -445,6 +459,10 @@ def review_talk(talk_id: int) -> Response:
     processes can generate links to talk detail pages for reviewers to
     consider (eg within a Google spreadsheet or similar).
     """
+    # Block page from view unless an admin or reviewer (for now)
+    if not g.user.is_reviewer and not g.user.is_site_admin:
+        abort(404)
+
     talk = Talk.query.anonymized().filter_by(talk_id=talk_id).first_or_404()
     vote = Vote.query.filter_by(talk_id=talk_id, user_id=g.user.user_id).first()
     return render_template(
