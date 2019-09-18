@@ -10,7 +10,7 @@ import click
 
 from yakbak.core import create_app
 from yakbak.models import Category, Conference, db, UsedMagicLink
-from yakbak.settings import find_settings_file, load_settings_file
+from yakbak.settings import find_settings_file, load_settings_from_env
 
 # TODO: remove once https://github.com/python/typeshed/pull/2958 is merged
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ else:
     from click.types import DateTime
 
 
-app = create_app(load_settings_file(find_settings_file()))
+app = create_app(load_settings_from_env())
 
 
 @app.cli.command()
