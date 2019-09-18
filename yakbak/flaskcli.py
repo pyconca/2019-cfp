@@ -135,10 +135,12 @@ def export_review_spreadsheet(category_id: int, base_url: Optional[str]) -> None
             "Title",
             "Length",
             "Link",
-            "Upvote Share",
-            "Neutral Share",
-            "Downvote Share",
-            "Net Score",
+            "Vote Count",
+            "Vote Score",
+            # "Upvote Share",
+            # "Neutral Share",
+            # "Downvote Share",
+            # "Net Score",
         ]
     )
     with app.test_request_context():
@@ -153,9 +155,11 @@ def export_review_spreadsheet(category_id: int, base_url: Optional[str]) -> None
                         talk_id=talk.talk_id,
                         _external=(base_url is not None),
                     ),
-                    f"{talk.upvote_score*100:.2f}",
-                    f"{talk.indifferent_score*100:.2f}",
-                    f"{talk.downvote_score*100:.2f}",
+                    f"{talk.vote_count*100:.2f}",
                     f"{talk.vote_score*100:.2f}",
+                    # f"{talk.vote_score*100:.2f}",
+                    # f"{talk.indifferent_score*100:.2f}",
+                    # f"{talk.downvote_score*100:.2f}",
+                    # f"{talk.vote_score*100:.2f}",
                 ]
             )
