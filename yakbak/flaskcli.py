@@ -9,7 +9,7 @@ from flask import url_for
 import click
 
 from yakbak.core import create_app
-from yakbak.models import Category, Conference, db, UsedMagicLink
+from yakbak.models import Category, Conference, db, UsedMagicLink, Talk
 from yakbak.settings import find_settings_file, load_settings_from_env
 
 # TODO: remove once https://github.com/python/typeshed/pull/2958 is merged
@@ -109,9 +109,8 @@ def clean_magic_links(older_than_days: str) -> None:
 
 
 @app.cli.command()
-@click.argument("category_id", type=int)
 @click.option("--base-url", type=str, help="Root URL of the Yak-Bak instance")
-def export_review_spreadsheet(category_id: int, base_url: Optional[str]) -> None:
+def export_review_spreadsheet(base_url: Optional[str]) -> None:
     """
     Prepare CSV files for program committee review.
 
@@ -135,31 +134,27 @@ def export_review_spreadsheet(category_id: int, base_url: Optional[str]) -> None
             "Title",
             "Length",
             "Link",
+            "Category",
             "Vote Count",
             "Vote Score",
-            # "Upvote Share",
-            # "Neutral Share",
-            # "Downvote Share",
-            # "Net Score",
         ]
     )
     with app.test_request_context():
-        for talk in Category.query.get(category_id).talks:
+        for talk in Talk.query.all():
+            url = url_for(
+                "views.review_talk",
+                talk_id=talk.talk_id,
+                _external=(base_url is not None),
+            )
+
             writer.writerow(
                 [
                     str(talk.talk_id),
                     talk.title,
                     str(talk.length),
-                    url_for(
-                        "views.review_talk",
-                        talk_id=talk.talk_id,
-                        _external=(base_url is not None),
-                    ),
-                    f"{talk.vote_count*100:.2f}",
-                    f"{talk.vote_score*100:.2f}",
-                    # f"{talk.vote_score*100:.2f}",
-                    # f"{talk.indifferent_score*100:.2f}",
-                    # f"{talk.downvote_score*100:.2f}",
-                    # f"{talk.vote_score*100:.2f}",
+                    ' // '.join(c.name for c in talk.categories),
+                    f"https://cfp.pycon.ca{url}",
+                    f"{talk.vote_count:.2f}" if talk.vote_count else None,
+                    f"{talk.vote_score:.2f}" if talk.vote_score else None,
                 ]
             )
