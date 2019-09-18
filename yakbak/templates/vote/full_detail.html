@@ -55,6 +55,40 @@
     </div>
   </div>
   <div class="col-lg-4">
+    <h2>Speaker</h2>
+    {% for speaker in talk.speakers %}
+    <div>
+      Full name: {{ speaker.user.fullname  }}<br>
+
+      {% if speaker.user.twitter %}
+      Twitter: {{ speaker.user.twitter }}<br>
+      {% endif %}
+
+      {% if speaker.user.demographic_survey.gender %}
+      Gender: {{ speaker.user.demographic_survey.gender }}<br>
+      {% endif %}
+
+      {% if speaker.user.demographic_survey.ethicity %}
+      Ethnicity: {{ speaker.user.demographic_survey.ethicity }}<br>
+      {% endif %}
+
+      {% if speaker.user.demographic_survey.past_speaking %}
+      Past speaking: {{ speaker.user.demographic_survey.past_speaking }}<br>
+      {% endif %}
+
+      {% if speaker.user.demographic_survey.age_group %}
+      Age Group: {{ speaker.user.demographic_survey.age_group }}<br>
+      {% endif %}
+
+      {% if speaker.user.demographic_survey.programming_experience %}
+      Programming Experience: {{ speaker.user.demographic_survey.programming_experience}}<br>
+      {% endif %}
+
+      <h2>Bio</h2>
+      {{ speaker.user.speaker_bio }}
+
+    </div>
+    {% endfor %}
     <div class="col"><h2>Categories:</h2></div>
     <ul>
     {% for category in talk.categories %}
