@@ -475,6 +475,31 @@ def review_talk(talk_id: int) -> Response:
     )
 
 
+@app.route("/review-full/<int:talk_id>")
+@requires_review_allowed
+@login_required
+def review_full_talk(talk_id: int) -> Response:
+    """
+    Show the de-anonymized talk, and all the votes
+
+    This view is intentionally (for now) not linked or used from within
+    the app; the intended use case is that outside-of-Yak-Bak review
+    processes can generate links to talk detail pages for reviewers to
+    consider (eg within a Google spreadsheet or similar).
+    """
+    # Block page from view unless an admin or reviewer (for now)
+    if not g.user.is_site_admin:
+        abort(404)
+
+    talk = Talk.query.anonymized().filter_by(talk_id=talk_id).first_or_404()
+    votes = Vote.query.filter_by(talk_id=talk_id)
+    return render_template(
+        "vote/full_detail.html",
+        talk=talk,
+        votes=votes,
+    )
+
+
 # TODO: consider the privacy implications of using talk_id here,
 # potentially switch to loading the talk by the vote's public id. If
 # that approach is taken, this route will also be
