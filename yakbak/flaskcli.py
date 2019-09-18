@@ -1,13 +1,16 @@
 from datetime import datetime, timedelta
 from typing import Optional, TYPE_CHECKING
+from urllib.parse import urlparse
+import csv
 import os.path
 import sys
 
+from flask import url_for
 import click
 
 from yakbak.core import create_app
-from yakbak.models import Conference, db, UsedMagicLink
-from yakbak.settings import find_settings_file, load_settings_from_env
+from yakbak.models import Category, Conference, db, UsedMagicLink
+from yakbak.settings import find_settings_file, load_settings_file
 
 # TODO: remove once https://github.com/python/typeshed/pull/2958 is merged
 if TYPE_CHECKING:
@@ -20,7 +23,7 @@ else:
     from click.types import DateTime
 
 
-app = create_app(load_settings_from_env())
+app = create_app(load_settings_file(find_settings_file()))
 
 
 @app.cli.command()
@@ -103,3 +106,56 @@ def clean_magic_links(older_than_days: str) -> None:
     threshold = now - timedelta(days=int(older_than_days))
     UsedMagicLink.query.filter(UsedMagicLink.used_on <= threshold).delete()
     db.session.commit()
+
+
+@app.cli.command()
+@click.argument("category_id", type=int)
+@click.option("--base-url", type=str, help="Root URL of the Yak-Bak instance")
+def export_review_spreadsheet(category_id: int, base_url: Optional[str]) -> None:
+    """
+    Prepare CSV files for program committee review.
+
+    Each file is named after a category, and contains a row for each talk in
+    that category. Each row contains fields for talk ID, title, length, a link
+    to review the proposal, and a summary of votes.
+
+    The CSV is written to stdout.
+
+    """
+
+    if base_url is not None:
+        parsed = urlparse(base_url)
+        app.config["PREFERRED_URL_SCHEME"] = parsed.scheme
+        app.config["SERVER_NAME"] = parsed.netloc
+
+    writer = csv.writer(sys.stdout)
+    writer.writerow(
+        [
+            "Talk ID",
+            "Title",
+            "Length",
+            "Link",
+            "Upvote Share",
+            "Neutral Share",
+            "Downvote Share",
+            "Net Score",
+        ]
+    )
+    with app.test_request_context():
+        for talk in Category.query.get(category_id).talks:
+            writer.writerow(
+                [
+                    str(talk.talk_id),
+                    talk.title,
+                    str(talk.length),
+                    url_for(
+                        "views.review_talk",
+                        talk_id=talk.talk_id,
+                        _external=(base_url is not None),
+                    ),
+                    f"{talk.upvote_score*100:.2f}",
+                    f"{talk.indifferent_score*100:.2f}",
+                    f"{talk.downvote_score*100:.2f}",
+                    f"{talk.vote_score*100:.2f}",
+                ]
+            )
