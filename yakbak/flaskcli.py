@@ -9,7 +9,7 @@ from flask import url_for
 import click
 
 from yakbak.core import create_app
-from yakbak.models import Category, Conference, db, UsedMagicLink, Talk
+from yakbak.models import Category, Conference, db, UsedMagicLink, TalkSpeaker, Talk
 from yakbak.settings import find_settings_file, load_settings_from_env
 
 # TODO: remove once https://github.com/python/typeshed/pull/2958 is merged
@@ -134,6 +134,7 @@ def export_review_spreadsheet(base_url: Optional[str]) -> None:
             "Title",
             "Length",
             "Link",
+            "Speakers",
             "Category",
             "Vote Count",
             "Vote Score",
@@ -141,6 +142,12 @@ def export_review_spreadsheet(base_url: Optional[str]) -> None:
     )
     with app.test_request_context():
         for talk in Talk.query.all():
+            talk_speakers = (
+                TalkSpeaker.query
+                .filter(TalkSpeaker.talk_id==str(talk.talk_id))
+                .all()
+            )
+
             url = url_for(
                 "views.review_talk",
                 talk_id=talk.talk_id,
@@ -152,6 +159,7 @@ def export_review_spreadsheet(base_url: Optional[str]) -> None:
                     str(talk.talk_id),
                     talk.title,
                     str(talk.length),
+                    ' // '.join(ts.user.fullname for ts in talk_speakers),
                     ' // '.join(c.name for c in talk.categories),
                     f"https://cfp.pycon.ca{url}",
                     f"{talk.vote_count:.2f}" if talk.vote_count else None,
