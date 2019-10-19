@@ -90,7 +90,7 @@ def add_conference(
         cfp_email=cfp_email,
         twitter_username=twitter_username,
         conduct_email=conduct_email,
-        proposals_begin=proposals_begin,
+        proposals_begin=proposals_begin,®
         proposals_end=proposals_end,
         voting_begin=voting_begin,
         voting_end=voting_end,
@@ -158,9 +158,12 @@ def export_review_spreadsheet(base_url: Optional[str]) -> None:
                 [
                     str(talk.talk_id),
                     talk.title,
+                    talk.description,
                     str(talk.length),
                     ' // '.join(ts.user.fullname for ts in talk_speakers),
                     ' // '.join(ts.user.email for ts in talk_speakers),
+                    ' // '.join(ts.user.speaker_bio for ts in talk_speakers),
+                    ' // '.join(ts.user.twitter_username for ts in talk_speakers),
                     ' // '.join(c.name for c in talk.categories),
                     f"https://cfp.pycon.ca{url}",
                     f"{talk.vote_count:.2f}" if talk.vote_count else None,
