@@ -90,7 +90,7 @@ def add_conference(
         cfp_email=cfp_email,
         twitter_username=twitter_username,
         conduct_email=conduct_email,
-        proposals_begin=proposals_begin,®
+        proposals_begin=proposals_begin,
         proposals_end=proposals_end,
         voting_begin=voting_begin,
         voting_end=voting_end,
