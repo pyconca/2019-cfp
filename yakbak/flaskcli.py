@@ -162,7 +162,6 @@ def export_review_spreadsheet(base_url: Optional[str]) -> None:
                     str(talk.length),
                     ' // '.join(ts.user.fullname for ts in talk_speakers),
                     ' // '.join(ts.user.email for ts in talk_speakers),
-                    ' // '.join(ts.user.speaker_bio for ts in talk_speakers),
                     ' // '.join(c.name for c in talk.categories),
                     f"https://cfp.pycon.ca{url}",
                     f"{talk.vote_count:.2f}" if talk.vote_count else None,
