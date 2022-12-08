@@ -8,7 +8,7 @@ alembic==1.0.10
 attrs==19.1.0
 blinker==1.4              # via flask-mail, sentry-sdk
 bunch==1.0.1
-certifi==2019.3.9         # via requests, sentry-sdk
+certifi==2022.12.7         # via requests, sentry-sdk
 chardet==3.0.4            # via requests
 click==7.0                # via flask
 decorator==4.4.0          # via validators
